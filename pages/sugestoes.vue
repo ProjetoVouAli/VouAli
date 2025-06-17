@@ -37,7 +37,37 @@ interface Destino {
 }
 
 // Busca os dados da API
-const { data: destinos, pending, error } = useFetch<Destino[]>('/api/destinos')
+// const { data: destinos, pending, error } = useFetch<Destino[]>('/api/destinos')
+
+// Mock de teste
+const destinos = ref<Destino[]>([
+    {
+        id: 1,
+        nome: 'Arraial do Cabo',
+        slug: 'arraial-do-cabo',
+        resumo: 'Belezas naturais e praias paradisíacas.',
+        descricao: 'Localizado na Região dos Lagos, Arraial do Cabo é conhecido por suas águas cristalinas e rica vida marinha.',
+        imagem: 'https://source.unsplash.com/600x400/?beach,ocean',
+        destaque: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    },
+    {
+        id: 2,
+        nome: 'Saquarema',
+        slug: 'saquarema',
+        resumo: 'A capital brasileira do surf.',
+        descricao: 'Saquarema é um dos principais pontos turísticos do Rio de Janeiro, com cultura vibrante e paisagens incríveis.',
+        imagem: 'https://source.unsplash.com/600x400/?surf,beach',
+        destaque: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+    }
+])
+
+const pending = ref(false)
+const error = ref(null)
+
 
 // Configuração de SEO
 useHead({
