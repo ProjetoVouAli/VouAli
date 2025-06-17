@@ -5,10 +5,10 @@
     
     <div v-else-if="error" class="container py-12">
         <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md">
-        Destino não encontrado ou erro ao carregar dados.
+            Destino não encontrado ou erro ao carregar dados.
         </div>
-        <Button class="mt-4" @click="navigateTo('/sugestoes')">
-        Voltar para sugestões
+        <Button class="mt-4" @click="navigateTo('/Sugestoes')">
+            Voltar para sugestões
         </Button>
     </div>
   
@@ -32,8 +32,8 @@
             <p>{{ destino.descricao }}</p>
             </div>
             
-            <Button class="mt-8" @click="navigateTo('/sugestoes')">
-            Voltar para sugestões
+            <Button class="mt-8" @click="navigateTo('/Sugestoes')">
+                Voltar para sugestões
             </Button>
         </div>
         </div>
