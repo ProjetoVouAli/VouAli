@@ -1,0 +1,1 @@
+import{b as o}from"./f1cbvne4.js";import{I as n,a2 as s,V as t}from"./vendor/json-editor-vue-g7zhhq6q.js";const r={},c={class:"n-badge"};function _(e,a){return s(),n("span",c,[t(e.$slots,"default")])}const m=o(r,[["render",_]]);export{m as _};
