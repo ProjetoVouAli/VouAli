@@ -1,0 +1,7 @@
+export { default as Card } from './Card.vue'
+export { default as CardCabecalho } from './CardCabecalho.vue'
+export { default as CardTitulo } from './CardTitulo.vue'
+export { default as CardDescricao } from './CardDescricao.vue'
+export { default as CardConteudo } from './CardConteudo.vue'
+export { default as CardRodape } from './CardRodape.vue'
+export { default as CardDestino } from './CardDestino.vue'
