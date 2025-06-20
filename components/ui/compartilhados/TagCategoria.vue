@@ -1,0 +1,1 @@
+// Tag para categorias (Pousada, Praia, etc)

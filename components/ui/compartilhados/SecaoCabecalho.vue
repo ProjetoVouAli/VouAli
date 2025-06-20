@@ -1,0 +1,1 @@
+// Cabeçalho de seção (título + link "Ver tudo")
