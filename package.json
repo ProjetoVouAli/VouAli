@@ -32,6 +32,9 @@
   },
   "devDependencies": {
     "@types/pg": "^8.15.4",
-    "drizzle-kit": "^0.31.1"
+    "drizzle-kit": "^0.31.1",
+    "@types/node": "^24.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
