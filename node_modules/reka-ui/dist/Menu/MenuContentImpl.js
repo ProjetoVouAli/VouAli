@@ -1,5 +1,4 @@
 import { defineComponent, mergeDefaults, toRefs, ref, watch, onUnmounted, createBlock, openBlock, unref, withCtx, createVNode, renderSlot } from 'vue';
-import { _ as _sfc_main$2 } from '../DismissableLayer/DismissableLayer.js';
 import { _ as _sfc_main$4, P as PopperContentPropsDefaultValue } from '../Popper/PopperContent.js';
 import { g as getOpenState, b as isPointerInGraceArea, F as FIRST_LAST_KEYS, L as LAST_KEYS, f as focusFirst, c as isMouseEvent } from './utils.js';
 import { u as useBodyScrollLock } from '../shared/useBodyScrollLock.js';
@@ -9,6 +8,7 @@ import { u as useFocusGuards } from '../shared/useFocusGuards.js';
 import { u as useForwardExpose } from '../shared/useForwardExpose.js';
 import { u as useTypeahead } from '../shared/useTypeahead.js';
 import { _ as _sfc_main$1 } from '../FocusScope/FocusScope.js';
+import { _ as _sfc_main$2 } from '../DismissableLayer/DismissableLayer.js';
 import { _ as _sfc_main$3 } from '../RovingFocus/RovingFocusGroup.js';
 import { u as useArrowNavigation } from '../shared/useArrowNavigation.js';
 import { g as getActiveElement } from '../shared/getActiveElement.js';

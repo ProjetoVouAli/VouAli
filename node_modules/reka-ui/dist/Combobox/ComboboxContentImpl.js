@@ -1,5 +1,4 @@
 import { defineComponent, toRefs, computed, ref, onMounted, onUnmounted, createBlock, openBlock, unref, withCtx, createVNode, resolveDynamicComponent, mergeProps, renderSlot } from 'vue';
-import { _ as _sfc_main$2 } from '../DismissableLayer/DismissableLayer.js';
 import { _ as _sfc_main$3 } from '../Popper/PopperContent.js';
 import { u as useBodyScrollLock } from '../shared/useBodyScrollLock.js';
 import { c as createContext } from '../shared/createContext.js';
@@ -8,6 +7,7 @@ import { u as useForwardExpose } from '../shared/useForwardExpose.js';
 import { u as useHideOthers } from '../shared/useHideOthers.js';
 import { u as useForwardProps } from '../shared/useForwardProps.js';
 import { _ as _sfc_main$1 } from '../Listbox/ListboxContent.js';
+import { _ as _sfc_main$2 } from '../DismissableLayer/DismissableLayer.js';
 import { P as Primitive } from '../Primitive/Primitive.js';
 
 const [injectComboboxContentContext, provideComboboxContentContext] = createContext("ComboboxContent");

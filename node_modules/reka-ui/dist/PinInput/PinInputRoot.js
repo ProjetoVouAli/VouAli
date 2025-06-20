@@ -43,8 +43,9 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
     function onInputElementChange(el) {
       inputElements.value.add(el);
     }
+    const isNumericMode = computed(() => props.type === "number");
     const isCompleted = computed(() => {
-      const modelValues = currentModelValue.value.filter((i) => !!i);
+      const modelValues = currentModelValue.value.filter((i) => !!i || isNumericMode.value && i === 0);
       return modelValues.length === inputElements.value.size;
     });
     watch(modelValue, () => {
@@ -62,7 +63,8 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
       disabled,
       isCompleted,
       inputElements,
-      onInputElementChange
+      onInputElementChange,
+      isNumericMode
     });
     return (_ctx, _cache) => {
       return openBlock(), createBlock(unref(Primitive), mergeProps(_ctx.$attrs, {

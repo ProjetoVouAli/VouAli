@@ -1,7 +1,6 @@
 'use strict';
 
 const vue = require('vue');
-const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
 const Popper_PopperContent = require('../Popper/PopperContent.cjs');
 const shared_useBodyScrollLock = require('../shared/useBodyScrollLock.cjs');
 const shared_createContext = require('../shared/createContext.cjs');
@@ -10,6 +9,7 @@ const shared_useForwardExpose = require('../shared/useForwardExpose.cjs');
 const shared_useHideOthers = require('../shared/useHideOthers.cjs');
 const shared_useForwardProps = require('../shared/useForwardProps.cjs');
 const Listbox_ListboxContent = require('../Listbox/ListboxContent.cjs');
+const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
 const Primitive_Primitive = require('../Primitive/Primitive.cjs');
 
 const [injectComboboxContentContext, provideComboboxContentContext] = shared_createContext.createContext("ComboboxContent");

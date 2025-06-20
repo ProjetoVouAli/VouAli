@@ -45,8 +45,9 @@ const _sfc_main = /* @__PURE__ */ vue.defineComponent({
     function onInputElementChange(el) {
       inputElements.value.add(el);
     }
+    const isNumericMode = vue.computed(() => props.type === "number");
     const isCompleted = vue.computed(() => {
-      const modelValues = currentModelValue.value.filter((i) => !!i);
+      const modelValues = currentModelValue.value.filter((i) => !!i || isNumericMode.value && i === 0);
       return modelValues.length === inputElements.value.size;
     });
     vue.watch(modelValue, () => {
@@ -64,7 +65,8 @@ const _sfc_main = /* @__PURE__ */ vue.defineComponent({
       disabled,
       isCompleted,
       inputElements,
-      onInputElementChange
+      onInputElementChange,
+      isNumericMode
     });
     return (_ctx, _cache) => {
       return vue.openBlock(), vue.createBlock(vue.unref(Primitive_Primitive.Primitive), vue.mergeProps(_ctx.$attrs, {

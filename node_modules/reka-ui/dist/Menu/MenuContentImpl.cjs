@@ -1,7 +1,6 @@
 'use strict';
 
 const vue = require('vue');
-const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
 const Popper_PopperContent = require('../Popper/PopperContent.cjs');
 const Menu_utils = require('./utils.cjs');
 const shared_useBodyScrollLock = require('../shared/useBodyScrollLock.cjs');
@@ -11,6 +10,7 @@ const shared_useFocusGuards = require('../shared/useFocusGuards.cjs');
 const shared_useForwardExpose = require('../shared/useForwardExpose.cjs');
 const shared_useTypeahead = require('../shared/useTypeahead.cjs');
 const FocusScope_FocusScope = require('../FocusScope/FocusScope.cjs');
+const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
 const RovingFocus_RovingFocusGroup = require('../RovingFocus/RovingFocusGroup.cjs');
 const shared_useArrowNavigation = require('../shared/useArrowNavigation.cjs');
 const shared_getActiveElement = require('../shared/getActiveElement.cjs');

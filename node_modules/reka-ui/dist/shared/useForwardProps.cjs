@@ -12,16 +12,14 @@ function useForwardProps(props) {
   }, {});
   const refProps = vue.toRef(props);
   return vue.computed(() => {
-    const propsAsRefs = vue.toRefs(refProps.value);
     const preservedProps = {};
     const assignedProps = vm?.vnode.props ?? {};
     Object.keys(assignedProps).forEach((key) => {
       preservedProps[vue.camelize(key)] = assignedProps[key];
     });
     return Object.keys({ ...defaultProps, ...preservedProps }).reduce((prev, curr) => {
-      const val = propsAsRefs[curr]?.value;
-      if (val !== void 0)
-        prev[curr] = val;
+      if (refProps.value[curr] !== void 0)
+        prev[curr] = refProps.value[curr];
       return prev;
     }, {});
   });

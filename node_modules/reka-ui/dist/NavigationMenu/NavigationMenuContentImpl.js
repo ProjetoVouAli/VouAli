@@ -1,9 +1,9 @@
 import { defineComponent, ref, computed, watchEffect, createBlock, openBlock, unref, mergeProps, withCtx, renderSlot } from 'vue';
-import { _ as _sfc_main$1 } from '../DismissableLayer/DismissableLayer.js';
 import { m as makeTriggerId, a as makeContentId, E as EVENT_ROOT_CONTENT_DISMISS, g as getOpenState, b as getTabbableCandidates, f as focusFirst } from './utils.js';
 import { u as useCollection } from '../Collection/Collection.js';
 import { u as useForwardExpose } from '../shared/useForwardExpose.js';
 import { i as injectNavigationMenuItemContext } from './NavigationMenuItem.js';
+import { _ as _sfc_main$1 } from '../DismissableLayer/DismissableLayer.js';
 import { g as getActiveElement } from '../shared/getActiveElement.js';
 import { u as useArrowNavigation } from '../shared/useArrowNavigation.js';
 import { i as injectNavigationMenuContext } from './NavigationMenuRoot.js';

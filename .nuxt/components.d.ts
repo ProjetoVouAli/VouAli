@@ -12,7 +12,10 @@ type HydrationStrategies = {
 }
 type LazyComponent<T> = (T & DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }>)
 interface _GlobalComponents {
-      'NuxtWelcome': typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
+      'AutenticacaoBotoesLoginSocial': typeof import("../components/autenticacao/BotoesLoginSocial.vue")['default']
+    'AutenticacaoCampoEntrada': typeof import("../components/autenticacao/CampoEntrada.vue")['default']
+    'AutenticacaoFormularioAutenticacao': typeof import("../components/autenticacao/FormularioAutenticacao.vue")['default']
+    'NuxtWelcome': typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
     'NuxtLayout': typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
     'NuxtErrorBoundary': typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
     'ClientOnly': typeof import("../node_modules/nuxt/dist/app/components/client-only")['default']
@@ -25,6 +28,13 @@ interface _GlobalComponents {
     'NuxtImg': typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']
     'NuxtPicture': typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']
     'Button': typeof import("../components/ui/button/index")['Button']
+    'Card': typeof import("../components/ui/card/index")['Card']
+    'CardCabecalho': typeof import("../components/ui/card/index")['CardCabecalho']
+    'CardTitulo': typeof import("../components/ui/card/index")['CardTitulo']
+    'CardDescricao': typeof import("../components/ui/card/index")['CardDescricao']
+    'CardConteudo': typeof import("../components/ui/card/index")['CardConteudo']
+    'CardRodape': typeof import("../components/ui/card/index")['CardRodape']
+    'CardDestino': typeof import("../components/ui/card/index")['CardDestino']
     'NuxtPage': typeof import("../node_modules/nuxt/dist/pages/runtime/page")['default']
     'NoScript': typeof import("../node_modules/nuxt/dist/head/runtime/components")['NoScript']
     'Link': typeof import("../node_modules/nuxt/dist/head/runtime/components")['Link']
@@ -37,7 +47,10 @@ interface _GlobalComponents {
     'Body': typeof import("../node_modules/nuxt/dist/head/runtime/components")['Body']
     'NuxtIsland': typeof import("../node_modules/nuxt/dist/app/components/nuxt-island")['default']
     'NuxtRouteAnnouncer': IslandComponent<typeof import("../node_modules/nuxt/dist/app/components/server-placeholder")['default']>
-      'LazyNuxtWelcome': LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
+      'LazyAutenticacaoBotoesLoginSocial': LazyComponent<typeof import("../components/autenticacao/BotoesLoginSocial.vue")['default']>
+    'LazyAutenticacaoCampoEntrada': LazyComponent<typeof import("../components/autenticacao/CampoEntrada.vue")['default']>
+    'LazyAutenticacaoFormularioAutenticacao': LazyComponent<typeof import("../components/autenticacao/FormularioAutenticacao.vue")['default']>
+    'LazyNuxtWelcome': LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
     'LazyNuxtLayout': LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
     'LazyNuxtErrorBoundary': LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>
     'LazyClientOnly': LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/client-only")['default']>
@@ -50,6 +63,13 @@ interface _GlobalComponents {
     'LazyNuxtImg': LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']>
     'LazyNuxtPicture': LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']>
     'LazyButton': LazyComponent<typeof import("../components/ui/button/index")['Button']>
+    'LazyCard': LazyComponent<typeof import("../components/ui/card/index")['Card']>
+    'LazyCardCabecalho': LazyComponent<typeof import("../components/ui/card/index")['CardCabecalho']>
+    'LazyCardTitulo': LazyComponent<typeof import("../components/ui/card/index")['CardTitulo']>
+    'LazyCardDescricao': LazyComponent<typeof import("../components/ui/card/index")['CardDescricao']>
+    'LazyCardConteudo': LazyComponent<typeof import("../components/ui/card/index")['CardConteudo']>
+    'LazyCardRodape': LazyComponent<typeof import("../components/ui/card/index")['CardRodape']>
+    'LazyCardDestino': LazyComponent<typeof import("../components/ui/card/index")['CardDestino']>
     'LazyNuxtPage': LazyComponent<typeof import("../node_modules/nuxt/dist/pages/runtime/page")['default']>
     'LazyNoScript': LazyComponent<typeof import("../node_modules/nuxt/dist/head/runtime/components")['NoScript']>
     'LazyLink': LazyComponent<typeof import("../node_modules/nuxt/dist/head/runtime/components")['Link']>
@@ -68,6 +88,9 @@ declare module 'vue' {
   export interface GlobalComponents extends _GlobalComponents { }
 }
 
+export const AutenticacaoBotoesLoginSocial: typeof import("../components/autenticacao/BotoesLoginSocial.vue")['default']
+export const AutenticacaoCampoEntrada: typeof import("../components/autenticacao/CampoEntrada.vue")['default']
+export const AutenticacaoFormularioAutenticacao: typeof import("../components/autenticacao/FormularioAutenticacao.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -81,6 +104,13 @@ export const NuxtRouteAnnouncer: typeof import("../node_modules/nuxt/dist/app/co
 export const NuxtImg: typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']
 export const NuxtPicture: typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']
 export const Button: typeof import("../components/ui/button/index")['Button']
+export const Card: typeof import("../components/ui/card/index")['Card']
+export const CardCabecalho: typeof import("../components/ui/card/index")['CardCabecalho']
+export const CardTitulo: typeof import("../components/ui/card/index")['CardTitulo']
+export const CardDescricao: typeof import("../components/ui/card/index")['CardDescricao']
+export const CardConteudo: typeof import("../components/ui/card/index")['CardConteudo']
+export const CardRodape: typeof import("../components/ui/card/index")['CardRodape']
+export const CardDestino: typeof import("../components/ui/card/index")['CardDestino']
 export const NuxtPage: typeof import("../node_modules/nuxt/dist/pages/runtime/page")['default']
 export const NoScript: typeof import("../node_modules/nuxt/dist/head/runtime/components")['NoScript']
 export const Link: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Link']
@@ -93,6 +123,9 @@ export const Html: typeof import("../node_modules/nuxt/dist/head/runtime/compone
 export const Body: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Body']
 export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components/nuxt-island")['default']
 export const NuxtRouteAnnouncer: IslandComponent<typeof import("../node_modules/nuxt/dist/app/components/server-placeholder")['default']>
+export const LazyAutenticacaoBotoesLoginSocial: LazyComponent<typeof import("../components/autenticacao/BotoesLoginSocial.vue")['default']>
+export const LazyAutenticacaoCampoEntrada: LazyComponent<typeof import("../components/autenticacao/CampoEntrada.vue")['default']>
+export const LazyAutenticacaoFormularioAutenticacao: LazyComponent<typeof import("../components/autenticacao/FormularioAutenticacao.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>
@@ -106,6 +139,13 @@ export const LazyNuxtRouteAnnouncer: LazyComponent<typeof import("../node_module
 export const LazyNuxtImg: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtImg']>
 export const LazyNuxtPicture: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-stubs")['NuxtPicture']>
 export const LazyButton: LazyComponent<typeof import("../components/ui/button/index")['Button']>
+export const LazyCard: LazyComponent<typeof import("../components/ui/card/index")['Card']>
+export const LazyCardCabecalho: LazyComponent<typeof import("../components/ui/card/index")['CardCabecalho']>
+export const LazyCardTitulo: LazyComponent<typeof import("../components/ui/card/index")['CardTitulo']>
+export const LazyCardDescricao: LazyComponent<typeof import("../components/ui/card/index")['CardDescricao']>
+export const LazyCardConteudo: LazyComponent<typeof import("../components/ui/card/index")['CardConteudo']>
+export const LazyCardRodape: LazyComponent<typeof import("../components/ui/card/index")['CardRodape']>
+export const LazyCardDestino: LazyComponent<typeof import("../components/ui/card/index")['CardDestino']>
 export const LazyNuxtPage: LazyComponent<typeof import("../node_modules/nuxt/dist/pages/runtime/page")['default']>
 export const LazyNoScript: LazyComponent<typeof import("../node_modules/nuxt/dist/head/runtime/components")['NoScript']>
 export const LazyLink: LazyComponent<typeof import("../node_modules/nuxt/dist/head/runtime/components")['Link']>

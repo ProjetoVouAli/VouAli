@@ -1,11 +1,11 @@
 'use strict';
 
 const vue = require('vue');
-const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
 const NavigationMenu_utils = require('./utils.cjs');
 const Collection_Collection = require('../Collection/Collection.cjs');
 const shared_useForwardExpose = require('../shared/useForwardExpose.cjs');
 const NavigationMenu_NavigationMenuItem = require('./NavigationMenuItem.cjs');
+const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
 const shared_getActiveElement = require('../shared/getActiveElement.cjs');
 const shared_useArrowNavigation = require('../shared/useArrowNavigation.cjs');
 const NavigationMenu_NavigationMenuRoot = require('./NavigationMenuRoot.cjs');

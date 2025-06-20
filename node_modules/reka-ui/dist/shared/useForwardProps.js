@@ -1,4 +1,4 @@
-import { getCurrentInstance, toRef, computed, toRefs, camelize } from 'vue';
+import { getCurrentInstance, toRef, computed, camelize } from 'vue';
 
 function useForwardProps(props) {
   const vm = getCurrentInstance();
@@ -10,16 +10,14 @@ function useForwardProps(props) {
   }, {});
   const refProps = toRef(props);
   return computed(() => {
-    const propsAsRefs = toRefs(refProps.value);
     const preservedProps = {};
     const assignedProps = vm?.vnode.props ?? {};
     Object.keys(assignedProps).forEach((key) => {
       preservedProps[camelize(key)] = assignedProps[key];
     });
     return Object.keys({ ...defaultProps, ...preservedProps }).reduce((prev, curr) => {
-      const val = propsAsRefs[curr]?.value;
-      if (val !== void 0)
-        prev[curr] = val;
+      if (refProps.value[curr] !== void 0)
+        prev[curr] = refProps.value[curr];
       return prev;
     }, {});
   });
