@@ -1,0 +1,1 @@
+// Card para itens próximos (horizontal)

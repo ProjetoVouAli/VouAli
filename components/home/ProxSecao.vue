@@ -1,0 +1,1 @@
+// Seção "Popular nas proximidades"  

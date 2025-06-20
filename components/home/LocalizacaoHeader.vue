@@ -1,0 +1,1 @@
+// Barra superior com localização e ícone de configurações
