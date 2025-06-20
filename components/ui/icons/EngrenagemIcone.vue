@@ -1,0 +1,1 @@
+// Ícone de engrenagem
