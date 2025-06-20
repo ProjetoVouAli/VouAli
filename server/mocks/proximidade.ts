@@ -1,0 +1,1 @@
+// Dados para "Popular nas proximidades" 

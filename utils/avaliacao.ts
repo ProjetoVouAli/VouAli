@@ -1,0 +1,1 @@
+// Formatação e cálculos de avaliações

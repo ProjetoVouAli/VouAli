@@ -1,0 +1,1 @@
+// Tipos para destinos, locais, etc.

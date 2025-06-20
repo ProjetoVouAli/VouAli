@@ -1,0 +1,1 @@
+// Cálculos de distância, formatação de localização
