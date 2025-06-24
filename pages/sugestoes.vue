@@ -23,6 +23,8 @@
 </template>
 
 <script setup lang="ts">
+import { navigateTo, useFetch, useHead } from 'nuxt/app'
+
 // Definição de tipos
 interface Destino {
     id: number
@@ -36,11 +38,10 @@ interface Destino {
     updatedAt: string
 }
 
-// Busca os dados da API
-// const { data: destinos, pending, error } = useFetch<Destino[]>('/api/destinos')
+ const { data: destinos, pending, error } = useFetch<Destino[]>('/api/destinos')
 
 // Mock de teste, apagar apos concluir banco de dados.0
-const destinos = ref<Destino[]>([
+/* let destinos = ref<Destino[]>([
     {
         id: 1,
         nome: 'Arraial do Cabo',
@@ -63,10 +64,9 @@ const destinos = ref<Destino[]>([
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
     }
-])
+]) */
 
-const pending = ref(false)
-const error = ref(null)
+
 
 
 // Configuração de SEO

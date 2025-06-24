@@ -5,6 +5,9 @@ import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { escapeHtml } from 'file:///home/bruno/docs/code/vouali/node_modules/@vue/shared/dist/shared.cjs.js';
+import { eq } from 'file:///home/bruno/docs/code/vouali/node_modules/drizzle-orm/index.js';
+import { drizzle } from 'file:///home/bruno/docs/code/vouali/node_modules/drizzle-orm/node-postgres/index.js';
+import { pgTable, timestamp, text, serial } from 'file:///home/bruno/docs/code/vouali/node_modules/drizzle-orm/pg-core/index.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///home/bruno/docs/code/vouali/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, joinRelativeURL } from 'file:///home/bruno/docs/code/vouali/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file:///home/bruno/docs/code/vouali/node_modules/vue/server-renderer/index.mjs';
@@ -1764,36 +1767,36 @@ const styles$1 = /*#__PURE__*/Object.freeze({
   default: styles
 });
 
-const destinosMock = [
-  {
-    id: 1,
-    slug: "arraial-do-cabo",
-    nome: "Arraial do Cabo",
-    descricao: "Localizado na Regi\xE3o dos Lagos, Arraial do Cabo \xE9 conhecido por suas \xE1guas cristalinas e rica vida marinha.",
-    resumo: "Belezas naturais e praias paradis\xEDacas.",
-    imagem: "/images/arraial-do-cabo.jpg",
-    destaque: true,
-    createdAt: "2024-06-10T00:00:00.000Z",
-    updatedAt: "2024-06-10T00:00:00.000Z"
-  },
-  {
-    id: 2,
-    slug: "saquarema",
-    nome: "Saquarema",
-    descricao: "Saquarema \xE9 um dos principais pontos tur\xEDsticos do Rio de Janeiro, com cultura vibrante e paisagens incr\xEDveis.",
-    resumo: "A capital brasileira do surf.",
-    imagem: "/images/saquarema.jpg",
-    destaque: true,
-    createdAt: "2024-06-10T00:00:00.000Z",
-    updatedAt: "2024-06-10T00:00:00.000Z"
-  }
-  // Adicione mais destinos se desejar
-];
+const destinos = pgTable("destinos", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  nome: text("nome").notNull(),
+  descricao: text("descricao"),
+  resumo: text("resumo"),
+  imagem: text("imagem"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+const schema = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  destinos: destinos
+});
+
+const db = drizzle(process.env.DATABASE_URL, { schema });
 
 const _slug__get = defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug");
+  if (!slug) {
+    throw createError({
+      statusCode: 400,
+      message: "Slug \xE9 obrigat\xF3rio"
+    });
+  }
   try {
-    const slug = getRouterParam(event, "slug");
-    const destino = destinosMock.find((d) => d.slug === slug);
+    const destino = await db.query.destinos.findFirst({
+      where: eq(destinos.slug, slug)
+    });
     if (!destino) {
       throw createError({
         statusCode: 404,
@@ -1802,10 +1805,10 @@ const _slug__get = defineEventHandler(async (event) => {
     }
     return destino;
   } catch (error) {
-    console.error(`Erro ao buscar destino: ${error}`);
+    console.error(`Erro ao buscar destino ${slug}:`, error);
     throw createError({
       statusCode: 500,
-      message: "Erro ao carregar dados do destino"
+      message: `Erro ao buscar destino ${slug}`
     });
   }
 });
@@ -1817,7 +1820,8 @@ const _slug__get$1 = /*#__PURE__*/Object.freeze({
 
 const index_get = defineEventHandler(async () => {
   try {
-    return destinosMock;
+    const destinos = await db.query.destinos.findMany();
+    return destinos;
   } catch (error) {
     console.error("Erro ao buscar destinos:", error);
     throw createError({

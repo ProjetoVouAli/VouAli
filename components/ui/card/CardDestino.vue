@@ -34,15 +34,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import {
-    Card,
-    CardCabecalho,
-    CardTitulo,
-    CardDescricao,
-    CardConteudo,
-    CardRodape
-} from '~/components/ui/card'
-import { Button } from '~/components/ui/button'
+import CardCabecalho from './CardCabecalho.vue'
+import CardDescricao from './CardDescricao.vue'
+import CardRodape from './CardRodape.vue'
 
 interface Destino {
     id: number

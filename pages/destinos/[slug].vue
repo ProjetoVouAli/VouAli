@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@/components/ui/button'
+import { navigateTo, useFetch, useHead, useRoute } from 'nuxt/app'
 
 const route = useRoute()
 const slug = route.params.slug as string
