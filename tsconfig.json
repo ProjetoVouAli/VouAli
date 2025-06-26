@@ -1,13 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node"
-  },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
+  "extends": "./.nuxt/tsconfig.json",
+
 }

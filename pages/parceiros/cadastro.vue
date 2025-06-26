@@ -133,7 +133,7 @@ function validate() {
   if (!form.empresa.trim()) errors.empresa = 'O nome da empresa é obrigatório.'
   if (!form.email.trim()) {
     errors.email = 'O e‑mail é obrigatório.'
-  } else if (!/.+@.+\\..+/.test(form.email)) {
+  } else if (!/.+@.+.\.+.+/.test(form.email)) {
     errors.email = 'Insira um e‑mail válido.'
   }
   if (!form.telefone.trim()) errors.telefone = 'O telefone é obrigatório.'
@@ -170,7 +170,7 @@ async function onSubmit() {
     payload.append('descricao', form.descricao)
     payload.append('preco', String(form.preco))
     form.imagens.forEach((img, i) => {
-      if (img) payload.append(`imagem_${i + 1}`, img)
+      if (img) payload.append(`imagem_${img.name}`, img)
     })
 
     // Exemplo: await fetch('/api/parceiros', { method: 'POST', body: payload })

@@ -99,6 +99,12 @@
       ],
       "#unhead/composables": [
         "../node_modules/nuxt/dist/head/runtime/composables/v3"
+      ],
+      "#tailwindcss": [
+        "../assets/css/tailwind"
+      ],
+      "#tailwindcss/sources": [
+        "./tailwindcss/sources"
       ]
     },
     "lib": [
@@ -109,8 +115,9 @@
   },
   "include": [
     "./types/nitro-nuxt.d.ts",
-    "../node_modules/@nuxt/eslint/runtime/server",
     "../node_modules/shadcn-nuxt/runtime/server",
+    "../node_modules/@nuxt/eslint/runtime/server",
+    "../node_modules/@nuxtjs/tailwindcss/runtime/server",
     "../node_modules/@nuxt/devtools/runtime/server",
     "../node_modules/@nuxt/telemetry/runtime/server",
     "./types/nitro.d.ts",
@@ -120,8 +127,9 @@
   "exclude": [
     "../node_modules",
     "../node_modules/nuxt/node_modules",
-    "../node_modules/@nuxt/eslint/node_modules",
     "../node_modules/shadcn-nuxt/node_modules",
+    "../node_modules/@nuxt/eslint/node_modules",
+    "../node_modules/@nuxtjs/tailwindcss/node_modules",
     "../node_modules/@nuxt/devtools/node_modules",
     "../node_modules/@nuxt/telemetry/node_modules",
     "../dist"
