@@ -3,14 +3,10 @@
 	import { MapPin } from '@lucide/svelte';
 	import { MapLibre, Marker, Popup } from 'svelte-maplibre-gl';
 	import { mode } from 'mode-watcher';
+	import type { DestinationInsert } from '$lib/server/db/schema';
 
-	const {
-		latitude,
-		longitude,
-		popupStr
-	}: { latitude: number; longitude: number; popupStr: string } = $props();
+	const { destinations }: { destinations: DestinationInsert[] } = $props();
 
-	let lnglat = $derived({ lng: longitude, lat: latitude });
 	let offset = $state(24);
 
 	let offsets: maplibregl.Offset = $derived({
@@ -30,24 +26,38 @@
 			? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 			: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json'
 	);
+
+	const mapBounds = $derived.by(() => {
+		const bounds = new maplibregl.LngLatBounds();
+		for (const { latitude, longitude } of destinations) {
+			bounds.extend([Number(longitude), Number(latitude)]);
+		}
+		return bounds;
+	});
 </script>
 
 <MapLibre
+	bounds={mapBounds}
 	style={mapStyle}
-	class="w-full min-h-[300px]"
-	zoom={10}
-	center={[longitude, latitude]}
+	class="w-full min-h-full"
+	fitBoundsOptions={{maxZoom:11}}
 	maxPitch={85}
 	attributionControl={false}
 >
-	<Marker bind:lnglat >
-		{#snippet content()}
-			<div class="items-center leading-none">
-				<MapPin class="w-full" />
-			</div>
-		{/snippet}
-		<Popup class="text-black" open={true} offset={offsets}>
-			<span class="text-lg">{popupStr}</span>
-		</Popup>
-	</Marker>
+	{#each destinations as { name,slug, longitude, latitude, image}}
+		<Marker lnglat={[Number(longitude), Number(latitude)]}>
+			{#snippet content()}
+				<div class="items-center *:last:hidden hover:*:last:block leading-none ">
+					<MapPin class="w-full" />
+					<p>{name}</p>
+				</div>
+			{/snippet}
+			<Popup class="text-center text-black w-36 h-36"   open={false} offset={offsets}>
+				<p>{name}</p>
+				<a href={`/destination/${slug}`}> 
+					<img class="flex overflow-hidden" alt={"image- " + name} src={image}/>
+				</a>
+			</Popup>
+		</Marker>
+	{/each}
 </MapLibre>

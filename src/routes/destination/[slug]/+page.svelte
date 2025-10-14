@@ -17,7 +17,7 @@
 	</Button>
 </nav>
 <section>
-	<Card.Root class="mb-5">
+	<Card.Root class="mb-5 shadow-2xl">
 		<Card.Header>
 			<h1 class="text-4xl font-bold mb-4">{name}</h1>
 		</Card.Header>
@@ -31,7 +31,7 @@
 		</Card.Content>
 	</Card.Root>
 
-	<Card.Root>
+	<Card.Root class=" inset-shadow-sm/30">
 		<Card.Content>
 			<section>
 				<h1 class="pb-2 font-bold">Descrição:</h1>
@@ -49,9 +49,9 @@
 			</section>
 		</Card.Content>
 		<Card.Footer>
-			<section class="flex flex-col w-full">
+			<section class="flex flex-col w-full h-90">
 				<h2 class="pb-2 font-bold">Localização:</h2>
-				<MarkerMap popupStr={name} latitude={Number(latitude)} longitude={Number(longitude)} />
+				<MarkerMap  destinations={[data.destination]} />
 			</section>
 		</Card.Footer>
 	</Card.Root>
