@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { destinations, destinationsCategories, destinationsCategoriesRelation } from '$lib/server/db/schema';
+import { destinations, destinationsCategories, destinationsCategoriesRelation, destinationsImages, type DestinationsImagesSelect } from '$lib/server/db/schema';
 import { and, ilike, eq, inArray, SQL, sql, getTableColumns } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
@@ -14,18 +14,22 @@ export const load: PageServerLoad = async ({ url }) => {
 	const results = await db
 		.select({
 			...destinationColumns,
-			categories: sql<string[]>`array_agg(${destinationsCategories.name})`
+			categories: sql<string[]>`array_agg(${destinationsCategories.name})`,
+			images: sql<DestinationsImagesSelect[]>`json_agg(DISTINCT ${destinationsImages})`
 		})
 		.from(destinations)
 		.innerJoin(
 			destinationsCategoriesRelation,
 			eq(destinationsCategoriesRelation.destinationId, destinations.id)
 		)
+		.innerJoin(destinationsImages,
+			eq(destinationsImages.destinationId, destinations.id)
+		)
 		.innerJoin(
 			destinationsCategories,
 			eq(destinationsCategories.id, destinationsCategoriesRelation.destinationCategoryId)
 		)
-		.groupBy(destinations.id, destinations.name)
+		.groupBy(destinations.id, destinations.name, destinationsImages.id)
 		.having(tags ?
 			sql`${sql.join(
 				tags.map((tag) => sql`bool_or(${destinationsCategories.name} = ${tag})`),

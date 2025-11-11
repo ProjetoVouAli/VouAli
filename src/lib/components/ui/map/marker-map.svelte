@@ -39,12 +39,12 @@
 <MapLibre
 	bounds={mapBounds}
 	style={mapStyle}
-	class="w-full min-h-full"
+	class="w-full h-full"
 	fitBoundsOptions={{maxZoom:11}}
 	maxPitch={85}
 	attributionControl={false}
 >
-	{#each destinations as { name,slug, longitude, latitude, image}}
+	{#each destinations as { name,slug, longitude, latitude, }}
 		<Marker lnglat={[Number(longitude), Number(latitude)]}>
 			{#snippet content()}
 				<div class="items-center *:last:hidden hover:*:last:block leading-none ">
@@ -54,9 +54,7 @@
 			{/snippet}
 			<Popup class="text-center text-black w-36 h-36"   open={false} offset={offsets}>
 				<p>{name}</p>
-				<a href={`/destination/${slug}`}> 
-					<img class="flex overflow-hidden" alt={"image- " + name} src={image}/>
-				</a>
+				<p>Clique para mais detalhes</p>
 			</Popup>
 		</Marker>
 	{/each}

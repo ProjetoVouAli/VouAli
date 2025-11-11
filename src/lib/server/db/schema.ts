@@ -9,7 +9,6 @@ export const destinations = pgTable('destinations', {
   name: text('name').notNull(),
   description: text('description').notNull(),
   summary: text('summary').notNull(),
-  image: text('image').notNull(),
   neighborhood: text('neighborhood').notNull(),
   city: text('city').notNull(),
   state: text('state').default('RJ').notNull(),
@@ -21,9 +20,16 @@ export const destinations = pgTable('destinations', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
-export const destinationsRelations = relations(destinations, ({many}) => ({
-  categoriesRelations: many(destinationsCategoriesRelation)
+export const destinationsRelations = relations(destinations, ({ many }) => ({
+  categoriesRelations: many(destinationsCategoriesRelation),
+  images: many(destinationsImages), 
 }));
+
+export const destinationsImages = pgTable('destinations_images', {
+  id: serial('id').primaryKey(),
+  url: varchar({length: 200}).notNull(),
+  destinationId: integer('destination_id').notNull().references(() => destinations.id)
+})
 
 export const destinationsCategoriesRelation = pgTable('destinations_categories_relation', {
   id: serial('id').primaryKey(),
@@ -51,5 +57,14 @@ export const destinationsCategoriesRelations = relations(destinationsCategories,
   destinationRelations: many(destinationsCategoriesRelation),
 }));
 
+export const destinationsImagesRelations = relations(destinationsImages, ({ one }) => ({
+  destination: one(destinations, {
+    fields: [destinationsImages.destinationId],
+    references: [destinations.id],
+  }),
+}));
+
 export type DestinationSelect = typeof destinations.$inferSelect
-export type DestinationInsert = typeof destinations.$inferInsert                         
+export type DestinationInsert = typeof destinations.$inferInsert            
+
+export type DestinationsImagesSelect = typeof destinationsImages.$inferSelect;

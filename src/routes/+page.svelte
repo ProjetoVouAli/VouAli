@@ -11,11 +11,11 @@
 	<img  src="/home-background.jpeg" alt="home" />
 </section>
 
+<Button href="/search/" class="w-full h-lg mb-10">Veja todos os destinos da cidade!</Button>
+
 <Card.Root class="mb-10">
-	<Card.Title class="text-center text-xl">Encontre cada destino da cidade!</Card.Title>
+	<Card.Title class="text-center text-xl">Veja o mapa de cada destino</Card.Title>
     <Card.Content class="flex w-full h-90">
         <MarkerMap destinations={data.destinations}/>
     </Card.Content>
 </Card.Root>
-
-<Button href="/search/" class="w-full h-lg mb-10">Ver Mais</Button>

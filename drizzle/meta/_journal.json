@@ -8,6 +8,27 @@
       "when": 1758899039695,
       "tag": "0000_fast_squirrel_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762800746573,
+      "tag": "0001_purple_malcolm_colcord",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762801735570,
+      "tag": "0002_aberrant_clint_barton",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1762801753234,
+      "tag": "0003_careless_terror",
+      "breakpoints": true
     }
   ]
 }

@@ -58,7 +58,7 @@
 	</div>
 </nav>
 <section class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
-	{#each data.destinations as { name, slug, image, summary }}
+	{#each data.destinations as { name, images, slug, summary }}
 		<a href="/destination/{slug}">
 			<Card.Root
 				class="transform transition-transform duration-300 
@@ -66,7 +66,7 @@
 			>
 				<Card.Title>{name}</Card.Title>
 				<Card.Content>
-					<img class="rounded-lg w-60 h-40 object-cover" alt={`${name} image`} src={image} />
+					<img class="rounded-lg w-60 h-40 object-cover" alt={`${name} image`} src={images[0].url} />
 				</Card.Content>
 				<Card.Footer>
 					<description class=" text-left">{summary}</description>

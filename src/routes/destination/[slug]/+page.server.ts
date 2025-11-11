@@ -8,10 +8,11 @@ export const load: PageServerLoad = async ({ params }) => {
     const result = await db.query.destinations.findFirst({
         where: eq(destinations.slug, params.slug),
         with: {
+            images: true,
             categoriesRelations: {
                 columns: {},
                 with: {
-                    category: { columns: { name: true } }
+                    category: { columns: { name: true } },
                 }
             }
         }
