@@ -3,7 +3,6 @@
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
 	import { cn } from '$lib/utils.js';
 
 	type Item = {
@@ -52,18 +51,22 @@
 	}}
 	bind:open
 >
-	<Popover.Trigger bind:ref={triggerRef}>
-		<Button
-			class={cn('flex justify-between', className)}
-			variant="outline"
-			role="combobox"
-			aria-expanded={open}
-		>
-			<p class="overflow-hidden whitespace-nowrap text-ellipsis">
-				{selectedValue || selectLabel}
-			</p>
-			<ChevronsUpDownIcon class="ml-2 size-4 shrink-0 opacity-50" />
-		</Button>
+	<Popover.Trigger 
+		bind:ref={triggerRef}
+		class={cn(
+			'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50',
+			'bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border',
+			'focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+			'h-9 px-4 py-2 flex justify-between',
+			className
+		)}
+		role="combobox"
+		aria-expanded={open}
+	>
+		<p class="overflow-hidden whitespace-nowrap text-ellipsis">
+			{selectedValue || selectLabel}
+		</p>
+		<ChevronsUpDownIcon class="ml-2 size-4 shrink-0 opacity-50" />
 	</Popover.Trigger>
 	<Popover.Content class="w-fit p-0">
 		<Command.Root>
