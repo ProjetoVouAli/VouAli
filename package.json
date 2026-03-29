@@ -44,6 +44,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
+		"firebase": "^12.11.0",
 		"mode-watcher": "^1.1.0",
 		"postgres": "^3.4.5",
 		"uninstall": "^0.0.0"
