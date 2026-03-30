@@ -1,9 +1,11 @@
 <script>
+	import path from 'path';
 	import { Button } from '../button';
 	import ModeToggle from './mode-toggle.svelte';
 
 	const navButtons = [
 		{ slug: 'Home', path: '/' },
+		{ slug: 'Entrar', path: '/login' },
 	];
 </script>
 
