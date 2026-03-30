@@ -3,9 +3,9 @@
 	import { MapPin } from '@lucide/svelte';
 	import { MapLibre, Marker, Popup } from 'svelte-maplibre-gl';
 	import { mode } from 'mode-watcher';
-	import type { DestinationInsert } from '$lib/server/db/schema';
+	import type { Destination } from '$lib/server/db/entities/Destination';
 
-	const { destinations }: { destinations: DestinationInsert[] } = $props();
+	const { destinations }: { destinations: Destination[] } = $props();
 
 	let offset = $state(24);
 

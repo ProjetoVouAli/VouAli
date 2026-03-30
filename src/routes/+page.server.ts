@@ -1,13 +1,12 @@
-import { db } from '$lib/server/db';
-import { destinations, destinationsCategories, destinationsCategoriesRelation } from '$lib/server/db/schema';
-import { and, ilike, eq, inArray, SQL, sql, getTableColumns } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
+import { Destination } from '$lib/server/db/entities/Destination';
+import { AppDataSource } from '$lib/server/db/data-source';
 
 export const load: PageServerLoad = async ({ url }) => {
     const searchParams = url.searchParams;
 
-    const results = await db.query.destinations.findMany({columns:{id: false}});
+    const results = await AppDataSource.getRepository(Destination).find();
     return {
-        destinations: results,
+        destinations: structuredClone(results),
     };
 };
