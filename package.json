@@ -13,13 +13,8 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check .",
 		"db:start": "docker compose up",
-		"db:push": "drizzle-kit push",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
-		,
-		"typeorm:generate": "typeorm migration:generate ./src/lib/server/db/migrations/UsuarioInit -d ./src/lib/server/db/data-source.ts",
-		"typeorm:run": "typeorm migration:run -d ./src/lib/server/db/data-source.ts"
+		"typeorm:generate": "typeorm migration:generate ./src/lib/server/db/migrations/UsuarioInit -d ./src/lib/server/db/data-source.cli.ts",
+		"typeorm:run": "typeorm migration:run -d ./src/lib/server/db/data-source.cli.ts"
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.9.0",
@@ -32,8 +27,6 @@
 		"@types/node": "^22",
 		"bits-ui": "^2.11.4",
 		"clsx": "^2.1.1",
-		"drizzle-kit": "^0.31.10",
-		"drizzle-orm": "^0.40.0",
 		"embla-carousel-svelte": "^8.6.0",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",

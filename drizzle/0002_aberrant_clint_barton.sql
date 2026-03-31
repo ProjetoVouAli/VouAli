@@ -1,1 +1,0 @@
-ALTER TABLE "destinations_images" ADD COLUMN "id" serial PRIMARY KEY NOT NULL;
