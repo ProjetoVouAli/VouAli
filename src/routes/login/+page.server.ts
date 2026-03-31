@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "../$types";
 import { fail, redirect } from "@sveltejs/kit";
 import { loginWithEmail } from "$lib/auth";
+import { AppDataSource } from '$lib/server/db/data-source';
+import { Usuario } from '$lib/server/db/entities/Usuario';
 
 export const load: PageServerLoad = async () => {
     return {
@@ -47,7 +49,7 @@ export const actions: Actions = {
                     message: result.message
                 });
             }
-            
+
             // GUARDAR TOKEN NOS COOKIES
             if (!result.token) {
                 return fail(500, {
@@ -64,15 +66,23 @@ export const actions: Actions = {
                 maxAge: 60 * 60 * 24 * 7 // 7 dias
             });
 
-            // REDIRECIONAR
-            throw redirect(303, '/search');
+            // Buscar usuário no banco pelo email
+            const userRepository = AppDataSource.getRepository(Usuario);
+            const usuario = await userRepository.findOne({ where: { email } });
+
+            // Retornar dados do usuário para o frontend
+            return {
+                success: true,
+                user: usuario ? { nome: usuario.nome, email: usuario.email } : null,
+                message: 'Login realizado com sucesso!'
+            };
 
         } catch (error: any) {
             if (error.location) throw error; //Redirecionar para outro lugar
 
             console.error('Erro ao fazer Login:', error);
             return fail(500, {
-                
+                message: 'Erro interno ao fazer login.'
             })
         }
     }

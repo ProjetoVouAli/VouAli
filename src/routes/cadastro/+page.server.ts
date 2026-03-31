@@ -76,7 +76,8 @@ export const actions: Actions = {
                 });
             }
             
-            await  saveUserToDatabase(firebaseUid, email, password, nome, sexo)
+
+            const usuario = await saveUserToDatabase(firebaseUid, email, password, nome, sexo);
 
             // 3. GUARDAR TOKEN NOS COOKIES
             cookies.set('authToken', result.token, {
@@ -87,8 +88,15 @@ export const actions: Actions = {
                 maxAge: 60 * 60 * 24 * 7 // 7 dias
             });
 
-            // REDIRECIONAR 
-            throw redirect(303, '/search');
+            // Retornar dados do usuário e mensagem de sucesso
+            return {
+                success: true,
+                user: {
+                    nome: usuario.nome,
+                    email: usuario.email
+                },
+                message: 'Cadastro realizado com sucesso!'
+            };
 
         } catch (error: any) {
             if (error.location) throw error;

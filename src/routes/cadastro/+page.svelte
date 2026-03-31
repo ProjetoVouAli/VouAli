@@ -1,8 +1,12 @@
 <script lang="ts">
+
     import Button from "$lib/components/ui/button/button.svelte";
     import { Input } from '$lib/components/ui/input/index.js';
     import { page } from "$app/state";
     import { enhance } from "$app/forms";
+    import { user } from '$lib/stores/user';
+    import { flash } from '$lib/stores/flash';
+    import { goto } from '$app/navigation';
 
     let email  = '';
     let password = '';
@@ -10,8 +14,14 @@
     let mostrarSenha = false;
     let loading = false;
 
-    const { registerWithEmail, registerWithGoogle } = page.data;
-    const { form } = page;
+        const { registerWithEmail, registerWithGoogle } = page.data;
+        const { form } = page;
+
+        $: if (form?.success) {
+            user.set(form.user);
+            flash.set(form.message);
+            window.location.href = '/'; // reload completo para hidratação SSR
+        }
 </script>
 
 <div class="min-h-screen bg-white dark:bg-slate-950 transition-colors">

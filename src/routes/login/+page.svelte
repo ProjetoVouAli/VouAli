@@ -3,6 +3,9 @@
     import { Input } from '$lib/components/ui/input/index.js';
     import { page } from '$app/state';
     import { enhance } from '$app/forms';
+    import { user } from '$lib/stores/user';
+    import { flash } from '$lib/stores/flash';
+    import { goto } from '$app/navigation';
 
     let email = '';
     let password = '';
@@ -10,7 +13,19 @@
     let loading = false;
 
     const { loginWithEmail, loginWithGoogle } = page.data;
-    const {form} = page;
+    const { form } = page;
+
+    $: {
+        console.log('[LOGIN] Valor de form:', form);
+        if (form?.success) {
+            console.log('[LOGIN] Login bem-sucedido, redirecionando para home...');
+            user.set(form.user);
+            flash.set(form.message);
+            if (typeof window !== 'undefined') {
+                window.location.href = '/'; // reload completo para hidratação SSR
+            }
+        }
+    }
 
 </script>
 
@@ -29,13 +44,6 @@
 
             <form 
                 method="POST"
-                use:enhance={() => {
-                    loading = true;
-                    return async ({ update }) => {
-                        loading = false;
-                        await update();
-                    };
-                }}
                 class="space-y-4"
             >
                 <div>
