@@ -6,6 +6,7 @@ import { env } from '$env/dynamic/private';
 import { Destination } from './entities/Destination';
 import { DestinationImage } from './entities/DestinationImage';
 import { DestinationCategory } from './entities/DestinationCategory';
+import { Usuario } from './entities/Usuario';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -16,6 +17,7 @@ export const AppDataSource = new DataSource({
     Destination, 
     DestinationImage, 
     DestinationCategory, 
+    Usuario,
   ],
   subscribers: [],
   migrations: [],

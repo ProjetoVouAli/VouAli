@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
+import 'reflect-metadata';
 
 @Entity('usuario')
 export class Usuario {

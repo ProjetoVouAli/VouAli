@@ -17,6 +17,9 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio"
+		,
+		"typeorm:generate": "typeorm migration:generate ./src/lib/server/db/migrations/UsuarioInit -d ./src/lib/server/db/data-source.ts",
+		"typeorm:run": "typeorm migration:run -d ./src/lib/server/db/data-source.ts"
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.9.0",
@@ -25,6 +28,7 @@
 		"@sveltejs/kit": "^2.22.0",
 		"@sveltejs/vite-plugin-svelte": "^6.0.0",
 		"@tailwindcss/vite": "^4.0.0",
+		"@types/bcrypt": "^6.0.0",
 		"@types/node": "^22",
 		"bits-ui": "^2.11.4",
 		"clsx": "^2.1.1",
@@ -44,6 +48,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
+		"bcrypt": "^6.0.0",
 		"firebase": "^12.11.0",
 		"mode-watcher": "^1.1.0",
 		"pg": "^8.20.0",

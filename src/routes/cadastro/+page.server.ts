@@ -1,7 +1,7 @@
 import type { PageServerLoad } from "../$types";
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { registerWithEmail } from "$lib/auth";
-import { resourceLimits } from "worker_threads";
+import { saveUserToDatabase } from "$lib/server/auth/cadastro";
 
 export const load: PageServerLoad = async () => {
     return {
@@ -16,6 +16,8 @@ export const actions: Actions = {
         const email =  data.get('email')?.toString().trim()  ??  '';
         const password = data.get('password')?.toString().trim() ?? '';
         const confirmPassword = data.get('confirmPassword')?.toString().trim() ?? '';
+        const nome = data.get('nome')?.toString().trim() ?? '';
+        const sexo = (data.get('sexo')?.toString() ?? 'O') as 'M' | 'F' | 'O';
 
         //  VALIDAÇÃO
         if (!email || !password || !confirmPassword) {
@@ -47,7 +49,7 @@ export const actions: Actions = {
         }
 
         try {
-            // CADASTRO COM FIREBASE
+            // 1. CADASTRO COM FIREBASE
             const result =  await registerWithEmail(email, password);
             
             if (!result.success) {
@@ -64,7 +66,19 @@ export const actions: Actions = {
                 });
             }
 
-            // GUARDAR TOKEN NOS COOKIES
+            // 2. SALVAR NO  BANCO DE  DADOS COM UID DO FIREBASE
+            const firebaseUid = result.user?.uid;
+
+            if (!firebaseUid) {
+                return fail(500, {
+                    email,
+                    message: 'Erro ao obter UID do Firebase'
+                });
+            }
+            
+            await  saveUserToDatabase(firebaseUid, email, password, nome, sexo)
+
+            // 3. GUARDAR TOKEN NOS COOKIES
             cookies.set('authToken', result.token, {
                 path: '/',
                 httpOnly: true,
