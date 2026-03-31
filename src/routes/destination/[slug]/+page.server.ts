@@ -1,28 +1,26 @@
-import { db } from "$lib/server/db";
-import { eq } from "drizzle-orm";
-import type { PageServerLoad } from "./$types";
-import { destinations } from "$lib/server/db/schema";
+import { AppDataSource } from "$lib/server/db/data-source";
+import { Destination } from "$lib/server/db/entities/Destination";
 import { error } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params }) => {
-    const result = await db.query.destinations.findFirst({
-        where: eq(destinations.slug, params.slug),
-        with: {
+    const destinationRepo = AppDataSource.getRepository(Destination);
+
+    const result = await destinationRepo.findOne({
+        where: { 
+            slug: params.slug 
+        },
+        relations: {
             images: true,
-            categoriesRelations: {
-                columns: {},
-                with: {
-                    category: { columns: { name: true } },
-                }
-            }
+            categories: true,
         }
     });
 
     if (!result) {
-        return error(404);
+        throw error(404, "Destino não encontrado");
     }
 
     return {
-        destination: result
+        destination: structuredClone(result)
     };
 };
