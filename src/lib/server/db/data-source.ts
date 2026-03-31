@@ -11,7 +11,7 @@ import { Usuario } from './entities/Usuario';
 export const AppDataSource = new DataSource({
   type: 'postgres',
   url: env.DATABASE_URL, 
-  synchronize: false, // Deixe false em produção (use migrations)
+  synchronize: true, // ATENÇÃO: use apenas em desenvolvimento!
   logging: true,
   entities: [
     Destination, 
