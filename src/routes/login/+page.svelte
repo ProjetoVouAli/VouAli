@@ -13,19 +13,6 @@
     let loading = false;
 
     const { loginWithEmail, loginWithGoogle } = page.data;
-    const { form } = page;
-
-    $: {
-        console.log('[LOGIN] Valor de form:', form);
-        if (form?.success) {
-            console.log('[LOGIN] Login bem-sucedido, redirecionando para home...');
-            user.set(form.user);
-            flash.set(form.message);
-            if (typeof window !== 'undefined') {
-                window.location.href = '/'; // reload completo para hidratação SSR
-            }
-        }
-    }
 
 </script>
 
@@ -36,15 +23,43 @@
                 Login
             </h2>
             
-            {#if form?.message}
-                <div class="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded">
-                    {form.message}
-                </div>
-            {/if}
+
 
             <form 
                 method="POST"
                 class="space-y-4"
+                use:enhance={({ formData }) => {
+                    loading = true;
+                    return async ({ result }) => {
+                        loading = false;
+                        if (result.type === 'redirect') {
+                            // Fallback: redirect do servidor
+                            await goto(result.location);
+                            return;
+                        }
+
+                        if (result.type === 'error') {
+                            console.log('[LOGIN ENHANCE] ❌ Erro inesperado:', result.error);
+                            flash.set('Ocorreu um erro inesperado ao processar o login.');
+                            return;
+                        }
+
+                        const data = result.data as any;
+
+                        // ✅ Se o login foi bem-sucedido, atualizar store e depois redirecionar
+                        if (result.type === 'success' && data?.success && data?.user) {
+                            console.log('[LOGIN ENHANCE] ✅ Login bem-sucedido:', data.user.email);
+                            user.set(data.user);
+                            flash.set(data.message);
+                            
+                            // Redirecionar para home APÓS atualizar o store
+                            await goto('/');
+                        } else if (result.type === 'failure' && data?.message) {
+                            console.log('[LOGIN ENHANCE] ❌ Erro:', data.message);
+                            flash.set(data.message);
+                        }
+                    };
+                }}
             >
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">

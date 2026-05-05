@@ -3,7 +3,18 @@ import { Destination } from "$lib/server/db/entities/Destination";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ params }) => {
+/**
+ * Página de Destino - Pública
+ * 
+ * Padrão:
+ * - Funciona com ou sem autenticação
+ * - Mostra detalhes completos do destino
+ * - Usuário é carregado do layout global
+ */
+export const load: PageServerLoad = async ({ params, locals }) => {
+    // ✅ Lazy Loading: Carrega usuário se existir (opcional nesta página)
+    const user = await locals.authUser();
+
     const destinationRepo = AppDataSource.getRepository(Destination);
 
     const result = await destinationRepo.findOne({
@@ -21,6 +32,7 @@ export const load: PageServerLoad = async ({ params }) => {
     }
 
     return {
-        destination: structuredClone(result)
+        destination: structuredClone(result),
+        user, // Passar para frontend se necessário
     };
 };

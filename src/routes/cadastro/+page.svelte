@@ -15,13 +15,7 @@
     let loading = false;
 
         const { registerWithEmail, registerWithGoogle } = page.data;
-        const { form } = page;
 
-        $: if (form?.success) {
-            user.set(form.user);
-            flash.set(form.message);
-            window.location.href = '/'; // reload completo para hidratação SSR
-        }
 </script>
 
 <div class="min-h-screen bg-white dark:bg-slate-950 transition-colors">
@@ -31,19 +25,40 @@
                 Registrar-se
             </h2>
 
-            {#if form?.message}
-                <div class="mb-4 p-3 bg-red-100 dark:bg-red-900 border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded">
-                    {form.message}
-                </div>
-            {/if}
+
 
             <form
                 method="POST"
-                use:enhance={() => {
+                use:enhance={({ formData }) => {
                     loading = true;
-                    return async ({ update }) => {
+                    return async ({ result }) => {
                         loading = false;
-                        await update();
+                        if (result.type === 'redirect') {
+                            // Fallback: redirect do servidor
+                            await goto(result.location);
+                            return;
+                        }
+
+                        if (result.type === 'error') {
+                            console.log('[CADASTRO ENHANCE] ❌ Erro inesperado:', result.error);
+                            flash.set('Ocorreu um erro inesperado ao processar o cadastro.');
+                            return;
+                        }
+
+                        const data = result.data as any;
+
+                        // ✅ Se o cadastro foi bem-sucedido, atualizar store e depois redirecionar
+                        if (result.type === 'success' && data?.success && data?.user) {
+                            console.log('[CADASTRO ENHANCE] ✅ Cadastro bem-sucedido:', data.user.email);
+                            user.set(data.user);
+                            flash.set(data.message);
+                            
+                            // Redirecionar para home APÓS atualizar o store
+                            await goto('/');
+                        } else if (result.type === 'failure' && data?.message) {
+                            console.log('[CADASTRO ENHANCE] ❌ Erro:', data.message);
+                            flash.set(data.message);
+                        }
                     };
                 }}
                 class="space-y-4"

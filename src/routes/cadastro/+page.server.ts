@@ -3,7 +3,22 @@ import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { registerWithEmail } from "$lib/auth";
 import { saveUserToDatabase } from "$lib/server/auth/cadastro";
 
-export const load: PageServerLoad = async () => {
+/**
+ * Página de Cadastro - Protegida com redirecionamento
+ * 
+ * Padrão de mercado:
+ * - Se já está logado, redireciona para home
+ * - Se não está logado, mostra formulário de cadastro
+ */
+export const load: PageServerLoad = async ({ locals }) => {
+    // ✅ Lazy Loading: Verifica apenas se está logado
+    const user = await locals.authUser();
+
+    // Se já está logado, redireciona para home
+    if (user) {
+        throw redirect(303, '/');
+    }
+
     return {
         registerWithEmail: true,
         registerWithGoogle: true
@@ -88,14 +103,20 @@ export const actions: Actions = {
                 maxAge: 60 * 60 * 24 * 7 // 7 dias
             });
 
-            // Retornar dados do usuário e mensagem de sucesso
+            // ✅ RETORNAR DADOS PRIMEIRO (sem redirect)
+            // O frontend vai fazer o redirect após atualizar o store
             return {
                 success: true,
                 user: {
+                    id: usuario.id,
                     nome: usuario.nome,
-                    email: usuario.email
+                    email: usuario.email,
+                    sexo: usuario.sexo,
+                    eAdministrador: usuario.eAdministrador,
+                    eParceiro: usuario.eParceiro,
+                    eViajante: usuario.eViajante,
                 },
-                message: 'Cadastro realizado com sucesso!'
+                message: '✅ Cadastro realizado com sucesso!'
             };
 
         } catch (error: any) {
