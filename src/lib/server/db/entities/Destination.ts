@@ -60,4 +60,9 @@ export class Destination {
     }
   })
   categories!: DestinationCategory[];
+	nome: string | null | undefined;
+	category: any;
+	descricao: any;
+	complementos: any;
+	servicos: any;
 }
