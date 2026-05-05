@@ -34,6 +34,13 @@
 		scrollTo,
 	});
 
+	// Sincronizar props reativos com estado
+	$effect(() => {
+		carouselState.orientation = orientation;
+		carouselState.options = opts;
+		carouselState.plugins = plugins;
+	});
+
 	setEmblaContext(carouselState);
 
 	function scrollPrev() {

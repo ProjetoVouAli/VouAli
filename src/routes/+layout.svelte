@@ -14,10 +14,8 @@
 	// IMPORTANTE: Não usar if(window) aqui - deixar rodar na hydration
 	$effect.pre(() => {
 		if (data?.user) {
-			console.log('[LAYOUT EFFECT.PRE] ✅ Setando usuário no store (antes da renderização):', data.user.nome);
 			user.set({ ...data.user, email: data.user.email ?? '' });
 		} else {
-			console.log('[LAYOUT EFFECT.PRE] ❌ Usuário não autenticado');
 			user.set(null);
 		}
 	});
