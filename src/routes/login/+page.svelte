@@ -1,6 +1,4 @@
 <script lang="ts">
-    import Button from '$lib/components/ui/button/button.svelte';
-    import { Input } from '$lib/components/ui/input/index.js';
     import { page } from '$app/state';
     import { enhance } from '$app/forms';
     import { user } from '$lib/stores/user';
@@ -13,113 +11,128 @@
     let loading = false;
 
     const { loginWithEmail, loginWithGoogle } = page.data;
-
 </script>
 
-<div class="min-h-screen bg-white dark:bg-slate-950 transition-colors">
-    <div class="flex flex-col items-center justify-center min-h-screen">
-        <div class="bg-white dark:bg-slate-900 p-8 rounded-lg shadow-lg dark:inset-shadow-slate-800 w-full max-w-md border">
-            <h2 class="text-2x1 font-bold mb-6 text-center text-gray-900 dark:text-white">
-                Login
-            </h2>
-            
+<!-- Nike: Design minimalista, preto/branco -->
+<div class="min-h-screen bg-white dark:bg-black pt-32 pb-16">
+    <div class="max-w-md mx-auto px-8">
+        <!-- Header -->
+        <div class="mb-12">
+            <h1 class="text-4xl font-bold mb-2">
+                Bem-vindo de volta
+            </h1>
+            <p class="text-muted-foreground text-lg">
+                Faça login na sua conta para continuar
+            </p>
+        </div>
 
-
+        <!-- Form Container -->
+        <div class="space-y-8">
+            <!-- Email/Password Form -->
             <form 
                 method="POST"
-                class="space-y-4"
+                class="space-y-6"
                 use:enhance={({ formData }) => {
                     loading = true;
                     return async ({ result }) => {
                         loading = false;
                         if (result.type === 'redirect') {
-                            // Fallback: redirect do servidor
                             await goto(result.location);
                             return;
                         }
 
                         if (result.type === 'error') {
-                            console.log('[LOGIN ENHANCE] ❌ Erro inesperado:', result.error);
                             flash.set('Ocorreu um erro inesperado ao processar o login.');
                             return;
                         }
 
                         const data = result.data as any;
-
-                        // ✅ Se o login foi bem-sucedido, atualizar store e depois redirecionar
                         if (result.type === 'success' && data?.success && data?.user) {
-                            console.log('[LOGIN ENHANCE] ✅ Login bem-sucedido:', data.user.email);
                             user.set(data.user);
                             flash.set(data.message);
-                            
-                            // Redirecionar para home APÓS atualizar o store
                             await goto('/');
                         } else if (result.type === 'failure' && data?.message) {
-                            console.log('[LOGIN ENHANCE] ❌ Erro:', data.message);
                             flash.set(data.message);
                         }
                     };
                 }}
             >
+                <!-- Email Input -->
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="email" class="block text-sm font-semibold mb-2">
                         Email
                     </label>
-                    <Input
+                    <input
                         id="email"
                         type="email"
                         name="email"
                         bind:value={email}
                         required
-                        class="mt-1 block w-full dark:bg-slate-800 dark:text-white dark:border-slate-600"
                         disabled={loading}
+                        class="w-full px-4 py-3 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"
+                        placeholder="seu@email.com"
                     />
                 </div>
 
+                <!-- Password Input -->
                 <div>
-                    <label for="password" class="block text-sm font-medium   text-gray-700 dark:text-gray-300">
+                    <label for="password" class="block text-sm font-semibold mb-2">
                         Senha
                     </label>
-                    <Input
-                        id="password"
-                        type={mostrarSenha ? 'text' : 'password'}
-                        name="password"
-                        bind:value={password}
-                        required
-                        class="mt-1 block w-full dark:bg-slate-800 dark:text-white dark:borders-slate-600"
-                        disabled={loading}
-                    />
+                    <div class="relative">
+                        <input
+                            id="password"
+                            type={mostrarSenha ? 'text' : 'password'}
+                            name="password"
+                            bind:value={password}
+                            required
+                            disabled={loading}
+                            class="w-full px-4 py-3 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"
+                            placeholder="••••••••"
+                        />
+                        <button
+                            type="button"
+                            onclick={() => mostrarSenha = !mostrarSenha}
+                            disabled={loading}
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold uppercase text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            {mostrarSenha ? 'Ocultar' : 'Mostrar'}
+                        </button>
+                    </div>
                 </div>
 
-                <div class="flex items-center">
-                    <input
-                        id="mostrarSenha"
-                        type="checkbox"
-                        bind:checked={mostrarSenha}
-                        disabled={loading}
-                        class="mr-2 dark:accent-blue-500"
-                    />
-                    <label for="mostrarSenha" class="text-sm text-gray-700 dark:text-gray-300">
-                        Mostrar senha
-                    </label>
-                </div>
-
-                <Button type="submit" class="w-full dark:bg-blue-600 dark:hover:bg-blue-700" disabled={loading}>
-                    {loading ? 'Entrando...' :  'Entrar'}
-                </Button>
+                <!-- Submit Button -->
+                <button
+                    type="submit"
+                    disabled={loading}
+                    class="w-full px-8 py-4 bg-black dark:bg-white text-white dark:text-black font-bold text-sm uppercase tracking-wide hover:opacity-80 disabled:opacity-50 transition-all duration-200"
+                >
+                    {loading ? 'Entrando...' : 'Entrar'}
+                </button>
             </form>
 
-            <div class="mt-4 text-center">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Não tem uma conta?
-                    <a href="/cadastro" class="text-blue-500 dark:text-blue-400 hover:underline">
-                        Registre-se
-                    </a>
-                </p>
-
+            <!-- Divider -->
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-border"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-white dark:bg-black text-muted-foreground">ou</span>
+                </div>
             </div>
 
+            <!-- Sign Up Link -->
+            <div class="text-center">
+                <p class="text-muted-foreground text-sm mb-4">
+                    Não tem uma conta?
+                </p>
+                <a
+                    href="/cadastro"
+                    class="inline-block px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white font-bold text-sm uppercase tracking-wide hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+                >
+                    Criar conta
+                </a>
+            </div>
         </div>
-
     </div>
 </div>
