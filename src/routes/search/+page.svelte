@@ -29,12 +29,12 @@
 		goto(`?${params.toString()}`, { replaceState: true });
 	}
 
-	function toggleCategory(categoryId: string) {
-		const categoryIdStr = String(categoryId);
-		if (selectedCategories.includes(categoryIdStr)) {
-			selectedCategories = selectedCategories.filter(c => c !== categoryIdStr);
+	function toggleCategory(categoryName: string) {
+		const categoryNameStr = String(categoryName);
+		if (selectedCategories.includes(categoryNameStr)) {
+			selectedCategories = selectedCategories.filter(c => c !== categoryNameStr);
 		} else {
-			selectedCategories = [...selectedCategories, categoryIdStr];
+			selectedCategories = [...selectedCategories, categoryNameStr];
 		}
 		updateSearch();
 	}
@@ -79,17 +79,17 @@
 								Categorias
 							</div>
 							<div class="space-y-3">
-								{#each data.categories as category (category.id)}
+								{#each data.categories as category (category.name)}
 									<label class="flex items-center gap-3 cursor-pointer hover:text-foreground transition-colors group">
 										<input
 											type="checkbox"
-											id="category-{category.id}"
-											checked={selectedCategories.includes(String(category.id))}
-											onchange={() => toggleCategory(String(category.id))}
+											id="category-{category.name}"
+											checked={selectedCategories.includes(category.name)}
+											onchange={() => toggleCategory(category.name)}
 											class="w-4 h-4 cursor-pointer accent-black dark:accent-white"
 										/>
 										<span class="text-sm font-medium group-hover:font-bold transition-all">
-											{category.nome}
+											{category.name}
 										</span>
 									</label>
 								{/each}
@@ -133,7 +133,7 @@
 										{#if destination.images && destination.images.length > 0}
 											<img
 												src={destination.images[0].url}
-												alt={destination.nome}
+											alt={destination.name}
 												class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
 											/>
 										{:else}
@@ -146,21 +146,21 @@
 									<!-- Content -->
 									<div class="p-6 space-y-4">
 										<!-- Category Badge -->
-										{#if destination.category}
+										{#if destination.categories && destination.categories.length > 0}
 											<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1">
-												{destination.category.nome}
+												{destination.categories[0]}
 											</span>
 										{/if}
 
 										<!-- Title -->
 										<h3 class="text-xl font-bold group-hover:underline transition-all">
-											{destination.nome}
+											{destination.name}
 										</h3>
 
 										<!-- Description -->
-										{#if destination.descricao}
+										{#if destination.description}
 											<p class="text-sm text-muted-foreground line-clamp-3">
-												{destination.descricao}
+												{destination.description}
 											</p>
 										{/if}
 

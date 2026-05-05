@@ -64,13 +64,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     });
 
     const allCategories = await categoryRepo.find({
-        select: ["name"],
+        select: ["id", "name"],
         order: { name: "ASC" }
     });
 
     return {
         destinations: structuredClone(formattedDestinations),
         categories: structuredClone(allCategories),
-        user, // Passar para frontend se necessário
+        user,
     };
 };

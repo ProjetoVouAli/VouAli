@@ -26,7 +26,7 @@
 				<div class="w-full h-full relative overflow-hidden">
 					<img
 						src={images[currentImageIndex].url}
-						alt={destination.nome}
+						alt={destination.name}
 						class="w-full h-full object-cover"
 					/>
 
@@ -64,19 +64,19 @@
 				<!-- Header -->
 				<div class="space-y-6">
 					<!-- Category Badge -->
-					{#if destination.category}
+					{#if destination.categories && destination.categories.length > 0}
 						<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-4 py-2">
-							{destination.category.nome}
+							{destination.categories[0]}
 						</span>
 					{/if}
 
 					<!-- Title -->
 					<div>
 						<h1 class="text-6xl font-bold mb-4 leading-tight">
-							{destination.nome}
-						</h1>
-						<p class="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-							{destination.descricao || 'Conheça este incrível destino.'}
+						{destination.name}
+					</h1>
+					<p class="text-xl text-muted-foreground leading-relaxed max-w-2xl">
+						{destination.description || 'Conheça este incrível destino.'}
 						</p>
 					</div>
 
@@ -101,31 +101,31 @@
 				<div class="border-t border-border"></div>
 
 				<!-- Info Grid -->
-				{#if destination.complementos || destination.servicos}
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-						{#if destination.complementos}
-							<div>
-								<h3 class="text-xl font-bold mb-4 uppercase tracking-wide">
-									Complementos
-								</h3>
-								<p class="text-muted-foreground leading-relaxed">
-									{destination.complementos}
-								</p>
-							</div>
-						{/if}
+			{#if destination.summary || destination.neighborhood}
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+					{#if destination.summary}
+						<div>
+							<h3 class="text-xl font-bold mb-4 uppercase tracking-wide">
+								Resumo
+							</h3>
+							<p class="text-muted-foreground leading-relaxed">
+								{destination.summary}
+							</p>
+						</div>
+					{/if}
 
-						{#if destination.servicos}
-							<div>
-								<h3 class="text-xl font-bold mb-4 uppercase tracking-wide">
-									Serviços
-								</h3>
-								<p class="text-muted-foreground leading-relaxed">
-									{destination.servicos}
-								</p>
-							</div>
-						{/if}
-					</div>
-				{/if}
+					{#if destination.neighborhood}
+						<div>
+							<h3 class="text-xl font-bold mb-4 uppercase tracking-wide">
+								Bairro
+							</h3>
+							<p class="text-muted-foreground leading-relaxed">
+								{destination.neighborhood}
+							</p>
+						</div>
+					{/if}
+				</div>
+			{/if}
 
 				<!-- Image Gallery -->
 				{#if images.length > 1}
@@ -141,7 +141,7 @@
 								>
 									<img
 										src={image.url}
-										alt={`${destination.nome} ${index + 1}`}
+									alt={`${destination.name} ${index + 1}`}
 										class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
 									/>
 									{#if currentImageIndex === index}

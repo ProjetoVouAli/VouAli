@@ -75,7 +75,7 @@
 									{#if destination.images && destination.images.length > 0}
 										<img
 											src={destination.images[0].url}
-											alt={destination.nome}
+											alt={destination.name}
 											class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
 										/>
 									{:else}
@@ -88,21 +88,21 @@
 								<!-- Content -->
 								<div class="p-6 space-y-4">
 									<!-- Category Badge -->
-									{#if destination.category}
+									{#if destination.categories && destination.categories.length > 0}
 										<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1">
-											{destination.category.nome}
+											{destination.categories[0]}
 										</span>
 									{/if}
 
 									<!-- Title -->
 									<h3 class="text-xl font-bold group-hover:underline transition-all">
-										{destination.nome}
+										{destination.name}
 									</h3>
 
 									<!-- Description -->
-									{#if destination.descricao}
+									{#if destination.description}
 										<p class="text-sm text-muted-foreground line-clamp-2">
-											{destination.descricao}
+											{destination.description}
 										</p>
 									{/if}
 

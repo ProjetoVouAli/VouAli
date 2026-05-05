@@ -31,8 +31,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         throw error(404, "Destino não encontrado");
     }
 
+    const formattedDestination = {
+        ...result,
+        categories: result.categories.map(c => c.name),
+    };
+
     return {
-        destination: structuredClone(result),
-        user, // Passar para frontend se necessário
+        destination: structuredClone(formattedDestination),
+        user,
     };
 };

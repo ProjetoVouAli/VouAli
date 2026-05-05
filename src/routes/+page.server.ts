@@ -11,7 +11,6 @@ import { AppDataSource } from '$lib/server/db/data-source';
  * - Mostra conteúdo diferente se logado
  */
 export const load: PageServerLoad = async ({ url, locals }) => {
-    // Usuário é carregado pelo layout, mas podemos acessar novamente se precisar
     const user = await locals.authUser();
 
     const searchParams = url.searchParams;
@@ -19,8 +18,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         relations: ['images', 'categories'],
     });
 
+    const formattedDestinations = results.map(dest => ({
+        ...dest,
+        categories: dest.categories.map(c => c.name),
+    }));
+
     return {
-        destinations: structuredClone(results),
-        user, // Passar para frontend se necessário
+        destinations: structuredClone(formattedDestinations),
+        user,
     };
 };
