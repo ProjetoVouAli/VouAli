@@ -14,7 +14,7 @@
 </script>
 
 <!-- Nike: Design minimalista, preto/branco -->
-<div class="min-h-screen bg-white dark:bg-black pt-32 pb-16">
+<div class="min-h-screen bg-background pt-32 pb-16">
     <div class="max-w-md mx-auto px-8">
         <!-- Header -->
         <div class="mb-12">
@@ -69,7 +69,7 @@
                         bind:value={email}
                         required
                         disabled={loading}
-                        class="w-full px-4 py-3 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"
+                        class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                         placeholder="seu@email.com"
                     />
                 </div>
@@ -87,7 +87,7 @@
                             bind:value={password}
                             required
                             disabled={loading}
-                            class="w-full px-4 py-3 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"
+                            class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                             placeholder="••••••••"
                         />
                         <button
@@ -105,7 +105,7 @@
                 <button
                     type="submit"
                     disabled={loading}
-                    class="w-full px-8 py-4 bg-black dark:bg-white text-white dark:text-black font-bold text-sm uppercase tracking-wide hover:opacity-80 disabled:opacity-50 transition-all duration-200"
+                    class="w-full px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 disabled:opacity-50 transition-all duration-200"
                 >
                     {loading ? 'Entrando...' : 'Entrar'}
                 </button>
@@ -117,7 +117,7 @@
                     <div class="w-full border-t border-border"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white dark:bg-black text-muted-foreground">ou</span>
+                    <span class="px-2 bg-background text-muted-foreground">ou</span>
                 </div>
             </div>
 
@@ -128,7 +128,7 @@
                 </p>
                 <a
                     href="/cadastro"
-                    class="inline-block px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white font-bold text-sm uppercase tracking-wide hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+                    class="inline-block px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
                 >
                     Criar conta
                 </a>

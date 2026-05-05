@@ -18,7 +18,7 @@
 
 <!-- Nike: Destination Detail Page -->
 {#if destination}
-	<div class="min-h-screen bg-white dark:bg-black">
+	<div class="min-h-screen bg-background">
 		<!-- Hero Image Section -->
 		<div class="relative w-full h-screen pt-32">
 			<!-- Main Image -->
@@ -34,20 +34,20 @@
 					<div class="absolute inset-0 flex items-center justify-between px-8 z-10">
 						<button
 							onclick={prevImage}
-							class="px-4 py-3 bg-black/70 dark:bg-white/70 text-white dark:text-black font-bold hover:bg-black dark:hover:bg-white transition-all duration-200"
+							class="px-4 py-3 bg-primary/70 text-primary-foreground font-bold hover:bg-primary transition-all duration-200"
 						>
 							←
 						</button>
 						<button
 							onclick={nextImage}
-							class="px-4 py-3 bg-black/70 dark:bg-white/70 text-white dark:text-black font-bold hover:bg-black dark:hover:bg-white transition-all duration-200"
+							class="px-4 py-3 bg-primary/70 text-primary-foreground font-bold hover:bg-primary transition-all duration-200"
 						>
 							→
 						</button>
 					</div>
 
 					<!-- Image Counter -->
-					<div class="absolute bottom-8 left-8 px-4 py-2 bg-black/70 dark:bg-white/70 text-white dark:text-black text-sm font-bold">
+					<div class="absolute bottom-8 left-8 px-4 py-2 bg-primary/70 text-primary-foreground text-sm font-bold">
 						{currentImageIndex + 1} / {images.length}
 					</div>
 				</div>
@@ -59,7 +59,7 @@
 		</div>
 
 		<!-- Content Section -->
-		<section class="bg-white dark:bg-black">
+	<section class="bg-background">
 			<div class="max-w-4xl mx-auto px-8 py-20 space-y-16">
 				<!-- Header -->
 				<div class="space-y-6">
@@ -84,13 +84,13 @@
 					<div class="flex gap-4 flex-wrap pt-4">
 						<a
 							href="/search"
-							class="px-8 py-4 bg-black dark:bg-white text-white dark:text-black font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
+							class="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
 						>
 							Voltar para Busca
 						</a>
 						<a
 							href="/"
-							class="px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white font-bold text-sm uppercase tracking-wide hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+							class="px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
 						>
 							Home
 						</a>
@@ -137,7 +137,7 @@
 						{#each images as image, index (image.url)}
 								<button
 									onclick={() => currentImageIndex = index}
-									class="relative h-40 overflow-hidden border-2 {currentImageIndex === index ? 'border-black dark:border-white' : 'border-border'} hover:border-black dark:hover:border-white transition-all duration-200"
+									class="relative h-40 overflow-hidden border-2 {currentImageIndex === index ? 'border-primary' : 'border-border'} hover:border-primary transition-all duration-200"
 								>
 									<img
 										src={image.url}
@@ -160,7 +160,7 @@
 					</h3>
 					<a
 						href="/search"
-						class="inline-block px-12 py-4 bg-black dark:bg-white text-white dark:text-black font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
+						class="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
 					>
 						Ver Mais Destinos
 					</a>
@@ -170,7 +170,7 @@
 	</div>
 {:else}
 	<!-- 404 State -->
-	<div class="min-h-screen bg-white dark:bg-black flex items-center justify-center pt-32">
+	<div class="min-h-screen bg-background flex items-center justify-center pt-32">
 		<div class="max-w-md mx-auto px-8 text-center space-y-6">
 			<div class="text-6xl mb-4">😕</div>
 			<h1 class="text-3xl font-bold">
@@ -181,7 +181,7 @@
 			</p>
 			<a
 				href="/"
-				class="inline-block px-8 py-4 bg-black dark:bg-white text-white dark:text-black font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
+				class="inline-block px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
 			>
 				Voltar para Home
 			</a>

@@ -24,7 +24,7 @@
 </script>
 
 <!-- Nike: Navbar minimalista, preto/branco -->
-<header class="fixed w-full top-0 left-0 z-50 bg-white dark:bg-black border-b border-border dark:border-border">
+<header class="fixed w-full top-0 left-0 z-50 bg-background border-b border-border">
 	<nav class="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
 		<!-- Logo/Brand -->
 		<a href="/" class="text-2xl font-bold tracking-tight hover:opacity-70 transition-opacity">
@@ -49,14 +49,14 @@
 				</div>
 				<button
 					onclick={logout}
-					class="px-6 py-2 text-xs font-bold uppercase tracking-wide border-2 border-black dark:border-white text-black dark:text-white hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+					class="px-6 py-2 text-xs font-bold uppercase tracking-wide border-2 border-primary text-foreground hover:bg-primary hover:text-primary-foreground transition-all duration-200"
 				>
 					Logout
 				</button>
 			{:else}
 				<a
 					href="/login"
-					class="px-6 py-2 text-xs font-bold uppercase tracking-wide bg-black dark:bg-white text-white dark:text-black hover:opacity-80 transition-opacity"
+					class="px-6 py-2 text-xs font-bold uppercase tracking-wide bg-primary text-primary-foreground hover:opacity-80 transition-opacity"
 				>
 					Entrar
 				</a>

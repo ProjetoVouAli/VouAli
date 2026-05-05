@@ -41,7 +41,7 @@
 </script>
 
 <!-- Nike: Search Page com filtros e grid -->
-<div class="min-h-screen bg-white dark:bg-black pt-32">
+<div class="min-h-screen bg-background pt-32">
 	<div class="max-w-7xl mx-auto px-8">
 		<!-- Page Header -->
 		<div class="mb-16">
@@ -68,7 +68,7 @@
 							bind:value={searchParam}
 							onchange={updateSearch}
 							placeholder="Nome do destino..."
-							class="w-full px-4 py-3 border-2 border-black dark:border-white bg-white dark:bg-black text-black dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"
+							class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
 						/>
 					</div>
 
@@ -86,7 +86,7 @@
 											id="category-{category.name}"
 											checked={selectedCategories.includes(category.name)}
 											onchange={() => toggleCategory(category.name)}
-											class="w-4 h-4 cursor-pointer accent-black dark:accent-white"
+												class="w-4 h-4 cursor-pointer accent-primary"
 										/>
 										<span class="text-sm font-medium group-hover:font-bold transition-all">
 											{category.name}
@@ -105,7 +105,7 @@
 								selectedCategories = [];
 								updateSearch();
 							}}
-							class="w-full px-4 py-3 border-2 border-black dark:border-white text-black dark:text-white font-bold text-xs uppercase tracking-wide hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+							class="w-full px-4 py-3 border-2 border-primary text-foreground font-bold text-xs uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
 						>
 							Limpar Filtros
 						</button>
@@ -197,7 +197,7 @@
 									selectedCategories = [];
 									updateSearch();
 								}}
-								class="mt-4 px-8 py-4 bg-black dark:bg-white text-white dark:text-black font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
+							class="mt-4 px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
 							>
 								Limpar Filtros
 							</button>

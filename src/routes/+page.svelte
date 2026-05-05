@@ -5,7 +5,7 @@
 </script>
 
 <!-- Nike: Hero Section com design moderno -->
-<div class="min-h-screen bg-white dark:bg-black">
+<div class="min-h-screen bg-background">
 	<!-- Hero Section -->
 	<section class="pt-40 pb-20 px-8">
 		<div class="max-w-7xl mx-auto">
@@ -26,13 +26,13 @@
 					<div class="flex gap-4 flex-wrap">
 						<a
 							href="/search"
-							class="px-8 py-4 bg-black dark:bg-white text-white dark:text-black font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
+							class="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
 						>
 							Explorar Destinos
 						</a>
 						<a
 							href="#destinations"
-							class="px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white font-bold text-sm uppercase tracking-wide hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+							class="px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
 						>
 							Saiba Mais
 						</a>
@@ -52,7 +52,7 @@
 	</section>
 
 	<!-- Featured Destinations Section -->
-	<section id="destinations" class="py-20 px-8 bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
+	<section id="destinations" class="py-20 px-8 bg-gradient-to-b from-background to-gray-50 dark:from-background dark:to-gray-950">
 		<div class="max-w-7xl mx-auto">
 			<!-- Section Header -->
 			<div class="mb-16">
@@ -123,7 +123,7 @@
 				<div class="mt-16 text-center">
 					<a
 						href="/search"
-						class="inline-block px-8 py-4 border-2 border-black dark:border-white text-black dark:text-white font-bold text-sm uppercase tracking-wide hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-200"
+						class="inline-block px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
 					>
 						Ver Todos os Destinos
 					</a>
@@ -131,7 +131,7 @@
 			{:else}
 				<div class="text-center py-16">
 					<p class="text-lg text-muted-foreground">Nenhum destino disponível no momento.</p>
-					<a href="/search" class="mt-4 inline-block text-black dark:text-white font-bold hover:underline">
+					<a href="/search" class="mt-4 inline-block text-foreground font-bold hover:underline">
 						Voltar para busca
 					</a>
 				</div>
