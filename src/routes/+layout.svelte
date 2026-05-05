@@ -10,16 +10,15 @@
 
 	let { data, children } = $props();
 
-	// ✅ Effect reativo que monitora data.user diretamente
-	$effect(() => {
-		if (typeof window !== 'undefined') {
-			if (data?.user) {
-				console.log('[LAYOUT EFFECT] ✅ Setando usuário no store:', data.user.nome);
-				user.set({ ...data.user, email: data.user.email ?? '' });
-			} else {
-				console.log('[LAYOUT EFFECT] ❌ Usuário não autenticado');
-				user.set(null);
-			}
+	// ✅ Effect.pre() dispara ANTES de outras renderizações (fix race condition de SSR)
+	// IMPORTANTE: Não usar if(window) aqui - deixar rodar na hydration
+	$effect.pre(() => {
+		if (data?.user) {
+			console.log('[LAYOUT EFFECT.PRE] ✅ Setando usuário no store (antes da renderização):', data.user.nome);
+			user.set({ ...data.user, email: data.user.email ?? '' });
+		} else {
+			console.log('[LAYOUT EFFECT.PRE] ❌ Usuário não autenticado');
+			user.set(null);
 		}
 	});
 
@@ -36,7 +35,7 @@
 </svelte:head>
 
 <ModeWatcher />
-<Navbar/>
+<Navbar initialUser={data.user}/>
 
 {#if $flash}
 	<div class="notificacao sucesso">

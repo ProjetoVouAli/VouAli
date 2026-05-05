@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   type: 'postgres',
   url: env.DATABASE_URL, 
   synchronize: true, // ATENÇÃO: use apenas em desenvolvimento!
-  logging: true,
+  logging: ['error'], // Mostra apenas erros, não as queries
   entities: [
     Destination, 
     DestinationImage, 
