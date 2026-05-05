@@ -142,7 +142,7 @@
 	<!-- Stats Section -->
 	<section class="py-20 px-8">
 		<div class="max-w-7xl mx-auto">
-			<div class="grid grid-cols-2 lg:grid-cols-4 gap-12">
+			<div class="grid grid-cols-2 lg:grid-cols-3 gap-12">
 				<div class="text-center">
 					<p class="text-5xl font-bold mb-2">{data.destinations?.length || 0}+</p>
 					<p class="text-muted-foreground">Destinos</p>
@@ -151,10 +151,7 @@
 					<p class="text-5xl font-bold mb-2">1000+</p>
 					<p class="text-muted-foreground">Viajantes</p>
 				</div>
-				<div class="text-center">
-					<p class="text-5xl font-bold mb-2">50+</p>
-					<p class="text-muted-foreground">Cidades</p>
-				</div>
+
 				<div class="text-center">
 					<p class="text-5xl font-bold mb-2">⭐ 4.9</p>
 					<p class="text-muted-foreground">Avaliação</p>
