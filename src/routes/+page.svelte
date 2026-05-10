@@ -95,13 +95,13 @@
 									{/if}
 
 									<!-- Title -->
-									<h3 class="text-xl font-bold group-hover:underline transition-all">
+									<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 cursor-help" title={destination.name}>
 										{destination.name}
 									</h3>
 
 									<!-- Description -->
 									{#if destination.description}
-										<p class="text-sm text-muted-foreground line-clamp-2">
+										<p class="text-sm text-muted-foreground line-clamp-3 cursor-help" title={destination.description}>
 											{destination.description}
 										</p>
 									{/if}

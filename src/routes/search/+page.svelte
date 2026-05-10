@@ -153,26 +153,26 @@
 										{/if}
 
 										<!-- Title -->
-										<h3 class="text-xl font-bold group-hover:underline transition-all">
-											{destination.name}
-										</h3>
+									<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 cursor-help" title={destination.name}>
+										{destination.name}
+									</h3>
 
-										<!-- Description -->
-										{#if destination.description}
-											<p class="text-sm text-muted-foreground line-clamp-3">
-												{destination.description}
-											</p>
-										{/if}
+									<!-- Description -->
+									{#if destination.description}
+										<p class="text-sm text-muted-foreground line-clamp-3 cursor-help" title={destination.description}>
+											{destination.description}
+										</p>
+									{/if}
 
-										<!-- Footer -->
-										<div class="pt-4 border-t border-border flex items-center justify-between">
-											<span class="text-xs font-bold uppercase tracking-wide">
-												Saiba Mais
-											</span>
-											<span class="group-hover:translate-x-1 transition-transform">→</span>
-										</div>
+									<!-- Footer -->
+									<div class="pt-4 border-t border-border flex items-center justify-between">
+										<span class="text-xs font-bold uppercase tracking-wide">
+											Saiba Mais
+										</span>
+										<span class="group-hover:translate-x-1 transition-transform">→</span>
 									</div>
 								</div>
+							</div>
 							</a>
 						{/each}
 					</div>
