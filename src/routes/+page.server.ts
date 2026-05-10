@@ -10,9 +10,7 @@ import { AppDataSource } from '$lib/server/db/data-source';
  * - Usuário já carregado do layout global
  * - Mostra conteúdo diferente se logado
  */
-export const load: PageServerLoad = async ({ url, locals }) => {
-    const user = await locals.authUser();
-
+export const load: PageServerLoad = async ({ url }) => {
     const searchParams = url.searchParams;
     const results = await AppDataSource.getRepository(Destination).find({
         relations: ['images', 'categories'],
@@ -25,6 +23,6 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
     return {
         destinations: structuredClone(formattedDestinations),
-        user,
+        // Usuário vem do layout, não precisa recarregar aqui!
     };
 };
