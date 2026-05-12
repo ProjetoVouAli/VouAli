@@ -4,7 +4,22 @@ import { loginWithEmail } from "$lib/auth";
 import { AppDataSource } from '$lib/server/db/data-source';
 import { Usuario } from '$lib/server/db/entities/Usuario';
 
-export const load: PageServerLoad = async () => {
+/**
+ * Página de Login - Protegida com redirecionamento
+ * 
+ * Padrão de mercado:
+ * - Se já está logado, redireciona para home
+ * - Se não está logado, mostra formulário
+ */
+export const load: PageServerLoad = async ({ locals }) => {
+    // ✅ Lazy Loading: Verifica apenas se está logado
+    const user = await locals.authUser();
+
+    // Se já está logado, redireciona para home
+    if (user) {
+        throw redirect(303, '/');
+    }
+
     return {
         loginWithEmail: true,
         loginWithGoogle: true
@@ -70,11 +85,27 @@ export const actions: Actions = {
             const userRepository = AppDataSource.getRepository(Usuario);
             const usuario = await userRepository.findOne({ where: { email } });
 
-            // Retornar dados do usuário para o frontend
+            if (!usuario) {
+                return fail(500, {
+                    email,
+                    message: 'Usuário não encontrado no banco de dados'
+                });
+            }
+
+            // ✅ RETORNAR DADOS PRIMEIRO (sem redirect)
+            // O frontend vai fazer o redirect após atualizar o store
             return {
                 success: true,
-                user: usuario ? { nome: usuario.nome, email: usuario.email } : null,
-                message: 'Login realizado com sucesso!'
+                user: {
+                    id: usuario.id,
+                    nome: usuario.nome,
+                    email: usuario.email,
+                    sexo: usuario.sexo,
+                    eAdministrador: usuario.eAdministrador,
+                    eParceiro: usuario.eParceiro,
+                    eViajante: usuario.eViajante,
+                },
+                message: '✅ Login realizado com sucesso!'
             };
 
         } catch (error: any) {

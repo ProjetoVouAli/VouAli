@@ -8,16 +8,17 @@
 	import { flash } from '$lib/stores/flash';
 	import { user } from '$lib/stores/user';
 
-
-
 	let { data, children } = $props();
 
-	$effect(() => {
-		if (typeof window !== 'undefined' && data?.user) {
-			user.set(data.user);
+	// ✅ Effect.pre() dispara ANTES de outras renderizações (fix race condition de SSR)
+	// IMPORTANTE: Não usar if(window) aqui - deixar rodar na hydration
+	$effect.pre(() => {
+		if (data?.user) {
+			user.set({ ...data.user, email: data.user.email ?? '' });
+		} else {
+			user.set(null);
 		}
 	});
-
 
 	$effect(() => {
 		if ($flash) {
@@ -32,12 +33,14 @@
 </svelte:head>
 
 <ModeWatcher />
-<Navbar/>
+<Navbar initialUser={data.user}/>
 
 {#if $flash}
-	<div class="notificacao sucesso">{$flash}</div>
+	<div class="notificacao sucesso">
+		{$flash}
+	</div>
 {/if}
 
 <main class="flex flex-col *:pl-5 *:pr-5 min-h-screen max-w-content-width overflow-clip w-full pt-20 m-auto">
-		{@render children?.()}
+	{@render children?.()}
 </main>

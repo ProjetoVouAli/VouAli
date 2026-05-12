@@ -1,124 +1,203 @@
 <script lang="ts">
-
-    import Button from "$lib/components/ui/button/button.svelte";
-    import { Input } from '$lib/components/ui/input/index.js';
     import { page } from "$app/state";
     import { enhance } from "$app/forms";
     import { user } from '$lib/stores/user';
     import { flash } from '$lib/stores/flash';
     import { goto } from '$app/navigation';
 
-    let email  = '';
+    let nome = '';
+    let email = '';
     let password = '';
     let confirmPassword = '';
+    let sexo = '';
     let mostrarSenha = false;
+    let mostrarConfirm = false;
     let loading = false;
+    let senhaMatch = true;
 
-        const { registerWithEmail, registerWithGoogle } = page.data;
-        const { form } = page;
+    function verificarSenha() {
+        senhaMatch = password === confirmPassword;
+    }
 
-        $: if (form?.success) {
-            user.set(form.user);
-            flash.set(form.message);
-            window.location.href = '/'; // reload completo para hidratação SSR
-        }
+    const { registerWithEmail, registerWithGoogle } = page.data;
 </script>
 
-<div class="min-h-screen bg-white dark:bg-slate-950 transition-colors">
-    <div class="flex flex-col  items-center justify-center min-h-screen">
-        <div class="bg-white dark:bg-slate-900 p-8 rounded-lg shadow-lg dark:shadow-slate-800 w-full max-w-md border border-gray-200 dark:border-slate-700 ">
-            <h2 class="text-2x1 font-bold mb-6 text-center text-gray-900 dark:text-white">
-                Registrar-se
-            </h2>
+<!-- Nike: Design minimalista, preto/branco -->
+<div class="min-h-screen bg-background pt-32 pb-16">
+    <div class="max-w-md mx-auto px-8">
+        <!-- Header -->
+        <div class="mb-12">
+            <h1 class="text-4xl font-bold mb-2">
+                Criar conta
+            </h1>
+            <p class="text-muted-foreground text-lg">
+                Junte-se ao VouAli e comece suas viagens
+            </p>
+        </div>
 
-            {#if form?.message}
-                <div class="mb-4 p-3 bg-red-100 dark:bg-red-900 border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded">
-                    {form.message}
-                </div>
-            {/if}
+        <!-- Form Container -->
+        <form 
+            method="POST"
+            class="space-y-6"
+            use:enhance={({ formData }) => {
+                loading = true;
+                return async ({ result }) => {
+                    loading = false;
+                    if (result.type === 'redirect') {
+                        await goto(result.location);
+                        return;
+                    }
 
-            <form
-                method="POST"
-                use:enhance={() => {
-                    loading = true;
-                    return async ({ update }) => {
-                        loading = false;
-                        await update();
-                    };
-                }}
-                class="space-y-4"
-            >
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Email
-                    </label>
-                    <Input
-                        id="email"
-                        type="email"
-                        name="email"
-                        bind:value={email}
-                        required
-                        class="mt-1 block w-full dark:bg-slate-800 dark:text-white dark:border-slate-600"
-                        disabled={loading}
-                    />
-                </div>
+                    if (result.type === 'error') {
+                        flash.set('Ocorreu um erro inesperado ao criar a conta.');
+                        return;
+                    }
 
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Senha
-                    </label>
-                    <Input
+                    const data = result.data as any;
+                    if (result.type === 'success' && data?.success && data?.user) {
+                        user.set(data.user);
+                        flash.set(data.message);
+                        await goto('/');
+                    } else if (result.type === 'failure' && data?.message) {
+                        flash.set(data.message);
+                    }
+                };
+            }}
+        >
+            <!-- Nome Input -->
+            <div>
+                <label for="nome" class="block text-sm font-semibold mb-2">
+                    Nome completo
+                </label>
+                <input
+                    id="nome"
+                    type="text"
+                    name="nome"
+                    bind:value={nome}
+                    required
+                    disabled={loading}
+                    class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                    placeholder="Seu nome"
+                />
+            </div>
+
+            <!-- Email Input -->
+            <div>
+                <label for="email" class="block text-sm font-semibold mb-2">
+                    Email
+                </label>
+                <input
+                    id="email"
+                    type="email"
+                    name="email"
+                    bind:value={email}
+                    required
+                    disabled={loading}
+                    class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                    placeholder="seu@email.com"
+                />
+            </div>
+
+            <!-- Gender Select -->
+            <div>
+                <label for="sexo" class="block text-sm font-semibold mb-2">
+                    Gênero
+                </label>
+                <select
+                    id="sexo"
+                    name="sexo"
+                    bind:value={sexo}
+                    required
+                    disabled={loading}
+                    class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all appearance-none cursor-pointer"
+                >
+                    <option value="">Selecione</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                    <option value="O">Outro</option>
+                </select>
+            </div>
+
+            <!-- Password Input -->
+            <div>
+                <label for="password" class="block text-sm font-semibold mb-2">
+                    Senha
+                </label>
+                <div class="relative">
+                    <input
                         id="password"
                         type={mostrarSenha ? 'text' : 'password'}
                         name="password"
                         bind:value={password}
+                        oninput={verificarSenha}
                         required
-                        class="mt-1 block w-full dark:bg-slate-800 dark:text-white dark:border-slate-600"
                         disabled={loading}
+                        class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
+                        placeholder="••••••••"
                     />
+                    <button
+                        type="button"
+                        onclick={() => mostrarSenha = !mostrarSenha}
+                        disabled={loading}
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold uppercase text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        {mostrarSenha ? 'Ocultar' : 'Mostrar'}
+                    </button>
                 </div>
+            </div>
 
-                <div>
-                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Confirmar Senha
-                    </label>
-                    <Input
+            <!-- Confirm Password Input -->
+            <div>
+                <label for="confirmPassword" class="block text-sm font-semibold mb-2">
+                    Confirmar senha
+                </label>
+                <div class="relative">
+                    <input
                         id="confirmPassword"
-                        type={mostrarSenha ? 'text' : 'password'}
+                        type={mostrarConfirm ? 'text' : 'password'}
                         name="confirmPassword"
                         bind:value={confirmPassword}
+                        oninput={verificarSenha}
                         required
-                        class="mt-1 block w-full dark:bg-slate-800 dark:text-white dark:border-slate-600"
                         disabled={loading}
+                        class="w-full px-4 py-3 border-2 {senhaMatch ? 'border-primary' : 'border-destructive'} bg-background text-foreground font-medium focus:outline-none focus:ring-2 {senhaMatch ? 'focus:ring-ring' : 'focus:ring-destructive'} transition-all"
+                        placeholder="••••••••"
                     />
-                </div>
-
-                <div class="flex items-center">
-                    <input
-                        id="mostrarSenha"
-                        type="checkbox"
-                        bind:checked={mostrarSenha}
+                    <button
+                        type="button"
+                        onclick={() => mostrarConfirm = !mostrarConfirm}
                         disabled={loading}
-                        class="mr-2 dark:accent-blue-500"
-                    />
-                    <label for="mostrarSenha" class="text-sm text-gray-700 dark:text-gray-300">
-                        Mostrar senha
-                    </label>
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold uppercase text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        {mostrarConfirm ? 'Ocultar' : 'Mostrar'}
+                    </button>
                 </div>
-
-                <Button type="submit" class="w-full dark:bg-blue-600 dark:hover:bg-blue-700" disabled={loading}>
-                    {loading ? 'Criando conta...' : 'Registrar-se'}
-                </Button>
-            </form>
-
-            <div class="mt-4 text-center">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Já tem uma conta?
-                    <a href="/login" class="text-blue-500 dark:text-blue-400 hover:underline">
-                        Entrar
-                    </a>
-                </p>
+                {#if !senhaMatch}
+                    <p class="text-red-500 text-xs font-semibold mt-1">As senhas não coincidem</p>
+                {/if}
             </div>
+
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                disabled={loading || !senhaMatch}
+                class="w-full px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 disabled:opacity-50 transition-all duration-200"
+            >
+                {loading ? 'Criando conta...' : 'Criar conta'}
+            </button>
+        </form>
+
+        <!-- Sign In Link -->
+        <div class="mt-8 text-center">
+            <p class="text-muted-foreground text-sm mb-4">
+                Já tem uma conta?
+            </p>
+            <a
+                href="/login"
+                class="inline-block px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+            >
+                Entrar
+            </a>
         </div>
     </div>
 </div>

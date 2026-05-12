@@ -25,3 +25,5 @@ vite.config.ts.timestamp-*
 
 pgdata
 docker-compose.yml
+
+serviceAccountKey.json

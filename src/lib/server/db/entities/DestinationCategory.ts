@@ -11,4 +11,5 @@ export class DestinationCategory {
 
   @ManyToMany(() => Destination, (destination) => destination.categories)
   destinations!: Destination[];
+	nome: any;
 }
