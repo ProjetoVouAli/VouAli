@@ -1,7 +1,6 @@
 import type { PageServerLoad, Actions } from "../$types";
 import { fail, redirect } from "@sveltejs/kit";
-import { loginWithEmail } from "$lib/auth";
-import { AppDataSource } from '$lib/server/db/data-source';
+import { loginWithEmail } from "$lib/auth";import { setAuthCookie } from '$lib/server/utils/auth';import { AppDataSource } from '$lib/server/db/data-source';
 import { Usuario } from '$lib/server/db/entities/Usuario';
 
 /**
@@ -73,13 +72,8 @@ export const actions: Actions = {
                 });
             }
 
-            cookies.set('authToken', result.token, {
-                path: '/',
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7 // 7 dias
-            });
+            // ✅ Usar função centralizada para definir cookie
+            setAuthCookie(cookies, result.token);
 
             // Buscar usuário no banco pelo email
             const userRepository = AppDataSource.getRepository(Usuario);
