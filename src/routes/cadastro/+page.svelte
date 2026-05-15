@@ -4,6 +4,8 @@
     import { user } from '$lib/stores/user';
     import { flash } from '$lib/stores/flash';
     import { goto } from '$app/navigation';
+    import { Button } from '$lib/components/ui/button';
+    import { Input } from '$lib/components/ui/input';
 
     let nome = '';
     let email = '';
@@ -69,14 +71,13 @@
                 <label for="nome" class="block text-sm font-semibold mb-2">
                     Nome completo
                 </label>
-                <input
+                <Input
                     id="nome"
                     type="text"
                     name="nome"
                     bind:value={nome}
                     required
                     disabled={loading}
-                    class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                     placeholder="Seu nome"
                 />
             </div>
@@ -86,14 +87,13 @@
                 <label for="email" class="block text-sm font-semibold mb-2">
                     Email
                 </label>
-                <input
+                <Input
                     id="email"
                     type="email"
                     name="email"
                     bind:value={email}
                     required
                     disabled={loading}
-                    class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                     placeholder="seu@email.com"
                 />
             </div>
@@ -124,7 +124,7 @@
                     Senha
                 </label>
                 <div class="relative">
-                    <input
+                    <Input
                         id="password"
                         type={mostrarSenha ? 'text' : 'password'}
                         name="password"
@@ -132,7 +132,6 @@
                         oninput={verificarSenha}
                         required
                         disabled={loading}
-                        class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                         placeholder="••••••••"
                     />
                     <button
@@ -152,7 +151,7 @@
                     Confirmar senha
                 </label>
                 <div class="relative">
-                    <input
+                    <Input
                         id="confirmPassword"
                         type={mostrarConfirm ? 'text' : 'password'}
                         name="confirmPassword"
@@ -160,7 +159,6 @@
                         oninput={verificarSenha}
                         required
                         disabled={loading}
-                        class="w-full px-4 py-3 border-2 {senhaMatch ? 'border-primary' : 'border-destructive'} bg-background text-foreground font-medium focus:outline-none focus:ring-2 {senhaMatch ? 'focus:ring-ring' : 'focus:ring-destructive'} transition-all"
                         placeholder="••••••••"
                     />
                     <button
@@ -178,13 +176,13 @@
             </div>
 
             <!-- Submit Button -->
-            <button
+            <Button
                 type="submit"
                 disabled={loading || !senhaMatch}
-                class="w-full px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 disabled:opacity-50 transition-all duration-200"
+                class="w-full"
             >
                 {loading ? 'Criando conta...' : 'Criar conta'}
-            </button>
+            </Button>
         </form>
 
         <!-- Sign In Link -->
@@ -192,12 +190,9 @@
             <p class="text-muted-foreground text-sm mb-4">
                 Já tem uma conta?
             </p>
-            <a
-                href="/login"
-                class="inline-block px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-            >
+            <Button href="/login" variant="outline">
                 Entrar
-            </a>
+            </Button>
         </div>
     </div>
 </div>

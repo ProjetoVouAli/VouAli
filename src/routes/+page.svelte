@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { Button } from '$lib/components/ui/button';
+	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	const { data }: { data: PageData } = $props();
 </script>
@@ -24,18 +26,12 @@
 
 					<!-- CTA Button -->
 					<div class="flex gap-4 flex-wrap">
-						<a
-							href="/search"
-							class="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
-						>
+						<Button href="/search">
 							Explorar Destinos
-						</a>
-						<a
-							href="#destinations"
-							class="px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-						>
+						</Button>
+						<Button href="#destinations" variant="outline">
 							Saiba Mais
-						</a>
+						</Button>
 					</div>
 				</div>
 
@@ -68,8 +64,8 @@
 			{#if data.destinations && data.destinations.length > 0}
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					{#each data.destinations.slice(0, 6) as destination (destination.id)}
-						<a href={`/destination/${destination.slug}`} class="group">
-							<div class="bg-card dark:bg-card border border-border rounded-none overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+						<a href={`/destination/${destination.slug}`} class="group hover:no-underline">
+							<Card class="overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
 								<!-- Image -->
 								<div class="h-64 bg-gray-200 dark:bg-gray-800 overflow-hidden">
 									{#if destination.images && destination.images.length > 0}
@@ -86,47 +82,40 @@
 								</div>
 
 								<!-- Content -->
-								<div class="p-6 space-y-4">
-									<!-- Category Badge -->
+								<CardContent class="flex-1 flex flex-col">
 									{#if destination.categories && destination.categories.length > 0}
-										<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1">
+										<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1 mb-3 w-fit">
 											{destination.categories[0]}
 										</span>
 									{/if}
 
-									<!-- Title -->
-									<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 cursor-help" title={destination.name}>
+									<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 mb-2 cursor-help" title={destination.name}>
 										{destination.name}
 									</h3>
 
-									<!-- Description -->
 									{#if destination.description}
-										<p class="text-sm text-muted-foreground line-clamp-3 cursor-help" title={destination.description}>
+										<p class="text-sm text-muted-foreground line-clamp-3 mb-4 cursor-help flex-1" title={destination.description}>
 											{destination.description}
 										</p>
 									{/if}
 
-									<!-- Learn More -->
-									<div class="pt-4 border-t border-border">
+									<div class="pt-4 border-t border-border mt-auto">
 										<span class="text-xs font-bold uppercase tracking-wide text-foreground group-hover:gap-2 flex items-center transition-all">
 											Saiba Mais
 											<span class="ml-2">→</span>
 										</span>
 									</div>
-								</div>
-							</div>
+								</CardContent>
+							</Card>
 						</a>
 					{/each}
 				</div>
 
 				<!-- View All Button -->
 				<div class="mt-16 text-center">
-					<a
-						href="/search"
-						class="inline-block px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-					>
+					<Button href="/search" variant="outline">
 						Ver Todos os Destinos
-					</a>
+					</Button>
 				</div>
 			{:else}
 				<div class="text-center py-16">
