@@ -1,6 +1,9 @@
 import type { PageServerLoad } from "../$types";
 import { fail, redirect, type Actions } from '@sveltejs/kit';
-import { registerWithEmail } from "$lib/auth";import { setAuthCookie } from '$lib/server/utils/auth';import { saveUserToDatabase } from "$lib/server/auth/cadastro";
+import { registerWithEmail } from "$lib/auth";
+import { setAuthCookie } from '$lib/server/utils/auth';
+import { buildAuthSuccessResponse } from '$lib/server/utils/responses';
+import { saveUserToDatabase } from "$lib/server/auth/cadastro";
 
 /**
  * Página de Cadastro - Protegida com redirecionamento
@@ -97,21 +100,9 @@ export const actions: Actions = {
             // ✅ Usar função centralizada para definir cookie
             setAuthCookie(cookies, result.token);
 
-            // ✅ RETORNAR DADOS PRIMEIRO (sem redirect)
+            // ✅ Usar função centralizada para construir response
             // O frontend vai fazer o redirect após atualizar o store
-            return {
-                success: true,
-                user: {
-                    id: usuario.id,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    sexo: usuario.sexo,
-                    eAdministrador: usuario.eAdministrador,
-                    eParceiro: usuario.eParceiro,
-                    eViajante: usuario.eViajante,
-                },
-                message: '✅ Cadastro realizado com sucesso!'
-            };
+            return buildAuthSuccessResponse(usuario, '✅ Cadastro realizado com sucesso!');
 
         } catch (error: any) {
             if (error.location) throw error;
