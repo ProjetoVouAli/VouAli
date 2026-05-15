@@ -52,7 +52,7 @@
 					<p>{name}</p>
 				</div>
 			{/snippet}
-			<Popup class="text-center text-black w-36 h-36"   open={false} offset={offsets}>
+			<Popup class="text-center text-foreground w-36 h-36"   open={false} offset={offsets}>
 				<p>{name}</p>
 				<p>Clique para mais detalhes</p>
 			</Popup>

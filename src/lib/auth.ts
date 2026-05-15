@@ -2,7 +2,6 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signOut,
-    onAuthStateChanged,
     type User
 } from 'firebase/auth';
 import {auth} from './firebase';
@@ -49,13 +48,4 @@ function tratarErroFirebase(code: string): string {
     };
 
     return erros[code] || 'Erro ao processar. Tente novamente';
-}
-
-export function getCurrentUser(): Promise<User | null> {
-    return new Promise((resolve) => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            unsubscribe();
-            resolve(user);
-        });
-    });
 }

@@ -1,10 +1,27 @@
 import type { PageServerLoad, Actions } from "../$types";
 import { fail, redirect } from "@sveltejs/kit";
 import { loginWithEmail } from "$lib/auth";
+import { setAuthCookie } from '$lib/server/utils/auth';
+import { buildAuthSuccessResponse } from '$lib/server/utils/responses';
 import { AppDataSource } from '$lib/server/db/data-source';
 import { Usuario } from '$lib/server/db/entities/Usuario';
 
-export const load: PageServerLoad = async () => {
+/**
+ * Página de Login - Protegida com redirecionamento
+ * 
+ * Padrão de mercado:
+ * - Se já está logado, redireciona para home
+ * - Se não está logado, mostra formulário
+ */
+export const load: PageServerLoad = async ({ locals }) => {
+    // ✅ Lazy Loading: Verifica apenas se está logado
+    const user = await locals.authUser();
+
+    // Se já está logado, redireciona para home
+    if (user) {
+        throw redirect(303, '/');
+    }
+
     return {
         loginWithEmail: true,
         loginWithGoogle: true
@@ -58,24 +75,23 @@ export const actions: Actions = {
                 });
             }
 
-            cookies.set('authToken', result.token, {
-                path: '/',
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7 // 7 dias
-            });
+            // ✅ Usar função centralizada para definir cookie
+            setAuthCookie(cookies, result.token);
 
             // Buscar usuário no banco pelo email
             const userRepository = AppDataSource.getRepository(Usuario);
             const usuario = await userRepository.findOne({ where: { email } });
 
-            // Retornar dados do usuário para o frontend
-            return {
-                success: true,
-                user: usuario ? { nome: usuario.nome, email: usuario.email } : null,
-                message: 'Login realizado com sucesso!'
-            };
+            if (!usuario) {
+                return fail(500, {
+                    email,
+                    message: 'Usuário não encontrado no banco de dados'
+                });
+            }
+
+            // ✅ Usar função centralizada para construir response
+            // O frontend vai fazer o redirect após atualizar o store
+            return buildAuthSuccessResponse(usuario, '✅ Login realizado com sucesso!');
 
         } catch (error: any) {
             if (error.location) throw error; //Redirecionar para outro lugar

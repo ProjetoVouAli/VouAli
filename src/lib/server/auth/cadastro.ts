@@ -1,11 +1,9 @@
 import { AppDataSource } from '../db/data-source';
 import { Usuario } from '../db/entities/Usuario';
-import * as bcrypt from 'bcrypt';
 
 export async function saveUserToDatabase(
     firebaseUid: string,
     email: string,
-    senha: string,
     nome: string,
     sexo: 'M' | 'F' | 'O'
 ) {
@@ -17,14 +15,10 @@ export async function saveUserToDatabase(
         throw new Error('Email já cadastrado');
     }
 
-    // Hash da senha
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    // Criar usuário com uid do Firebase
+    // Criar usuário com uid do Firebase (Firebase gerencia a senha)
     const usuario = userRepository.create({
         uid: firebaseUid,  // ✅ UID do Firebase
         email,
-        senha: senhaHash,
         nome,
         sexo,
         estaAutenticado: true,

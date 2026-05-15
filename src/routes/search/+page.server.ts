@@ -3,7 +3,18 @@ import { Destination } from '$lib/server/db/entities/Destination';
 import { DestinationCategory } from '$lib/server/db/entities/DestinationCategory';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+/**
+ * Página de Busca - Pública
+ * 
+ * Padrão:
+ * - Funciona com ou sem autenticação
+ * - Usuário é carregado do layout global se disponível
+ * - Suporta filtros de pesquisa e categorias
+ */
+export const load: PageServerLoad = async ({ url, locals }) => {
+    // ✅ Lazy Loading: Carrega usuário se existir (opcional nesta página)
+    const user = await locals.authUser();
+
     const searchParams = url.searchParams;
     const searchParam = searchParams.get("search");
     const tagsParam = searchParams.get("tags");
@@ -12,7 +23,7 @@ export const load: PageServerLoad = async ({ url }) => {
     const destinationRepo = AppDataSource.getRepository(Destination);
     const categoryRepo = AppDataSource.getRepository(DestinationCategory);
 
-    // 1. Joins simplificados: chamamos apenas 'categories' agora!
+    // 1. Query builder com relacionamentos
     const qb = destinationRepo.createQueryBuilder("destination")
         .leftJoinAndSelect("destination.images", "image")
         .leftJoinAndSelect("destination.categories", "category"); 
@@ -22,13 +33,13 @@ export const load: PageServerLoad = async ({ url }) => {
         qb.andWhere("destination.name ILIKE :search", { search: `%${searchParam}%` });
     }
 
-    // 3. Filtro de Tags (Subquery atualizada para usar a relação ManyToMany)
+    // 3. Filtro de Tags (Subquery)
     if (tags && tags.length > 0) {
         qb.andWhere(sub => {
             const subQuery = sub.subQuery()
                 .select("d.id")
                 .from(Destination, "d")
-                .innerJoin("d.categories", "c") // Usa a relação direta criada pelo TypeORM
+                .innerJoin("d.categories", "c")
                 .where("c.name IN (:...tags)")
                 .groupBy("d.id")
                 .having("COUNT(DISTINCT c.name) = :tagCount")
@@ -43,22 +54,23 @@ export const load: PageServerLoad = async ({ url }) => {
 
     const rawDestinations = await qb.getMany();
 
-    // 4. Formatação: pegamos o array de objetos 'categories' e transformamos em array de strings
+    // 4. Formatação
     const formattedDestinations = rawDestinations.map(dest => {
         return {
             ...dest,
-            categories: dest.categories.map(c => c.name), // Extrai apenas o nome
+            categories: dest.categories.map(c => c.name),
             images: dest.images
         };
     });
 
     const allCategories = await categoryRepo.find({
-        select: ["name"],
+        select: ["id", "name"],
         order: { name: "ASC" }
     });
 
     return {
         destinations: structuredClone(formattedDestinations),
-        categories: structuredClone(allCategories)
+        categories: structuredClone(allCategories),
+        user,
     };
 };
