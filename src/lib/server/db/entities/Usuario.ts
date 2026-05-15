@@ -15,9 +15,6 @@ export class Usuario {
     @Column('varchar', { length: 30, unique: true })
     email!: string;
 
-    @Column('varchar', { length: 255 })
-    senha!: string;
-
     @Column('enum', { enum: ['M', 'F', 'O'] })
     sexo!: 'M' | 'F' | 'O';
 

@@ -92,7 +92,7 @@ export const actions: Actions = {
             }
             
 
-            const usuario = await saveUserToDatabase(firebaseUid, email, password, nome, sexo);
+            const usuario = await saveUserToDatabase(firebaseUid, email, nome, sexo);
 
             // 3. GUARDAR TOKEN NOS COOKIES
             cookies.set('authToken', result.token, {
