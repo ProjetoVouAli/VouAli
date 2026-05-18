@@ -4,6 +4,8 @@
     import { user } from '$lib/stores/user';
     import { flash } from '$lib/stores/flash';
     import { goto } from '$app/navigation';
+    import { Button } from '$lib/components/ui/button';
+    import { Input } from '$lib/components/ui/input';
 
     let email = '';
     let password = '';
@@ -62,14 +64,13 @@
                     <label for="email" class="block text-sm font-semibold mb-2">
                         Email
                     </label>
-                    <input
+                    <Input
                         id="email"
                         type="email"
                         name="email"
                         bind:value={email}
                         required
                         disabled={loading}
-                        class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                         placeholder="seu@email.com"
                     />
                 </div>
@@ -80,14 +81,13 @@
                         Senha
                     </label>
                     <div class="relative">
-                        <input
+                        <Input
                             id="password"
                             type={mostrarSenha ? 'text' : 'password'}
                             name="password"
                             bind:value={password}
                             required
                             disabled={loading}
-                            class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                             placeholder="••••••••"
                         />
                         <button
@@ -102,16 +102,15 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button
+                <Button
                     type="submit"
                     disabled={loading}
-                    class="w-full px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 disabled:opacity-50 transition-all duration-200"
+                    class="w-full"
                 >
                     {loading ? 'Entrando...' : 'Entrar'}
-                </button>
+                </Button>
             </form>
-
-            <!-- Divider -->
+            
             <div class="relative">
                 <div class="absolute inset-0 flex items-center">
                     <div class="w-full border-t border-border"></div>
@@ -126,12 +125,9 @@
                 <p class="text-muted-foreground text-sm mb-4">
                     Não tem uma conta?
                 </p>
-                <a
-                    href="/cadastro"
-                    class="inline-block px-8 py-4 border-2 border-primary text-foreground font-bold text-sm uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
-                >
+                <Button href="/cadastro" variant="outline">
                     Criar conta
-                </a>
+                </Button>
             </div>
         </div>
     </div>
