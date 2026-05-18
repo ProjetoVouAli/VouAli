@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import type { Usuario } from '../db/entities/Usuario';
+import type { Usuario, TipoUsuario } from '../db/entities/Usuario';
 
 /**
  * Interface padrão para respostas de autenticação
@@ -12,9 +12,7 @@ export interface AuthSuccessResponse {
         nome: string;
         email: string;
         sexo: 'M' | 'F' | 'O';
-        eAdministrador: boolean;
-        eParceiro: boolean;
-        eViajante: boolean;
+        papeis: TipoUsuario[];
     };
     message: string;
 }
@@ -38,9 +36,7 @@ export function buildAuthSuccessResponse(
             nome: usuario.nome,
             email: usuario.email,
             sexo: usuario.sexo,
-            eAdministrador: usuario.eAdministrador,
-            eParceiro: usuario.eParceiro,
-            eViajante: usuario.eViajante,
+            papeis: usuario.papeis,
         },
         message
     };

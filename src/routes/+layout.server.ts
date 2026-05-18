@@ -21,9 +21,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
             nome: user.nome,
             email: user.email,
             sexo: user.sexo,
-            eAdministrador: user.eAdministrador,
-            eParceiro: user.eParceiro,
-            eViajante: user.eViajante,
+            papeis: user.papeis,
         } : null,
     };
 };

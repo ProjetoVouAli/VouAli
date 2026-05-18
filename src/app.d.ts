@@ -32,7 +32,7 @@ declare global {
 			 *     throw redirect(303, '/login');
 			 * }
 			 * 
-			 * console.log(user.nome, user.eAdministrador);
+			 * console.log(user.nome, user.papeis);
 			 * ```
 			 * 
 			 * IMPORTANTE: Mais pesado que authUser() pois consulta o banco

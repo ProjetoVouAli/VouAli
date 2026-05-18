@@ -388,9 +388,7 @@ npm run preview
 │ senha (hash)    │
 │ sexo            │
 │ estaAutenticado │
-│ eViajante       │
-│ eAdministrador  │
-│ eParceiro       │
+│ papeis          │
 │ creationDate    │
 └─────────────────┘
 
@@ -439,9 +437,7 @@ export class Usuario {
     senha: string (255 chars)           // Senha hash (bcrypt)
     sexo: 'M' | 'F' | 'O'              // Sexo/Gênero
     estaAutenticado: boolean (default: true)
-    eViajante: boolean (default: true)
-    eAdministrador: boolean (default: false)
-    eParceiro: boolean (default: false)
+    papeis: TipoUsuario[] (default: ['VIAJANTE'])
     creationDate: Date                  // Data de criação
 }
 ```
@@ -992,7 +988,7 @@ export const load: PageServerLoad = async ({ locals, redirect }) => {
         throw redirect(303, '/login');
     }
     
-    console.log(user.nome, user.eAdministrador);
+    console.log(user.nome, user.papeis);
     return { user };
 };
 ```
@@ -1002,7 +998,7 @@ export const load: PageServerLoad = async ({ locals, redirect }) => {
 export const load: PageServerLoad = async ({ locals, redirect }) => {
     const user = await locals.databaseUser();
     
-    if (!user?.eAdministrador) {
+    if (!user?.papeis?.includes('ADMINISTRADOR')) {
         throw redirect(303, '/');
     }
     
