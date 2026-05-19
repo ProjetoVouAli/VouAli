@@ -27,3 +27,5 @@ pgdata
 docker-compose.yml
 
 serviceAccountKey.json
+
+static/upload
