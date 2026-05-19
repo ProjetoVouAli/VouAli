@@ -1,6 +1,8 @@
 import type { PageServerLoad } from "../$types";
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { registerWithEmail } from "$lib/auth";
+import { setAuthCookie } from '$lib/server/utils/auth';
+import { buildAuthSuccessResponse } from '$lib/server/utils/responses';
 import { saveUserToDatabase } from "$lib/server/auth/cadastro";
 
 /**
@@ -92,32 +94,15 @@ export const actions: Actions = {
             }
             
 
-            const usuario = await saveUserToDatabase(firebaseUid, email, password, nome, sexo);
+            const usuario = await saveUserToDatabase(firebaseUid, email, nome, sexo);
 
             // 3. GUARDAR TOKEN NOS COOKIES
-            cookies.set('authToken', result.token, {
-                path: '/',
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7 // 7 dias
-            });
+            // ✅ Usar função centralizada para definir cookie
+            setAuthCookie(cookies, result.token);
 
-            // ✅ RETORNAR DADOS PRIMEIRO (sem redirect)
+            // ✅ Usar função centralizada para construir response
             // O frontend vai fazer o redirect após atualizar o store
-            return {
-                success: true,
-                user: {
-                    id: usuario.id,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    sexo: usuario.sexo,
-                    eAdministrador: usuario.eAdministrador,
-                    eParceiro: usuario.eParceiro,
-                    eViajante: usuario.eViajante,
-                },
-                message: '✅ Cadastro realizado com sucesso!'
-            };
+            return buildAuthSuccessResponse(usuario, '✅ Cadastro realizado com sucesso!');
 
         } catch (error: any) {
             if (error.location) throw error;

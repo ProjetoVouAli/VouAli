@@ -1,6 +1,8 @@
 import type { PageServerLoad, Actions } from "../$types";
 import { fail, redirect } from "@sveltejs/kit";
 import { loginWithEmail } from "$lib/auth";
+import { setAuthCookie } from '$lib/server/utils/auth';
+import { buildAuthSuccessResponse } from '$lib/server/utils/responses';
 import { AppDataSource } from '$lib/server/db/data-source';
 import { Usuario } from '$lib/server/db/entities/Usuario';
 
@@ -73,13 +75,8 @@ export const actions: Actions = {
                 });
             }
 
-            cookies.set('authToken', result.token, {
-                path: '/',
-                httpOnly: true,
-                secure: true,
-                sameSite: 'strict',
-                maxAge: 60 * 60 * 24 * 7 // 7 dias
-            });
+            // ✅ Usar função centralizada para definir cookie
+            setAuthCookie(cookies, result.token);
 
             // Buscar usuário no banco pelo email
             const userRepository = AppDataSource.getRepository(Usuario);
@@ -92,21 +89,9 @@ export const actions: Actions = {
                 });
             }
 
-            // ✅ RETORNAR DADOS PRIMEIRO (sem redirect)
+            // ✅ Usar função centralizada para construir response
             // O frontend vai fazer o redirect após atualizar o store
-            return {
-                success: true,
-                user: {
-                    id: usuario.id,
-                    nome: usuario.nome,
-                    email: usuario.email,
-                    sexo: usuario.sexo,
-                    eAdministrador: usuario.eAdministrador,
-                    eParceiro: usuario.eParceiro,
-                    eViajante: usuario.eViajante,
-                },
-                message: '✅ Login realizado com sucesso!'
-            };
+            return buildAuthSuccessResponse(usuario, '✅ Login realizado com sucesso!');
 
         } catch (error: any) {
             if (error.location) throw error; //Redirecionar para outro lugar

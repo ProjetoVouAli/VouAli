@@ -2,6 +2,9 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import { Card, CardContent } from '$lib/components/ui/card';
 
 	const searchParams = $state(page.url.searchParams);
 	let searchParam = $state(searchParams.get('search') || '');
@@ -62,17 +65,15 @@
 						<label for="search-input" class="block text-sm font-bold mb-4 uppercase tracking-wide">
 							Buscar
 						</label>
-						<input
+						<Input
 							id="search-input"
 							type="text"
 							bind:value={searchParam}
 							onchange={updateSearch}
 							placeholder="Nome do destino..."
-							class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all"
 						/>
 					</div>
 
-					<!-- Categories Filter -->
 					{#if data.categories && data.categories.length > 0}
 						<div>
 							<div class="text-sm font-bold mb-4 uppercase tracking-wide">
@@ -86,7 +87,7 @@
 											id="category-{category.name}"
 											checked={selectedCategories.includes(category.name)}
 											onchange={() => toggleCategory(category.name)}
-												class="w-4 h-4 cursor-pointer accent-primary"
+											class="w-4 h-4 cursor-pointer accent-primary"
 										/>
 										<span class="text-sm font-medium group-hover:font-bold transition-all">
 											{category.name}
@@ -99,16 +100,17 @@
 
 					<!-- Clear Filters -->
 					{#if searchParam || selectedCategories.length > 0}
-						<button
+						<Button
 							onclick={() => {
 								searchParam = '';
 								selectedCategories = [];
 								updateSearch();
 							}}
-							class="w-full px-4 py-3 border-2 border-primary text-foreground font-bold text-xs uppercase tracking-wide hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+							variant="outline"
+							class="w-full"
 						>
 							Limpar Filtros
-						</button>
+						</Button>
 					{/if}
 				</div>
 			</div>
@@ -116,24 +118,21 @@
 			<!-- Main: Results -->
 			<div class="lg:col-span-3">
 				{#if data.destinations && data.destinations.length > 0}
-					<!-- Results Count -->
 					<div class="mb-8">
 						<p class="text-sm text-muted-foreground font-medium">
 							{data.destinations.length} resultado{data.destinations.length !== 1 ? 's' : ''} encontrado{data.destinations.length !== 1 ? 's' : ''}
 						</p>
 					</div>
 
-					<!-- Destinations Grid -->
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 						{#each data.destinations as destination (destination.id)}
 							<a href={`/destination/${destination.slug}`} class="group">
-								<div class="bg-card dark:bg-card border border-border rounded-none overflow-hidden hover:shadow-2xl transition-all duration-300">
-									<!-- Image -->
-									<div class="h-56 bg-gray-200 dark:bg-gray-800 overflow-hidden">
+								<Card class="rounded-none overflow-hidden hover:shadow-2xl transition-all duration-300 border-border flex flex-col h-full">
+									<div class="h-56 bg-muted overflow-hidden shrink-0">
 										{#if destination.images && destination.images.length > 0}
 											<img
 												src={destination.images[0].url}
-											alt={destination.name}
+												alt={destination.name}
 												class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
 											/>
 										{:else}
@@ -143,42 +142,37 @@
 										{/if}
 									</div>
 
-									<!-- Content -->
-									<div class="p-6 space-y-4">
-										<!-- Category Badge -->
+									<CardContent class="p-6 flex-1 flex flex-col">
 										{#if destination.categories && destination.categories.length > 0}
-											<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1">
+											<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1 mb-3 w-fit">
 												{destination.categories[0]}
 											</span>
 										{/if}
 
-										<!-- Title -->
-									<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 cursor-help" title={destination.name}>
-										{destination.name}
-									</h3>
+										<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 mb-2 cursor-help" title={destination.name}>
+											{destination.name}
+										</h3>
 
-									<!-- Description -->
-									{#if destination.description}
-										<p class="text-sm text-muted-foreground line-clamp-3 cursor-help" title={destination.description}>
-											{destination.description}
-										</p>
-									{/if}
+										{#if destination.description}
+											<p class="text-sm text-muted-foreground line-clamp-3 mb-4 cursor-help flex-1" title={destination.description}>
+												{destination.description}
+											</p>
+										{/if}
 
-									<!-- Footer -->
-									<div class="pt-4 border-t border-border flex items-center justify-between">
-										<span class="text-xs font-bold uppercase tracking-wide">
-											Saiba Mais
-										</span>
-										<span class="group-hover:translate-x-1 transition-transform">→</span>
-									</div>
-								</div>
-							</div>
+										<div class="pt-4 border-t border-border mt-auto">
+											<span class="text-xs font-bold uppercase tracking-wide text-foreground group-hover:gap-2 flex items-center transition-all">
+												Saiba Mais
+												<span class="ml-2">→</span>
+											</span>
+										</div>
+									</CardContent>
+								</Card>
 							</a>
 						{/each}
 					</div>
+
 				{:else}
-					<!-- Empty State -->
-					<div class="col-span-3 py-20 text-center space-y-6">
+					<div class="py-20 text-center space-y-6">
 						<div class="text-6xl mb-4">🔍</div>
 						<h3 class="text-2xl font-bold">
 							Nenhum destino encontrado
@@ -191,16 +185,15 @@
 							{/if}
 						</p>
 						{#if searchParam || selectedCategories.length > 0}
-							<button
+							<Button
 								onclick={() => {
 									searchParam = '';
 									selectedCategories = [];
 									updateSearch();
 								}}
-							class="mt-4 px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity"
 							>
 								Limpar Filtros
-							</button>
+							</Button>
 						{/if}
 					</div>
 				{/if}
