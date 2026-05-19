@@ -1,5 +1,5 @@
 import { AppDataSource } from '../db/data-source';
-import { Usuario } from '../db/entities/Usuario';
+import { Usuario, TipoUsuario } from '../db/entities/Usuario';
 
 export async function saveUserToDatabase(
     firebaseUid: string,
@@ -22,9 +22,7 @@ export async function saveUserToDatabase(
         nome,
         sexo,
         estaAutenticado: true,
-        eViajante: true,
-        eAdministrador: false,
-        eParceiro: false
+        papeis: [TipoUsuario.VIAJANTE]
     });
 
     await userRepository.save(usuario);

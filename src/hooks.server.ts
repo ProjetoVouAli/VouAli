@@ -2,7 +2,7 @@ import 'reflect-metadata'; // <-- DEVE SER A PRIMEIRA LINHA
 import type { Handle } from '@sveltejs/kit';
 import { AppDataSource } from '$lib/server/db/data-source';
 import { verifyIdToken, verifySessionCookie, initializeFirebaseAdmin } from '$lib/server/firebase-admin';
-import { Usuario } from '$lib/server/db/entities/Usuario';
+import { Usuario, TipoUsuario } from '$lib/server/db/entities/Usuario';
 import { env } from '$env/dynamic/private';
 
 // Inicializar banco de dados (apenas uma vez)
@@ -38,9 +38,7 @@ export interface DatabaseUser extends AuthUser {
     nome: string;
     sexo: 'M' | 'F' | 'O';
     estaAutenticado: boolean;
-    eViajante: boolean;
-    eAdministrador: boolean;
-    eParceiro: boolean;
+    papeis: TipoUsuario[];
     creationDate: Date;
 }
 
@@ -175,9 +173,7 @@ export const handle: Handle = async ({ event, resolve }) => {
                 nome: usuario.nome,
                 sexo: usuario.sexo,
                 estaAutenticado: usuario.estaAutenticado,
-                eViajante: usuario.eViajante,
-                eAdministrador: usuario.eAdministrador,
-                eParceiro: usuario.eParceiro,
+                papeis: usuario.papeis,
                 creationDate: usuario.creationDate,
             };
 

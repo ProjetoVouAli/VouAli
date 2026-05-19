@@ -1,6 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
 import 'reflect-metadata';
 
+export enum TipoUsuario {
+    VIAJANTE = 'VIAJANTE',
+    ADMINISTRADOR = 'ADMINISTRADOR',
+    PARCEIRO = 'PARCEIRO'
+}
+
 @Entity('usuario')
 export class Usuario {
     @PrimaryGeneratedColumn('increment')
@@ -24,12 +30,11 @@ export class Usuario {
     @Column('boolean', { default: true })
     estaAutenticado!: boolean;
 
-    @Column('boolean', { default: true })
-    eViajante!: boolean;
-
-    @Column('boolean', { default: false })
-    eAdministrador!: boolean;
-
-    @Column('boolean', { default: false })
-    eParceiro!: boolean;
+    @Column({
+        type: 'enum',
+        enum: TipoUsuario,
+        array: true,
+        default: [TipoUsuario.VIAJANTE]
+    })
+    papeis!: TipoUsuario[];
 }

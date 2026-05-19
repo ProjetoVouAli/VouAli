@@ -8,13 +8,13 @@ import type { PageServerLoad } from './$types';
  * - Redireciona se não está autenticado
  * - Remove token e redireciona para home se está autenticado
  */
-export const load: PageServerLoad = async ({ locals, redirect: svelteRedirect }) => {
+export const load: PageServerLoad = async ({ locals }) => {
     // ✅ Lazy Loading: Verifica autenticação
     const user = await locals.authUser();
 
     // Se não está logado, redireciona para home (não tem sentido acessar logout sem estar logado)
     if (!user) {
-        throw svelteRedirect(303, '/');
+        throw redirect(303, '/');
     }
 
     return {};
