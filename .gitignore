@@ -26,3 +26,6 @@ pgdata
 docker-compose.yml
 
 serviceAccountKey.json
+
+*.sql
+*.sqlite
