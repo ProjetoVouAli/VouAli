@@ -7,8 +7,19 @@ import {
     validateCNPJ,
     validateCamposObrigatorios,
     validateEstado,
-    validateDescricao
+    validateDescricao,
+    validateComprimento,
+    validateCNPJComDigito,
+    validateEmailDuplicadoRecente,
+    sanitizarEntrada,
+    CHAR_LIMITS
 } from "$lib/server/utils/validators-parceiro";
+import {
+    verificarRateLimitingIP,
+    verificarEmailDuplicado,
+    verificarCNPJDuplicado,
+    registrarTentativa
+} from "$lib/server/utils/rate-limit-parceiro";
 
 /**
  * Página de Solicitação de Parceria
@@ -27,29 +38,110 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-    default: async ({ request }) => {
+    default: async ({ request, getClientAddress }) => {
+        const enderecoIP = getClientAddress();
+
+        // ===== RATE LIMITING =====
+        const rateLimitCheck = await verificarRateLimitingIP(enderecoIP);
+        if (!rateLimitCheck.permitido) {
+            return fail(429, {
+                message: rateLimitCheck.mensagem
+            });
+        }
+
         const data = await request.formData();
 
-        // Extrair dados do formulário
-        const nomeResponsavel = data.get('nomeResponsavel')?.toString().trim() ?? '';
-        const emailResponsavel = data.get('emailResponsavel')?.toString().trim() ?? '';
-        const telefoneResponsavel = data.get('telefoneResponsavel')?.toString().trim() ?? '';
-        const nomeEmpresa = data.get('nomeEmpresa')?.toString().trim() ?? '';
-        const razaoSocial = data.get('razaoSocial')?.toString().trim() ?? '';
-        const cnpj = data.get('cnpj')?.toString().trim() ?? '';
-        const segmentoAtuacao = data.get('segmentoAtuacao')?.toString().trim() ?? '';
-        const descricaoNegocio = data.get('descricaoNegocio')?.toString().trim() ?? '';
-        const website = data.get('website')?.toString().trim() ?? '';
-        const instagram = data.get('instagram')?.toString().trim() ?? '';
-        const whatsapp = data.get('whatsapp')?.toString().trim() ?? '';
-        const cidade = data.get('cidade')?.toString().trim() ?? '';
-        const estado = data.get('estado')?.toString().trim().toUpperCase() ?? '';
-        const endereco = data.get('endereco')?.toString().trim() ?? '';
+        // Extrair e sanitizar dados do formulário
+        const nomeResponsavel = sanitizarEntrada(data.get('nomeResponsavel')?.toString() ?? '', 'nome');
+        const emailResponsavel = sanitizarEntrada(data.get('emailResponsavel')?.toString() ?? '', 'email');
+        const telefoneResponsavel = (data.get('telefoneResponsavel')?.toString() ?? '').replace(/\D/g, '');
+        const nomeEmpresa = sanitizarEntrada(data.get('nomeEmpresa')?.toString() ?? '', 'nome');
+        const razaoSocial = sanitizarEntrada(data.get('razaoSocial')?.toString() ?? '', 'texto');
+        const cnpj = (data.get('cnpj')?.toString() ?? '').replace(/\D/g, '');
+        const segmentoAtuacao = sanitizarEntrada(data.get('segmentoAtuacao')?.toString() ?? '', 'texto');
+        const descricaoNegocio = sanitizarEntrada(data.get('descricaoNegocio')?.toString() ?? '', 'texto');
+        const website = sanitizarEntrada(data.get('website')?.toString() ?? '', 'url');
+        const instagram = sanitizarEntrada(data.get('instagram')?.toString() ?? '', 'texto');
+        const whatsapp = (data.get('whatsapp')?.toString() ?? '').replace(/\D/g, '');
+        const cidade = sanitizarEntrada(data.get('cidade')?.toString() ?? '', 'nome');
+        const estado = (data.get('estado')?.toString() ?? '').toUpperCase();
+        const endereco = sanitizarEntrada(data.get('endereco')?.toString() ?? '', 'texto');
         const aceiteTermos = data.get('aceiteTermos') === 'on';
 
-        // ===== VALIDAÇÕES =====
+        // ===== VALIDAÇÕES CRÍTICAS DE SEGURANÇA =====
 
-        // 1. Campos obrigatórios
+        // 1. Validar comprimento de CADA CAMPO
+        const validacaoComprimentoNome = validateComprimento('NOME_RESPONSAVEL', nomeResponsavel);
+        if (!validacaoComprimentoNome.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoComprimentoNome.message
+            });
+            return fail(400, {
+                email: emailResponsavel,
+                message: validacaoComprimentoNome.message
+            });
+        }
+
+        const validacaoComprimentoEmail = validateComprimento('EMAIL', emailResponsavel);
+        if (!validacaoComprimentoEmail.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoComprimentoEmail.message
+            });
+            return fail(400, {
+                email: emailResponsavel,
+                message: validacaoComprimentoEmail.message
+            });
+        }
+
+        const validacaoComprimentoEmpresa = validateComprimento('NOME_EMPRESA', nomeEmpresa);
+        if (!validacaoComprimentoEmpresa.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoComprimentoEmpresa.message
+            });
+            return fail(400, {
+                email: emailResponsavel,
+                message: validacaoComprimentoEmpresa.message
+            });
+        }
+
+        const validacaoComprimentoCidade = validateComprimento('CIDADE', cidade);
+        if (!validacaoComprimentoCidade.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoComprimentoCidade.message
+            });
+            return fail(400, {
+                email: emailResponsavel,
+                message: validacaoComprimentoCidade.message
+            });
+        }
+
+        const validacaoComprimentoDescricao = validateComprimento('DESCRICAO', descricaoNegocio);
+        if (!validacaoComprimentoDescricao.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoComprimentoDescricao.message
+            });
+            return fail(400, {
+                email: emailResponsavel,
+                message: validacaoComprimentoDescricao.message
+            });
+        }
+
+        // 2. Campos obrigatórios
         const validacaoCampos = validateCamposObrigatorios({
             nomeResponsavel,
             emailResponsavel,
@@ -64,54 +156,127 @@ export const actions: Actions = {
         });
 
         if (!validacaoCampos.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoCampos.message
+            });
             return fail(400, {
                 email: emailResponsavel,
                 message: validacaoCampos.message
             });
         }
 
-        // 2. Email válido
+        // 3. Email válido
         const validacaoEmail = validateEmail(emailResponsavel);
         if (!validacaoEmail.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoEmail.message
+            });
             return fail(400, {
                 email: emailResponsavel,
                 message: validacaoEmail.message
             });
         }
 
-        // 3. Telefone válido
+        // 4. Telefone válido
         const validacaoTelefone = validateTelefone(telefoneResponsavel);
         if (!validacaoTelefone.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoTelefone.message
+            });
             return fail(400, {
                 email: emailResponsavel,
                 message: validacaoTelefone.message
             });
         }
 
-        // 4. CNPJ válido
-        const validacaoCNPJ = validateCNPJ(cnpj);
+        // 5. CNPJ com validação de dígito verificador
+        const validacaoCNPJ = validateCNPJComDigito(cnpj);
         if (!validacaoCNPJ.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                cnpj,
+                sucesso: false,
+                motivo: validacaoCNPJ.message
+            });
             return fail(400, {
                 email: emailResponsavel,
                 message: validacaoCNPJ.message
             });
         }
 
-        // 5. Estado válido
+        // 6. Estado válido
         const validacaoEstado = validateEstado(estado);
         if (!validacaoEstado.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoEstado.message
+            });
             return fail(400, {
                 email: emailResponsavel,
                 message: validacaoEstado.message
             });
         }
 
-        // 6. Descrição com tamanho mínimo
+        // 7. Descrição com tamanho mínimo
         const validacaoDescricao = validateDescricao(descricaoNegocio, 20);
         if (!validacaoDescricao.valid) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                sucesso: false,
+                motivo: validacaoDescricao.message
+            });
             return fail(400, {
                 email: emailResponsavel,
                 message: validacaoDescricao.message
+            });
+        }
+
+        // ===== VALIDAÇÕES DE DUPLICAÇÃO =====
+
+        // 8. Email duplicado em 24h
+        const checkEmailDuplicado = await verificarEmailDuplicado(emailResponsavel);
+        if (checkEmailDuplicado.existe) {
+            const validacaoEmailRecente = validateEmailDuplicadoRecente(checkEmailDuplicado.ultimaSolicitacao ?? null);
+            if (!validacaoEmailRecente.valid) {
+                await registrarTentativa({
+                    enderecoIP,
+                    email: emailResponsavel,
+                    sucesso: false,
+                    motivo: validacaoEmailRecente.message
+                });
+                return fail(400, {
+                    email: emailResponsavel,
+                    message: validacaoEmailRecente.message
+                });
+            }
+        }
+
+        // 9. CNPJ duplicado (sem limite de tempo)
+        const checkCNPJDuplicado = await verificarCNPJDuplicado(cnpj);
+        if (checkCNPJDuplicado.existe) {
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                cnpj,
+                sucesso: false,
+                motivo: 'CNPJ já possui solicitação'
+            });
+            return fail(400, {
+                email: emailResponsavel,
+                message: 'CNPJ já possui solicitação de parceria'
             });
         }
 
@@ -135,9 +300,16 @@ export const actions: Actions = {
                 aceiteTermos
             });
 
+            // Registrar tentativa bem-sucedida
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                cnpj,
+                sucesso: true
+            });
+
             console.log(`[PARCEIRO] Solicitação criada: ${solicitacao.id} (${emailResponsavel})`);
 
-            // ✅ Retornar sucesso
             return {
                 success: true,
                 message: '✅ Solicitação de parceria enviada com sucesso! Analisaremos sua solicitação em breve.',
@@ -147,20 +319,14 @@ export const actions: Actions = {
         } catch (error: any) {
             console.error('[PARCEIRO] Erro ao salvar solicitação:', error);
 
-            // Tratar erros específicos
-            if (error.message.includes('Email já possui')) {
-                return fail(400, {
-                    email: emailResponsavel,
-                    message: error.message
-                });
-            }
-
-            if (error.message.includes('CNPJ já possui')) {
-                return fail(400, {
-                    email: emailResponsavel,
-                    message: error.message
-                });
-            }
+            // Registrar tentativa com erro
+            await registrarTentativa({
+                enderecoIP,
+                email: emailResponsavel,
+                cnpj,
+                sucesso: false,
+                motivo: error.message
+            });
 
             return fail(500, {
                 email: emailResponsavel,
