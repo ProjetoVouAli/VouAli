@@ -52,6 +52,7 @@ export async function saveSolicitacaoParceiro(dados: {
         website: dados.website,
         instagram: dados.instagram,
         whatsapp: dados.whatsapp,
+        cep: dados.cep,
         cidade: dados.cidade,
         estado: dados.estado,
         endereco: dados.endereco,
