@@ -1,3 +1,5 @@
+import { cpf } from 'cpf-cnpj-validator';
+
 /**
  * Validadores centralizados para formulário de parceiro
  * Segue o mesmo padrão de src/lib/server/utils/validators.ts
@@ -17,7 +19,7 @@ export const CHAR_LIMITS = {
     TELEFONE: { min: 10, max: 20 },
     NOME_EMPRESA: { min: 3, max: 100 },
     RAZAO_SOCIAL: { min: 3, max: 100 },
-    CNPJ: { min: 14, max: 18 },
+    CNPJ: { min: 14, max: 14 },
     SEGMENTO: { min: 3, max: 50 },
     WEBSITE: { min: 7, max: 100 },
     INSTAGRAM: { min: 1, max: 30 },
@@ -303,4 +305,18 @@ export function validateEmailDuplicadoRecente(ultimaSolicitacao: Date | null): V
     }
 
     return { valid: true };
+}
+
+export function validateCPFComDigito(valor: string) {
+    const cleanCPF = valor.replace(/\D/g, '');
+    
+    if (cleanCPF.length !== 11) {
+        return { valid: false, message: 'O CPF deve conter 11 dígitos.' };
+    }
+    
+    if (!cpf.isValid(cleanCPF)) {
+        return { valid: false, message: 'O CPF informado é matematicamente inválido.' };
+    }
+    
+    return { valid: true, message: 'CPF válido.' };
 }

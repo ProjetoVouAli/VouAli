@@ -6,8 +6,10 @@
     import { Input } from '$lib/components/ui/input';
     import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
     import TelephoneInput from '$lib/components/ui/telephone-input/telephone-input.svelte';
+    import DocumentInput from '$lib/components/ui/document-input/document-input.svelte';
 
     // Estados do formulário
+    let docValido = $state<boolean | null>(null);
     let loading = $state(false);
     let formData = $state({
         nomeResponsavel: '',
@@ -61,15 +63,6 @@
         'Eventos',
         'Outros'
     ];
-
-    // ✅ Funções de formatação
-    function formatarCNPJ(value: string): string {
-        const v = value.replace(/\D/g, '');
-        if (v.length <= 14) {
-            return v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2})/, '$1.$2.$3/$4-$5');
-        }
-        return value;
-    }
 
     function formatarTelefone(value: string): string {
         const v = value.replace(/\D/g, '');
@@ -127,11 +120,6 @@
         // Disparar reatividade
         erros = erros;
         camposInvalidos = camposInvalidos;
-    }
-
-    function handleCNPJChange(e: Event) {
-        const input = e.target as HTMLInputElement;
-        formData.cnpj = formatarCNPJ(input.value);
     }
 
     function handleTelefoneChange(e: Event) {
@@ -350,26 +338,27 @@
                     <!-- CNPJ -->
                     <div>
                         <label for="cnpj" class="block text-sm font-semibold mb-2">
-                            CNPJ *
+                            CPF ou CNPJ *
                         </label>
-                        <Input
-                            id="cnpj"
-                            type="text"
-                            name="cnpj"
+                        
+                        <DocumentInput
                             bind:value={formData.cnpj}
-                            onchange={handleCNPJChange}
-                            onblur={() => handleValidarCampo('cnpj')}
-                            max="18"
-                            required
+                            bind:isValid={docValido}
                             disabled={loading}
                             placeholder="XX.XXX.XXX/XXXX-XX"
-                            aria-invalid={camposInvalidos.has('cnpj')}
-                            class={camposInvalidos.has('cnpj') ? 'border-destructive' : ''}
                         />
+                        
+                        <input 
+                            type="hidden" 
+                            name="cnpj" 
+                            value={formData.cnpj}
+                        />
+
                         {#if erros.cnpj}
                             <p class="text-xs text-destructive mt-1">{erros.cnpj}</p>
+                        {:else if docValido === false}
+                            <p class="text-xs text-destructive mt-1">Documento inválido. Verifique os números.</p>
                         {/if}
-                        <p class="text-xs text-muted-foreground mt-1">{formData.cnpj.replace(/\D/g, '').length}/14 dígitos</p>
                     </div>
 
                     <!-- Segmento de Atuação -->
@@ -588,7 +577,7 @@
                 {/if}
                 <Button
                     type="submit"
-                    disabled={loading || camposInvalidos.size > 0 || !formData.aceiteTermos}
+                    disabled={loading || camposInvalidos.size > 0 || !formData.aceiteTermos || docValido === false}
                     class="w-full"
                 >
                     {loading ? 'Enviando solicitação...' : 'Enviar Solicitação'}

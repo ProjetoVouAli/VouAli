@@ -1,18 +1,17 @@
 import type { PageServerLoad, Actions } from "./$types";
-import { fail, redirect } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import { saveSolicitacaoParceiro } from "$lib/server/auth/parceiro";
 import {
     validateEmail,
     validateTelefone,
-    validateCNPJ,
     validateCamposObrigatorios,
     validateEstado,
     validateDescricao,
     validateComprimento,
     validateCNPJComDigito,
+    validateCPFComDigito,
     validateEmailDuplicadoRecente,
     sanitizarEntrada,
-    CHAR_LIMITS
 } from "$lib/server/utils/validators-parceiro";
 import {
     verificarRateLimitingIP,
@@ -199,18 +198,28 @@ export const actions: Actions = {
         }
 
         // 5. CNPJ com validação de dígito verificador
-        const validacaoCNPJ = validateCNPJComDigito(cnpj);
-        if (!validacaoCNPJ.valid) {
+        // 5. CPF ou CNPJ com validação de dígito verificador
+        let validacaoDocumento;
+        
+        if (cnpj.length === 11) {
+            validacaoDocumento = validateCPFComDigito(cnpj);
+        } else if (cnpj.length === 14) {
+            validacaoDocumento = validateCNPJComDigito(cnpj);
+        } else {
+            validacaoDocumento = { valid: false, message: 'O documento deve ter 11 (CPF) ou 14 (CNPJ) dígitos válidos.' };
+        }
+
+        if (!validacaoDocumento.valid) {
             await registrarTentativa({
                 enderecoIP,
                 email: emailResponsavel,
                 cnpj,
                 sucesso: false,
-                motivo: validacaoCNPJ.message
+                motivo: validacaoDocumento.message
             });
             return fail(400, {
                 email: emailResponsavel,
-                message: validacaoCNPJ.message
+                message: validacaoDocumento.message
             });
         }
 
