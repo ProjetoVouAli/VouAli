@@ -7,10 +7,13 @@
     import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
     import TelephoneInput from '$lib/components/ui/telephone-input/telephone-input.svelte';
     import DocumentInput from '$lib/components/ui/document-input/document-input.svelte';
+    import { imask } from '@imask/svelte';
 
     // Estados do formulário
     let docValido = $state<boolean | null>(null);
     let loading = $state(false);
+    let loadingCep = $state(false);
+
     let formData = $state({
         nomeResponsavel: '',
         emailResponsavel: '',
@@ -23,6 +26,7 @@
         website: '',
         instagram: '',
         whatsapp: '',
+        cep: '',
         cidade: '',
         estado: '',
         endereco: '',
@@ -63,6 +67,49 @@
         'Eventos',
         'Outros'
     ];
+
+    // ✅ Função para buscar o CEP na API
+    async function buscarCep(cepLimpo: string) {
+        if (cepLimpo.length !== 8) return;
+
+        loadingCep = true;
+        
+        try {
+            const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+            const data = await response.json();
+
+            if (!data.erro) {
+                // Auto-preenche os campos com os dados da API
+                formData.cidade = data.localidade;
+                formData.estado = data.uf; 
+                
+                // Monta o endereço inicial (Rua + Bairro)
+                formData.endereco = data.logradouro;
+                if (data.bairro) {
+                    formData.endereco += ` - ${data.bairro}`;
+                }
+
+                // Remove possíveis erros antigos da tela
+                camposInvalidos.delete('cep');
+                camposInvalidos.delete('cidade');
+                camposInvalidos.delete('estado');
+                camposInvalidos.delete('endereco');
+                delete erros.cep;
+                delete erros.cidade;
+                delete erros.estado;
+                delete erros.endereco;
+            } else {
+                erros.cep = 'CEP não encontrado.';
+                camposInvalidos.add('cep');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar o CEP:', error);
+            erros.cep = 'Erro ao consultar CEP.';
+            camposInvalidos.add('cep');
+        } finally {
+            loadingCep = false;
+        }
+    }
 
     function formatarTelefone(value: string): string {
         const v = value.replace(/\D/g, '');
@@ -150,6 +197,7 @@
             'nomeEmpresa',
             'cnpj',
             'segmentoAtuacao',
+            'cep',
             'cidade',
             'estado',
             'descricaoNegocio'
@@ -423,21 +471,63 @@
                         />
                     </div>
 
-                    <!-- WhatsApp -->
+                    <!-- Telefone da Empresa-->
                     <div>
-                        <label for="whatsapp" class="block text-sm font-semibold mb-2">
-                            WhatsApp
+                        <label for="telefoneResponsavel" class="block text-sm font-semibold mb-2">
+                            Telefone/WhatsApp da Empresa *
                         </label>
-                        <Input
-                            id="whatsapp"
-                            type="tel"
-                            name="whatsapp"
-                            bind:value={formData.whatsapp}
-                            onchange={handleWhatsAppChange}
-                            max="20"
+                        <TelephoneInput
+                            bind:value={formData.telefoneResponsavel}
                             disabled={loading}
                             placeholder="(11) 9XXXX-XXXX"
                         />
+                        <!-- Campo hidden para enviar o telefone no formulário -->
+                        <input 
+                            type="hidden" 
+                            name="telefoneResponsavel" 
+                            value={formData.telefoneResponsavel}
+                        />
+                        {#if erros.telefoneResponsavel}
+                            <p class="text-xs text-destructive mt-1">{erros.telefoneResponsavel}</p>
+                        {/if}
+                    </div>
+
+                    <!-- CEP -->
+                     <div>
+                        <label for="cep" class="block text-sm font-semibold mb-2">
+                            CEP *
+                        </label>
+                        <div class="relative">
+                            <input
+                                id="cep"
+                                type="text"
+                                use:imask={{ mask: '00000-000' }}
+                                onaccept={(e) => {
+                                    // Atualiza a variável com os números limpos
+                                    formData.cep = e.detail.unmaskedValue;
+                                }}
+                                oncomplete={(e) => {
+                                    // Só dispara a API quando a máscara está 100% preenchida
+                                    buscarCep(e.detail.unmaskedValue);
+                                }}
+                                disabled={loading || loadingCep}
+                                placeholder="12345-678"
+                                class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                                class:border-destructive={camposInvalidos.has('cep')}
+                            />
+                            
+                            {#if loadingCep}
+                                <span class="absolute right-3 top-2 text-sm animate-pulse text-muted-foreground">
+                                    Buscando...
+                                </span>
+                            {/if}
+                        </div>
+                        
+                        <input type="hidden" name="cep" value={formData.cep} />
+
+                        {#if erros.cep}
+                            <p class="text-xs text-destructive mt-1">{erros.cep}</p>
+                        {/if}
                     </div>
 
                     <!-- Cidade -->

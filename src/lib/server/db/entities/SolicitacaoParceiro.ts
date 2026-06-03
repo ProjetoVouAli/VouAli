@@ -46,6 +46,9 @@ export class SolicitacaoParceiro {
     @Column('varchar', { length: 20, nullable: true })
     whatsapp?: string;
 
+    @Column('varchar', { length: 8 })
+    cep!: string;
+
     @Column('varchar', { length: 100 })
     cidade!: string;
 

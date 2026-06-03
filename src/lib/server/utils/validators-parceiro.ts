@@ -26,7 +26,8 @@ export const CHAR_LIMITS = {
     WHATSAPP: { min: 10, max: 20 },
     CIDADE: { min: 2, max: 50 },
     ENDERECO: { min: 5, max: 150 },
-    DESCRICAO: { min: 20, max: 1000 }
+    DESCRICAO: { min: 20, max: 1000 },
+    CEP: { min: 8, max: 8 }
 };
 
 /**
@@ -93,6 +94,7 @@ export function validateCamposObrigatorios(dados: {
     cnpj: string;
     segmentoAtuacao: string;
     descricaoNegocio: string;
+    cep: string;
     cidade: string;
     estado: string;
     aceiteTermos: boolean;
@@ -105,6 +107,7 @@ export function validateCamposObrigatorios(dados: {
         'cnpj',
         'segmentoAtuacao',
         'descricaoNegocio',
+        'cep',
         'cidade',
         'estado'
     ];

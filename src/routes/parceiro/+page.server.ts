@@ -62,6 +62,7 @@ export const actions: Actions = {
         const website = sanitizarEntrada(data.get('website')?.toString() ?? '', 'url');
         const instagram = sanitizarEntrada(data.get('instagram')?.toString() ?? '', 'texto');
         const whatsapp = (data.get('whatsapp')?.toString() ?? '').replace(/\D/g, '');
+        const cep = (data.get('cep')?.toString() ?? '').replace(/\D/g, '');
         const cidade = sanitizarEntrada(data.get('cidade')?.toString() ?? '', 'nome');
         const estado = (data.get('estado')?.toString() ?? '').toUpperCase();
         const endereco = sanitizarEntrada(data.get('endereco')?.toString() ?? '', 'texto');
@@ -149,6 +150,7 @@ export const actions: Actions = {
             cnpj,
             segmentoAtuacao,
             descricaoNegocio,
+            cep,
             cidade,
             estado,
             aceiteTermos
@@ -303,6 +305,7 @@ export const actions: Actions = {
                 website: website || undefined,
                 instagram: instagram || undefined,
                 whatsapp: whatsapp || undefined,
+                cep,
                 cidade,
                 estado,
                 endereco: endereco || undefined,

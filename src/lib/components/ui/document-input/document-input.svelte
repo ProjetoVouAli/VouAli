@@ -49,7 +49,7 @@
     <input
         type="text"
         use:imask={maskOptions}
-        on:accept={handleAccept}
+        onaccept={handleAccept}
         value={displayValue}
         {placeholder}
         {disabled}

@@ -13,6 +13,7 @@ export async function saveSolicitacaoParceiro(dados: {
     website?: string;
     instagram?: string;
     whatsapp?: string;
+    cep: string;
     cidade: string;
     estado: string;
     endereco?: string;
