@@ -36,6 +36,9 @@
 			<a href="/search" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Explorar
 			</a>
+			<a href="/parceiro" class="text-sm font-medium hover:text-muted-foreground transition-colors">
+				Parceria
+			</a>
 			<a href="/" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Home
 			</a>

@@ -5,10 +5,11 @@
     import { Button } from '$lib/components/ui/button';
     import { Input } from '$lib/components/ui/input';
     import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+    import TelephoneInput from '$lib/components/ui/telephone-input/telephone-input.svelte';
 
     // Estados do formulário
-    let loading = false;
-    let formData = {
+    let loading = $state(false);
+    let formData = $state({
         nomeResponsavel: '',
         emailResponsavel: '',
         telefoneResponsavel: '',
@@ -24,6 +25,23 @@
         estado: '',
         endereco: '',
         aceiteTermos: false
+    });
+
+    // Objeto de validação reativa
+    let erros: Record<string, string> = $state({});
+    let camposInvalidos = $state(new Set<string>());
+
+    // Limites de caracteres (do backend)
+    const CHAR_LIMITS: Record<string, { min: number; max: number }> = {
+        nomeResponsavel: { min: 3, max: 40 },
+        emailResponsavel: { min: 5, max: 100 },
+        telefoneResponsavel: { min: 10, max: 20 },
+        nomeEmpresa: { min: 3, max: 100 },
+        razaoSocial: { min: 0, max: 150 },
+        cnpj: { min: 18, max: 18 },
+        cidade: { min: 2, max: 50 },
+        endereco: { min: 0, max: 255 },
+        descricaoNegocio: { min: 20, max: 1000 }
     };
 
     const estados = [
@@ -44,6 +62,7 @@
         'Outros'
     ];
 
+    // ✅ Funções de formatação
     function formatarCNPJ(value: string): string {
         const v = value.replace(/\D/g, '');
         if (v.length <= 14) {
@@ -64,6 +83,52 @@
         return value;
     }
 
+    // ✅ Validação por campo
+    function validarCampo(nomeCampo: string, valor: string): string | null {
+        const limits = CHAR_LIMITS[nomeCampo];
+        
+        if (!limits) return null;
+
+        // Verificar tamanho mínimo
+        if (valor.trim().length < limits.min && valor.trim().length > 0) {
+            return `Mínimo de ${limits.min} caracteres`;
+        }
+
+        // Verificar tamanho máximo
+        if (valor.length > limits.max) {
+            return `Máximo de ${limits.max} caracteres`;
+        }
+
+        // Validações específicas
+        if (nomeCampo === 'emailResponsavel' && valor && !valor.includes('@')) {
+            return 'Email inválido';
+        }
+
+        if (nomeCampo === 'cnpj' && valor && valor.replace(/\D/g, '').length !== 14) {
+            return 'CNPJ deve conter 14 dígitos';
+        }
+
+        return null;
+    }
+
+    // ✅ Handler para validação em tempo real
+    function handleValidarCampo(nomeCampo: string) {
+        const valor = formData[nomeCampo as keyof typeof formData] || '';
+        const erro = validarCampo(nomeCampo, String(valor));
+
+        if (erro) {
+            erros[nomeCampo] = erro;
+            camposInvalidos.add(nomeCampo);
+        } else {
+            delete erros[nomeCampo];
+            camposInvalidos.delete(nomeCampo);
+        }
+
+        // Disparar reatividade
+        erros = erros;
+        camposInvalidos = camposInvalidos;
+    }
+
     function handleCNPJChange(e: Event) {
         const input = e.target as HTMLInputElement;
         formData.cnpj = formatarCNPJ(input.value);
@@ -78,6 +143,37 @@
         const input = e.target as HTMLInputElement;
         formData.whatsapp = formatarTelefone(input.value);
     }
+
+    // ✅ Caps lock automático para estado
+    function handleEstadoChange(e: Event) {
+        const select = e.target as HTMLSelectElement;
+        if (select.value) {
+            formData.estado = select.value.toUpperCase();
+        }
+    }
+
+    // ✅ Verificar se formulário é válido
+    let isFormValid = $derived.by(() => {
+        // Campos obrigatórios
+        const obrigatorios = [
+            'nomeResponsavel',
+            'emailResponsavel',
+            'telefoneResponsavel',
+            'nomeEmpresa',
+            'cnpj',
+            'segmentoAtuacao',
+            'cidade',
+            'estado',
+            'descricaoNegocio'
+        ];
+
+        const temErros = camposInvalidos.size > 0;
+        const todosPreenchidos = obrigatorios.every(
+            (campo) => String(formData[campo as keyof typeof formData] || '').trim() !== ''
+        );
+
+        return !temErros && todosPreenchidos && formData.aceiteTermos;
+    });
 </script>
 
 <!-- Nike: Página de Solicitação de Parceria -->
@@ -141,10 +237,18 @@
                             type="text"
                             name="nomeResponsavel"
                             bind:value={formData.nomeResponsavel}
+                            onblur={() => handleValidarCampo('nomeResponsavel')}
+                            max="40"
                             required
                             disabled={loading}
                             placeholder="Seu nome completo"
+                            aria-invalid={camposInvalidos.has('nomeResponsavel')}
+                            class={camposInvalidos.has('nomeResponsavel') ? 'border-destructive' : ''}
                         />
+                        {#if erros.nomeResponsavel}
+                            <p class="text-xs text-destructive mt-1">{erros.nomeResponsavel}</p>
+                        {/if}
+                        <p class="text-xs text-muted-foreground mt-1">{formData.nomeResponsavel.length}/40</p>
                     </div>
 
                     <!-- Email -->
@@ -157,10 +261,18 @@
                             type="email"
                             name="emailResponsavel"
                             bind:value={formData.emailResponsavel}
+                            onblur={() => handleValidarCampo('emailResponsavel')}
+                            max="100"
                             required
                             disabled={loading}
                             placeholder="seu@email.com"
+                            aria-invalid={camposInvalidos.has('emailResponsavel')}
+                            class={camposInvalidos.has('emailResponsavel') ? 'border-destructive' : ''}
                         />
+                        {#if erros.emailResponsavel}
+                            <p class="text-xs text-destructive mt-1">{erros.emailResponsavel}</p>
+                        {/if}
+                        <p class="text-xs text-muted-foreground mt-1">{formData.emailResponsavel.length}/100</p>
                     </div>
 
                     <!-- Telefone -->
@@ -168,16 +280,20 @@
                         <label for="telefoneResponsavel" class="block text-sm font-semibold mb-2">
                             Telefone/WhatsApp *
                         </label>
-                        <Input
-                            id="telefoneResponsavel"
-                            type="tel"
-                            name="telefoneResponsavel"
+                        <TelephoneInput
                             bind:value={formData.telefoneResponsavel}
-                            onchange={handleTelefoneChange}
-                            required
                             disabled={loading}
                             placeholder="(11) 9XXXX-XXXX"
                         />
+                        <!-- Campo hidden para enviar o telefone no formulário -->
+                        <input 
+                            type="hidden" 
+                            name="telefoneResponsavel" 
+                            value={formData.telefoneResponsavel}
+                        />
+                        {#if erros.telefoneResponsavel}
+                            <p class="text-xs text-destructive mt-1">{erros.telefoneResponsavel}</p>
+                        {/if}
                     </div>
                 </CardContent>
             </Card>
@@ -200,10 +316,18 @@
                             type="text"
                             name="nomeEmpresa"
                             bind:value={formData.nomeEmpresa}
+                            onblur={() => handleValidarCampo('nomeEmpresa')}
+                            max="100"
                             required
                             disabled={loading}
                             placeholder="Ex: Pousada Praia Dourada"
+                            aria-invalid={camposInvalidos.has('nomeEmpresa')}
+                            class={camposInvalidos.has('nomeEmpresa') ? 'border-destructive' : ''}
                         />
+                        {#if erros.nomeEmpresa}
+                            <p class="text-xs text-destructive mt-1">{erros.nomeEmpresa}</p>
+                        {/if}
+                        <p class="text-xs text-muted-foreground mt-1">{formData.nomeEmpresa.length}/100</p>
                     </div>
 
                     <!-- Razão Social -->
@@ -216,9 +340,11 @@
                             type="text"
                             name="razaoSocial"
                             bind:value={formData.razaoSocial}
+                            max="150"
                             disabled={loading}
                             placeholder="Ex: Pousada Praia Dourada LTDA"
                         />
+                        <p class="text-xs text-muted-foreground mt-1">{formData.razaoSocial.length}/150</p>
                     </div>
 
                     <!-- CNPJ -->
@@ -232,10 +358,18 @@
                             name="cnpj"
                             bind:value={formData.cnpj}
                             onchange={handleCNPJChange}
+                            onblur={() => handleValidarCampo('cnpj')}
+                            max="18"
                             required
                             disabled={loading}
                             placeholder="XX.XXX.XXX/XXXX-XX"
+                            aria-invalid={camposInvalidos.has('cnpj')}
+                            class={camposInvalidos.has('cnpj') ? 'border-destructive' : ''}
                         />
+                        {#if erros.cnpj}
+                            <p class="text-xs text-destructive mt-1">{erros.cnpj}</p>
+                        {/if}
+                        <p class="text-xs text-muted-foreground mt-1">{formData.cnpj.replace(/\D/g, '').length}/14 dígitos</p>
                     </div>
 
                     <!-- Segmento de Atuação -->
@@ -278,6 +412,7 @@
                             type="url"
                             name="website"
                             bind:value={formData.website}
+                            max="255"
                             disabled={loading}
                             placeholder="https://seusite.com.br"
                         />
@@ -293,6 +428,7 @@
                             type="text"
                             name="instagram"
                             bind:value={formData.instagram}
+                            max="100"
                             disabled={loading}
                             placeholder="@seuinstagram"
                         />
@@ -309,6 +445,7 @@
                             name="whatsapp"
                             bind:value={formData.whatsapp}
                             onchange={handleWhatsAppChange}
+                            max="20"
                             disabled={loading}
                             placeholder="(11) 9XXXX-XXXX"
                         />
@@ -324,10 +461,18 @@
                             type="text"
                             name="cidade"
                             bind:value={formData.cidade}
+                            onblur={() => handleValidarCampo('cidade')}
+                            max="50"
                             required
                             disabled={loading}
                             placeholder="Ex: São Paulo"
+                            aria-invalid={camposInvalidos.has('cidade')}
+                            class={camposInvalidos.has('cidade') ? 'border-destructive' : ''}
                         />
+                        {#if erros.cidade}
+                            <p class="text-xs text-destructive mt-1">{erros.cidade}</p>
+                        {/if}
+                        <p class="text-xs text-muted-foreground mt-1">{formData.cidade.length}/50</p>
                     </div>
 
                     <!-- Estado -->
@@ -339,6 +484,7 @@
                             id="estado"
                             name="estado"
                             bind:value={formData.estado}
+                            onchange={handleEstadoChange}
                             required
                             disabled={loading}
                             class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all appearance-none cursor-pointer"
@@ -360,9 +506,17 @@
                             type="text"
                             name="endereco"
                             bind:value={formData.endereco}
+                            onblur={() => handleValidarCampo('endereco')}
+                            max="255"
                             disabled={loading}
                             placeholder="Rua, número, complemento"
+                            aria-invalid={camposInvalidos.has('endereco')}
+                            class={camposInvalidos.has('endereco') ? 'border-destructive' : ''}
                         />
+                        {#if erros.endereco}
+                            <p class="text-xs text-destructive mt-1">{erros.endereco}</p>
+                        {/if}
+                        <p class="text-xs text-muted-foreground mt-1">{formData.endereco.length}/255</p>
                     </div>
                 </CardContent>
             </Card>
@@ -381,15 +535,24 @@
                             id="descricaoNegocio"
                             name="descricaoNegocio"
                             bind:value={formData.descricaoNegocio}
+                            onblur={() => handleValidarCampo('descricaoNegocio')}
                             required
                             disabled={loading}
                             placeholder="Descreva seu negócio, diferenciais, público-alvo, etc. (mínimo 20 caracteres)"
                             class="w-full px-4 py-3 border-2 border-primary bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-ring transition-all rounded-md resize-none"
+                            class:border-destructive={camposInvalidos.has('descricaoNegocio')}
                             rows="5"
+                            aria-invalid={camposInvalidos.has('descricaoNegocio')}
                         ></textarea>
-                        <p class="text-xs text-muted-foreground mt-2">
-                            {formData.descricaoNegocio.length} caracteres
-                        </p>
+                        {#if erros.descricaoNegocio}
+                            <p class="text-xs text-destructive mt-1">{erros.descricaoNegocio}</p>
+                        {/if}
+                        <div class="flex justify-between text-xs mt-2">
+                            <p class="text-muted-foreground">{formData.descricaoNegocio.length}/1000 caracteres</p>
+                            <p class={formData.descricaoNegocio.length < 20 ? 'text-amber-600 font-semibold' : 'text-green-600'}>
+                                {formData.descricaoNegocio.length < 20 ? `${20 - formData.descricaoNegocio.length} para ir` : '✓ OK'}
+                            </p>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -418,9 +581,14 @@
 
             <!-- Submit Button -->
             <div class="space-y-4">
+                {#if camposInvalidos.size > 0}
+                    <p class="text-xs text-amber-600 p-3 bg-amber-50 dark:bg-amber-950 rounded">
+                        ⚠️ Por favor, corrija os erros destacados em vermelho antes de enviar.
+                    </p>
+                {/if}
                 <Button
                     type="submit"
-                    disabled={loading || !formData.aceiteTermos}
+                    disabled={loading || camposInvalidos.size > 0 || !formData.aceiteTermos}
                     class="w-full"
                 >
                     {loading ? 'Enviando solicitação...' : 'Enviar Solicitação'}
