@@ -78,4 +78,45 @@
     :global(.iti) {
         width: 100%;
     }
+
+    /* === FORÇAR DARK/LIGHT MODE DO SHADCN NO DROPDOWN === */
+    
+    /* Fundo da lista e bordas */
+    :global(.iti__country-list) {
+        background-color: var(--background) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--foreground) !important;
+        border-radius: var(--radius);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    /* Cor do texto de cada país */
+    :global(.iti__country) {
+        color: var(--foreground) !important;
+    }
+
+    /* Efeito de Hover (passar o rato) e seleção via teclado */
+    :global(.iti__country:hover),
+    :global(.iti__country.iti__highlight) {
+        background-color: var(--accent) !important;
+        color: var(--accent-foreground) !important;
+    }
+
+    /* Estilização da barra de pesquisa no topo do dropdown */
+    :global(.iti__search-input) {
+        background-color: var(--background) !important;
+        color: var(--foreground) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 0px; /* Seguindo o padrão radius: 0px do seu tema Nike */
+    }
+
+    :global(.iti__search-input::placeholder) {
+        color: var(--muted-foreground) !important;
+    }
+
+    /* Ajuste do fundo do container flutuante inteiro */
+    :global(.iti__dropdown-content) {
+        background-color: var(--background) !important;
+        border-color: var(--border) !important;
+    }
 </style>
