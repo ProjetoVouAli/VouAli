@@ -16,12 +16,6 @@ export const load: LayoutServerLoad = async ({ locals }) => {
     console.log('[LAYOUT SERVER] user obtido:', user ? `${user.email}` : null);
 
     return {
-        user: user ? {
-            id: user.id,
-            nome: user.nome,
-            email: user.email,
-            sexo: user.sexo,
-            papeis: user.papeis,
-        } : null,
+        user: user
     };
 };

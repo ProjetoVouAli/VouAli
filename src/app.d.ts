@@ -1,6 +1,7 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 
+import type { Usuario } from '$lib/server/db/entities/Usuario';
 import type { AuthUser, DatabaseUser } from './hooks.server';
 
 declare global {
@@ -37,7 +38,7 @@ declare global {
 			 * 
 			 * IMPORTANTE: Mais pesado que authUser() pois consulta o banco
 			 */
-			databaseUser: () => Promise<DatabaseUser | null>;
+			databaseUser: () => Promise<Usuario | null>;
 		}
 		// interface PageData {}
 		// interface PageState {}

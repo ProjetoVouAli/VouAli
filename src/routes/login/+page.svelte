@@ -3,7 +3,7 @@
     import { enhance } from '$app/forms';
     import { user } from '$lib/stores/user';
     import { flash } from '$lib/stores/flash';
-    import { goto } from '$app/navigation';
+    import { goto, invalidateAll } from '$app/navigation';
     import { Button } from '$lib/components/ui/button';
     import { Input } from '$lib/components/ui/input';
 
@@ -52,6 +52,7 @@
                         if (result.type === 'success' && data?.success && data?.user) {
                             user.set(data.user);
                             flash.set(data.message);
+                            await invalidateAll();
                             await goto('/');
                         } else if (result.type === 'failure' && data?.message) {
                             flash.set(data.message);

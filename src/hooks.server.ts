@@ -57,7 +57,7 @@ export const handle: Handle = async ({ event, resolve }) => {
      * Evita múltiplas validações do mesmo token
      */
     let cachedAuthUser: AuthUser | null = null;
-    let cachedDatabaseUser: DatabaseUser | null = null;
+    let cachedDatabaseUser: Usuario | null = null;
     let authValidationAttempted = false;
     let dbValidationAttempted = false;
 
@@ -138,7 +138,7 @@ export const handle: Handle = async ({ event, resolve }) => {
      * 
      * IMPORTANTE: Esta função é assíncrona e deve ser AWAIT'ED
      */
-    const getDatabaseUser = async (): Promise<DatabaseUser | null> => {
+    const getDatabaseUser = async (): Promise<Usuario | null> => {
         // Se já foi validado nesta requisição, retorna do cache
         if (dbValidationAttempted) {
             return cachedDatabaseUser;
@@ -167,14 +167,9 @@ export const handle: Handle = async ({ event, resolve }) => {
             }
 
             // Construir objeto DatabaseUser
-            const databaseUser: DatabaseUser = {
+            const databaseUser: Usuario = {
                 ...authUser,
-                id: usuario.id,
-                nome: usuario.nome,
-                sexo: usuario.sexo,
-                estaAutenticado: usuario.estaAutenticado,
-                papeis: usuario.papeis,
-                creationDate: usuario.creationDate,
+                ...usuario,
             };
 
             console.log(`[Auth] ✓ Dados do banco carregados para: ${usuario.email}`);

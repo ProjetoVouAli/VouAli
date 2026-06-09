@@ -1,14 +1,27 @@
-
 <script lang="ts">
 	import { Button } from '../button';
 	import ModeToggle from './mode-toggle.svelte';
-	import { user } from '$lib/stores/user';
+	import { TipoUsuario, type Usuario } from '$lib/server/db/entities/Usuario';
+	import { invalidateAll, goto } from '$app/navigation';
+	import { tick } from 'svelte';
+	import * as Command from '$lib/components/ui/command/index.js';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 
-	let { initialUser = null } = $props();
+	let { initialUser: user } : {initialUser: Usuario | null} = $props();
 
-	let displayUser = $derived.by(() => {
-		return $user ?? initialUser;
-	});
+	let destinoOpen = $state(false);
+	let destinosTriggerRef = $state<HTMLButtonElement>(null!);
+
+	function closeAndFocusDestinos() {
+		destinoOpen = false;
+		tick().then(() => destinosTriggerRef.focus());
+	}
+
+	function irPara(path: string) {
+		closeAndFocusDestinos();
+		goto(path);
+	}
 
 	async function logout() {
 		console.log('[LOGOUT] Iniciando logout...');
@@ -18,12 +31,12 @@
 			body: ''
 		});
 		console.log('[LOGOUT] Resposta do backend:', resp.status);
-		user.set(null);
-		window.location.href = '/';
+
+		await invalidateAll();
+		await goto('/');
 	}
 </script>
 
-<!-- Nike: Navbar minimalista, preto/branco -->
 <header class="fixed w-full top-0 left-0 z-50 bg-background border-b border-border">
 	<nav class="max-w-7xl mx-auto px-8 py-6 flex items-center justify-between">
 		<!-- Logo/Brand -->
@@ -33,19 +46,58 @@
 
 		<!-- Navigation Links -->
 		<div class="hidden md:flex items-center gap-12">
-			<a href="/search" class="text-sm font-medium hover:text-muted-foreground transition-colors">
-				Explorar
-			</a>
 			<a href="/" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Home
 			</a>
-		</div>
+			<a href="/search" class="text-sm font-medium hover:text-muted-foreground transition-colors">
+				Explorar
+			</a>
 
+			{#if user && user.papeis.find(u => u == TipoUsuario.PARCEIRO || u == TipoUsuario.ADMINISTRADOR)}
+			<Popover.Root bind:open={destinoOpen}>
+				<Popover.Trigger bind:ref={destinosTriggerRef}>
+					{#snippet child({ props })}
+					<button
+							{...props}
+							role="combobox"
+							aria-expanded={destinoOpen}
+							class="text-sm font-medium hover:text-muted-foreground transition-colors inline-flex items-center gap-1"
+						>
+							Destinos
+							<ChevronsUpDown class="size-4 opacity-50" />
+						</button>
+						{/snippet}
+					</Popover.Trigger>
+					<Popover.Content class="w-[180px] p-0" align="start">
+						<Command.Root>
+							<Command.List>
+								<Command.Empty>Nenhum destino encontrado.</Command.Empty>
+								<Command.Group>
+									<Command.Item
+									value="cadastrados"
+									onSelect={() => irPara('/inventory')}
+								>
+									Cadastrados
+								</Command.Item>
+								<Command.Item
+									value="cadastrar"
+									onSelect={() => irPara('/destination/create')}
+								>
+									Cadastrar
+								</Command.Item>
+							</Command.Group>
+						</Command.List>
+					</Command.Root>
+				</Popover.Content>
+			</Popover.Root>
+			{/if} 
+		</div>
+		
 		<!-- User & Theme -->
 		<div class="flex items-center gap-6">
-			{#if displayUser}
+			{#if user}
 				<div class="hidden sm:block">
-					<p class="text-sm font-semibold">{displayUser.nome || displayUser.email}</p>
+					<p class="text-sm font-semibold">{user.nome || user.email}</p>
 				</div>
 				<button
 					onclick={logout}
