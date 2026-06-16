@@ -29,6 +29,8 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
     let initialData: Record<string, unknown> = {
         state: 'RJ',
         active: true,
+        latitude: -22.9068,
+        longitude: -43.1729,
         categories: [],
         images: [],
         imagesToDelete: [] // Adicionado fallback para deleção

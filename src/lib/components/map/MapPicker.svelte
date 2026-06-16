@@ -15,17 +15,20 @@
     let geocodeError = $state('');
 
     let map: any;
-    let marker: any;
+    let marker = $state<any>();
 
     async function initMap() {
         if (!browser) return;
 
         const maplibregl = await import('maplibre-gl');
 
+        const startLng = Number(longitude) || -43.1729;
+        const startLat = Number(latitude) || -22.9068;
+
         map = new maplibregl.Map({
             container: mapContainer,
             style: 'https://tiles.openfreemap.org/styles/liberty',
-            center: [longitude || -43.1729, latitude || -22.9068],
+            center: [startLng, startLat],
             zoom: 12,
         });
 
@@ -35,19 +38,27 @@
         el.style.cssText = 'width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);pointer-events:none;';
 
         marker = new maplibregl.Marker({ element: el })
-            .setLngLat([longitude || -43.1729, latitude || -22.9068])
+            .setLngLat([startLng, startLat])
             .addTo(map);
 
         map.on('click', (e: any) => {
+            const lng = e.lngLat.lng;
+            const lat = e.lngLat.lat;
             marker.setLngLat(e.lngLat);
-            latitude = e.lngLat.lat;
-            longitude = e.lngLat.lng;
+            latitude = lat;
+            longitude = lng;
         });
 
         map.on('load', () => {
             mapReady = true;
         });
     }
+
+    // Move marker when lat/lng changes (from parent or geocoding)
+    $effect(() => {
+        if (!marker || latitude == null || longitude == null) return;
+        marker.setLngLat([longitude, latitude]);
+    });
 
     $effect(() => {
         if (!browser || !mapContainer) return;
@@ -57,11 +68,6 @@
         return () => {
             map?.remove();
         };
-    });
-
-    $effect(() => {
-        if (!marker || latitude == null || longitude == null) return;
-        marker.setLngLat([longitude, latitude]);
     });
 
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
@@ -75,7 +81,7 @@
             geocoding = true;
             geocodeError = '';
             try {
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&accept-language=pt&polygon_geojson=1`;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&accept-language=pt`;
                 const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
                 const data = await res.json();
                 if (data && data.length > 0) {
@@ -85,7 +91,6 @@
                     latitude = lat;
                     longitude = lon;
 
-                    // Ajusta zoom para enquadrar a área encontrada
                     if (data[0].boundingbox) {
                         const [south, north, west, east] = data[0].boundingbox.map(parseFloat);
                         map?.fitBounds([[west, south], [east, north]], { padding: 60, maxZoom: 17 });

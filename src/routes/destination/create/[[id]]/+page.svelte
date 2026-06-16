@@ -30,8 +30,8 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
     let previewUrls = $state<string[]>([]);
     let isDragging = $state(false);
 
-    let mapLat = $state($formData.latitude ?? -22.9068);
-    let mapLng = $state($formData.longitude ?? -43.1729);
+    let mapLat = $state(Number($formData.latitude) || -22.9068);
+    let mapLng = $state(Number($formData.longitude) || -43.1729);
 
     let searchQuery = $derived.by(() => {
         const parts = [$formData.address, $formData.neighborhood, $formData.city, $formData.state, $formData.name].filter(Boolean);
