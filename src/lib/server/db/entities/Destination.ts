@@ -35,9 +35,11 @@ export class Destination {
   @Column({ type: 'decimal', precision: 11, scale: 8 })
   longitude!: number;
 
-
   @Column({ type: 'boolean', default: true })
   active!: boolean;
+
+  @Column({ type: 'varchar', length: 20, default: 'approved' })
+  status!: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
@@ -65,11 +67,4 @@ export class Destination {
   @ManyToOne(() => Usuario)
   @JoinColumn({ name: 'created_by' })
   createdBy!: Usuario;
-
-  
-	nome: string | null | undefined;
-	category: any;
-	descricao: any;
-	complementos: any;
-	servicos: any;
 }
