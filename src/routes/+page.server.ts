@@ -21,6 +21,7 @@ export const load: PageServerLoad = async ({ url, parent }) => {
 
     const searchParams = url.searchParams;
     const results = await AppDataSource.getRepository(Destination).find({
+        where: { status: 'approved' },
         relations: ['images', 'categories'],
     });
 
