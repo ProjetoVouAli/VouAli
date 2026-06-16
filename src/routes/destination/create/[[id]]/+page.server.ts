@@ -84,7 +84,12 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
 };
 
 export const actions: Actions = {
-    default: async ({ request, params }) => {
+    default: async ({ request, params, locals }) => {
+        const user = await locals.databaseUser();
+        if (!user || (!user.papeis.includes(TipoUsuario.PARCEIRO) && !user.papeis.includes(TipoUsuario.ADMINISTRADOR))) {
+            throw error(403, { message: 'Acesso negado.' });
+        }
+
         const form = await superValidate(request, zod(destinationSchema));
 
         if (!form.valid) {
@@ -145,9 +150,13 @@ export const actions: Actions = {
             await destinationRepo.save(existingDestination);
             destinationId = existingDestination.id;
         } else {
+            const isAdmin = user.papeis.includes(TipoUsuario.ADMINISTRADOR);
+
             const newDestination = destinationRepo.create({
                 ...destinationData,
-                categories: finalCategories
+                categories: finalCategories,
+                createdBy: user,
+                status: isAdmin ? 'approved' : 'pending',
             });
 
             const createdDestination = await destinationRepo.save(newDestination);
