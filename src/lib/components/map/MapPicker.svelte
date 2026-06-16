@@ -23,6 +23,13 @@
         if (!browser) return;
 
         const maplibregl = await import('maplibre-gl');
+        if (!document.getElementById('ml-css')) {
+            const link = document.createElement('link');
+            link.id = 'ml-css';
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.3/dist/maplibre-gl.css';
+            document.head.appendChild(link);
+        }
 
         const startLng = Number(longitude) || -43.1729;
         const startLat = Number(latitude) || -22.9068;
@@ -41,11 +48,11 @@
         pulse.style.cssText = 'position:absolute;width:60px;height:60px;top:-16px;left:-16px;border-radius:50%;background:rgba(220,38,38,0.2);border:2px solid rgba(220,38,38,0.4);animation:pulse 2s ease-in-out infinite;pointer-events:none;';
 
         const el = document.createElement('div');
-        el.style.cssText = 'position:relative;width:28px;height:28px;pointer-events:none;';
+        el.style.cssText = 'position:relative;width:28px;height:40px;';
         el.appendChild(pulse);
 
         const pin = document.createElement('div');
-        pin.style.cssText = 'position:absolute;top:0;left:0;width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:1;';
+        pin.style.cssText = 'position:absolute;top:0;left:0;width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:1;pointer-events:none;';
         el.appendChild(pin);
 
         // Inject pulse keyframes once
