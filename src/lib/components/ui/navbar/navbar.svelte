@@ -53,6 +53,12 @@
 				Explorar
 			</a>
 
+			{#if user && user.papeis?.includes('ADMINISTRADOR')}
+			<a href="/apuracoes" class="text-sm font-medium hover:text-muted-foreground transition-colors">
+				Apurações
+			</a>
+			{/if}
+
 			{#if user && user.papeis.find(u => u === 'PARCEIRO' || u === 'ADMINISTRADOR')}
 			<Popover.Root bind:open={destinoOpen}>
 				<Popover.Trigger bind:ref={destinosTriggerRef}>
