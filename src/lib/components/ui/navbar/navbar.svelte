@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '../button';
 	import ModeToggle from './mode-toggle.svelte';
-	import { TipoUsuario, type Usuario } from '$lib/server/db/entities/Usuario';
+	import type { Usuario } from '$lib/server/db/entities/Usuario';
 	import { invalidateAll, goto } from '$app/navigation';
 	import { tick } from 'svelte';
 	import * as Command from '$lib/components/ui/command/index.js';
@@ -53,7 +53,7 @@
 				Explorar
 			</a>
 
-			{#if user && user.papeis.find(u => u == TipoUsuario.PARCEIRO || u == TipoUsuario.ADMINISTRADOR)}
+			{#if user && user.papeis.find(u => u === 'PARCEIRO' || u === 'ADMINISTRADOR')}
 			<Popover.Root bind:open={destinoOpen}>
 				<Popover.Trigger bind:ref={destinosTriggerRef}>
 					{#snippet child({ props })}
@@ -74,22 +74,22 @@
 								<Command.Empty>Nenhum destino encontrado.</Command.Empty>
 								<Command.Group>
 									<Command.Item
-									value="cadastrados"
-									onSelect={() => irPara('/inventory')}
-								>
-									Cadastrados
-								</Command.Item>
-								<Command.Item
-									value="cadastrar"
-									onSelect={() => irPara('/destination/create')}
-								>
-									Cadastrar
-								</Command.Item>
-							</Command.Group>
-						</Command.List>
-					</Command.Root>
-				</Popover.Content>
-			</Popover.Root>
+										value="cadastrados"
+										onSelect={() => irPara('/inventory')}
+									>
+										Cadastrados
+									</Command.Item>
+									<Command.Item
+										value="cadastrar"
+										onSelect={() => irPara('/destination/create')}
+									>
+										Cadastrar
+									</Command.Item>
+								</Command.Group>
+							</Command.List>
+						</Command.Root>
+					</Popover.Content>
+				</Popover.Root>
 			{/if} 
 		</div>
 		
