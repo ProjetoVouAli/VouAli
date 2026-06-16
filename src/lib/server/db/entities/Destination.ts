@@ -41,6 +41,9 @@ export class Destination {
   @Column({ type: 'varchar', length: 20, default: 'approved' })
   status!: string;
 
+  @Column({ type: 'text', nullable: true })
+  rejectionReason!: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
 

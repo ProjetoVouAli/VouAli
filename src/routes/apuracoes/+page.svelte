@@ -8,6 +8,8 @@
 
     const { data }: { data: PageData } = $props();
 
+    let loading = $state(false);
+
     function formatDate(dateStr: string): string {
         const d = new Date(dateStr);
         return d.toLocaleDateString('pt-BR', {
@@ -100,19 +102,30 @@
                                                 </Button>
                                             </form>
 
-                                            <form method="POST" action="?/reject" use:enhance={() => {
+                                            <div class="flex items-start gap-2">
+                                            <form method="POST" action="?/reject" use:enhance={(data) => {
+                                                loading = true;
                                                 return async ({ result }) => {
+                                                    loading = false;
                                                     if (result.type === 'success') {
                                                         flash.set('Destino recusado.');
                                                         await goto('/apuracoes');
                                                     }
                                                 };
-                                            }}>
+                                            }} class="flex-1">
                                                 <input type="hidden" name="id" value={destination.id} />
+                                                <textarea
+                                                    name="reason"
+                                                    placeholder="Motivo da recusa..."
+                                                    required
+                                                    class="w-full px-3 py-2 text-sm border-2 border-destructive/50 bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-destructive mb-2 resize-none"
+                                                    rows="2"
+                                                ></textarea>
                                                 <Button type="submit" variant="destructive" size="sm">
                                                     Recusar
                                                 </Button>
                                             </form>
+                                            </div>
 
                                             <a href={`/destination/create/${destination.id}`} 
                                                class="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors ml-auto">

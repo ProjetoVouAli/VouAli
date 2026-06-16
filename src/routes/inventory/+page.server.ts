@@ -39,9 +39,11 @@ export const load: PageServerLoad = async ({ parent }) => {
     // 5. Return the destinations to your +page.svelte
     const pendingDestinations = userDestinations.filter(d => d.status === 'pending');
     const approvedDestinations = userDestinations.filter(d => d.status === 'approved');
+    const rejectedDestinations = userDestinations.filter(d => d.status === 'rejected');
 
     return {
         pending: structuredClone(pendingDestinations),
         approved: structuredClone(approvedDestinations),
+        rejected: structuredClone(rejectedDestinations),
     };
 };

@@ -44,9 +44,10 @@ export const actions: Actions = {
 
         const data = await request.formData();
         const id = parseInt(data.get('id') as string);
+        const reason = (data.get('reason') as string)?.trim() || 'Motivo não informado';
 
         const repo = AppDataSource.getRepository(Destination);
-        await repo.update(id, { status: 'rejected' });
+        await repo.update(id, { status: 'rejected', rejectionReason: reason });
 
         return { success: true };
     },

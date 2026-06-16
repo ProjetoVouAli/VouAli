@@ -34,6 +34,7 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
         imagesToDelete: [] // Adicionado fallback para deleção
     };
 
+    let destinationStatus: string | null = null;
     let existingImages: DestinationImage[] = [];
 
     if (params.id) {
@@ -58,6 +59,8 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
             images: [],
             imagesToDelete: []
         };
+
+        destinationStatus = destination.status;
     }
 
     const form = await superValidate(initialData, zod(destinationSchema));
@@ -79,7 +82,8 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
         form,
         isEdit: !!params.id,
         categories,
-        existingImages: imagesData
+        existingImages: imagesData,
+        destinationStatus
     };
 };
 
@@ -146,6 +150,12 @@ export const actions: Actions = {
 
             destinationRepo.merge(existingDestination, destinationData);
             existingDestination.categories = finalCategories;
+
+            // Se estava recusado, reenviar para aprovação
+            if (existingDestination.status === 'rejected') {
+                existingDestination.status = 'pending';
+                existingDestination.rejectionReason = null;
+            }
 
             await destinationRepo.save(existingDestination);
             destinationId = existingDestination.id;
