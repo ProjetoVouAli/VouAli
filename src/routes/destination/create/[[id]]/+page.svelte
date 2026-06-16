@@ -56,19 +56,19 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
             if (data?.address) {
                 const addr = data.address;
                 const road = [addr.road, addr.house_number].filter(Boolean).join(', ');
-                if (road && !$formData.address) $formData.address = road;
-                if (addr.suburb && !$formData.neighborhood) $formData.neighborhood = addr.suburb;
-                else if (addr.neighbourhood && !$formData.neighborhood) $formData.neighborhood = addr.neighbourhood;
-                if (addr.city && !$formData.city) $formData.city = addr.city;
-                else if (addr.town && !$formData.city) $formData.city = addr.town;
-                else if (addr.village && !$formData.city) $formData.city = addr.village;
+                if (road) $formData.address = road;
+                if (addr.suburb) $formData.neighborhood = addr.suburb;
+                else if (addr.neighbourhood) $formData.neighborhood = addr.neighbourhood;
+                if (addr.city) $formData.city = addr.city;
+                else if (addr.town) $formData.city = addr.town;
+                else if (addr.village) $formData.city = addr.village;
                 if (addr.state) {
                     const ufMatch = addr.state.match(/\(([A-Z]{2})\)/);
                     if (ufMatch) {
-                        if (!$formData.state) $formData.state = ufMatch[1];
+                        $formData.state = ufMatch[1];
                     } else if (addr['ISO3166-2-lvl4']) {
                         const uf = addr['ISO3166-2-lvl4'].split('-')[1];
-                        if (uf && !$formData.state) $formData.state = uf;
+                        if (uf) $formData.state = uf;
                     }
                 }
             }
