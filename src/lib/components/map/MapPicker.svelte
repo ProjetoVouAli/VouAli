@@ -5,14 +5,16 @@
         latitude?: number;
         longitude?: number;
         searchQuery?: string;
+        onPinMoved?: (lat: number, lng: number) => void;
     }
 
-    let { latitude = $bindable(-22.9068), longitude = $bindable(-43.1729), searchQuery = '' }: Props = $props();
+    let { latitude = $bindable(-22.9068), longitude = $bindable(-43.1729), searchQuery = '', onPinMoved }: Props = $props();
 
     let mapContainer: HTMLDivElement;
     let mapReady = $state(false);
     let geocoding = $state(false);
     let geocodeError = $state('');
+    let pulseStyle = $state('');
 
     let map: any;
     let marker = $state<any>();
@@ -34,8 +36,25 @@
 
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
+        // Pulse circle behind the pin
+        const pulse = document.createElement('div');
+        pulse.style.cssText = 'position:absolute;width:60px;height:60px;top:-16px;left:-16px;border-radius:50%;background:rgba(220,38,38,0.2);border:2px solid rgba(220,38,38,0.4);animation:pulse 2s ease-in-out infinite;pointer-events:none;';
+
         const el = document.createElement('div');
-        el.style.cssText = 'width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);pointer-events:none;';
+        el.style.cssText = 'position:relative;width:28px;height:28px;pointer-events:none;';
+        el.appendChild(pulse);
+
+        const pin = document.createElement('div');
+        pin.style.cssText = 'position:absolute;top:0;left:0;width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:1;';
+        el.appendChild(pin);
+
+        // Inject pulse keyframes once
+        if (!document.getElementById('map-pulse-style')) {
+            const style = document.createElement('style');
+            style.id = 'map-pulse-style';
+            style.textContent = '@keyframes pulse{0%{transform:scale(0.8);opacity:0.6}50%{transform:scale(1.3);opacity:0.2}100%{transform:scale(0.8);opacity:0.6}}';
+            document.head.appendChild(style);
+        }
 
         marker = new maplibregl.Marker({ element: el })
             .setLngLat([startLng, startLat])
@@ -47,6 +66,7 @@
             marker.setLngLat(e.lngLat);
             latitude = lat;
             longitude = lng;
+            onPinMoved?.(lat, lng);
         });
 
         map.on('load', () => {
@@ -54,7 +74,6 @@
         });
     }
 
-    // Move marker when lat/lng changes (from parent or geocoding)
     $effect(() => {
         if (!marker || latitude == null || longitude == null) return;
         marker.setLngLat([longitude, latitude]);
