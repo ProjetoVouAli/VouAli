@@ -6,19 +6,10 @@
 
 	import Navbar from '$lib/components/ui/navbar/navbar.svelte';
 	import { flash } from '$lib/stores/flash';
-	import { user } from '$lib/stores/user';
 
 	let { data, children } = $props();
 
-	// ✅ Effect.pre() dispara ANTES de outras renderizações (fix race condition de SSR)
-	// IMPORTANTE: Não usar if(window) aqui - deixar rodar na hydration
-	$effect.pre(() => {
-		if (data?.user) {
-			user.set({ ...data.user, email: data.user.email ?? '' });
-		} else {
-			user.set(null);
-		}
-	});
+
 
 	$effect(() => {
 		if ($flash) {
@@ -33,7 +24,8 @@
 </svelte:head>
 
 <ModeWatcher />
-<Navbar initialUser={data.user}/>
+
+<Navbar initialUser={data.user }/>
 
 {#if $flash}
 	<div class="notificacao sucesso">

@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { DestinationCategory } from './DestinationCategory';
 import { DestinationImage } from './DestinationImage';
+import { Usuario } from './Usuario';
 
 @Entity('destinations')
 export class Destination {
@@ -60,6 +61,12 @@ export class Destination {
     }
   })
   categories!: DestinationCategory[];
+
+  @ManyToOne(() => Usuario)
+  @JoinColumn({ name: 'created_by' })
+  createdBy!: Usuario;
+
+  
 	nome: string | null | undefined;
 	category: any;
 	descricao: any;

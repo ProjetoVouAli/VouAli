@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from "typeorm";
 import 'reflect-metadata';
+import { Destination } from "./Destination";
 
 export enum TipoUsuario {
     VIAJANTE = 'VIAJANTE',
@@ -37,4 +38,8 @@ export class Usuario {
         default: [TipoUsuario.VIAJANTE]
     })
     papeis!: TipoUsuario[];
+
+
+    @OneToMany(() => Destination, (destination) => destination.createdBy)
+    destinations!: Destination[];
 }

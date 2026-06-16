@@ -13,7 +13,8 @@ import { Usuario } from '$lib/server/db/entities/Usuario';
  * - Se já está logado, redireciona para home
  * - Se não está logado, mostra formulário
  */
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, parent }) => {
+    
     // ✅ Lazy Loading: Verifica apenas se está logado
     const user = await locals.authUser();
 
