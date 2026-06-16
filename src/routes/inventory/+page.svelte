@@ -4,6 +4,8 @@
     import { Card, CardContent } from '$lib/components/ui/card';
 
     const { data }: { data: PageData } = $props();
+
+    let totalDestinos = $derived((data.pending?.length || 0) + (data.approved?.length || 0));
 </script>
 
 <div class="min-h-screen bg-background">
@@ -26,93 +28,184 @@
         </div>
     </section>
 
-    <section id="destinations" class="py-12 px-8">
+    <!-- Seção: Aguardando Aprovação -->
+    {#if data.pending && data.pending.length > 0}
+    <section class="py-8 px-8">
         <div class="max-w-7xl mx-auto">
-            {#if data.destinations && data.destinations.length > 0}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {#each data.destinations as destination (destination.id)}
-                        <Card class="relative overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col group">
-                            
-                            <a href={`/destination/${destination.slug}`} class="h-64 bg-gray-200 dark:bg-gray-800 overflow-hidden block">
-                                {#if destination.images && destination.images.length > 0}
-                                    <img
-                                        src={destination.images[0].url}
-                                        alt={destination.name}
-                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                {:else}
-                                    <div class="w-full h-full flex items-center justify-center text-muted-foreground">
-                                        Sem imagem
-                                    </div>
-                                {/if}
+            <div class="flex items-center gap-3 mb-8">
+                <span class="inline-block w-3 h-3 rounded-full bg-yellow-500"></span>
+                <h2 class="text-2xl font-bold">Aguardando Aprovação</h2>
+                <span class="text-sm font-semibold text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                    {data.pending.length}
+                </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {#each data.pending as destination (destination.id)}
+                    {@const totalImagens = destination.images?.length || 0}
+                    <Card class="relative overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col group border-yellow-500/30">
+                        <a href={`/destination/${destination.slug}`} class="h-64 bg-gray-200 dark:bg-gray-800 overflow-hidden block relative">
+                            {#if totalImagens > 0}
+                                <img
+                                    src={destination.images[0].url}
+                                    alt={destination.name}
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                            {:else}
+                                <div class="w-full h-full flex items-center justify-center text-muted-foreground">
+                                    Sem imagem
+                                </div>
+                            {/if}
+                            <span class="absolute top-3 right-3 text-xs font-bold uppercase tracking-wide bg-yellow-500 text-black px-3 py-1 rounded-full">
+                                Pendente
+                            </span>
+                        </a>
+
+                        <CardContent class="flex-1 flex flex-col pt-6">
+                            {#if destination.categories && destination.categories.length > 0}
+                                <span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1 mb-3 w-fit">
+                                    {destination.categories[0].name || destination.categories[0]}
+                                </span>
+                            {/if}
+
+                            <a href={`/destination/${destination.slug}`} class="hover:underline">
+                                <h3 class="text-xl font-bold line-clamp-1 mb-2" title={destination.name}>
+                                    {destination.name}
+                                </h3>
                             </a>
 
-                            <CardContent class="flex-1 flex flex-col pt-6">
-                                {#if destination.categories && destination.categories.length > 0}
-                                    <span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1 mb-3 w-fit">
-                                        {destination.categories[0].name || destination.categories[0]}
-                                    </span>
-                                {/if}
+                            {#if destination.description}
+                                <p class="text-sm text-muted-foreground line-clamp-3 mb-6 flex-1" title={destination.description}>
+                                    {destination.description}
+                                </p>
+                            {/if}
 
-                                <a href={`/destination/${destination.slug}`} class="hover:underline">
-                                    <h3 class="text-xl font-bold line-clamp-1 mb-2" title={destination.name}>
-                                        {destination.name}
-                                    </h3>
+                            <div class="pt-4 border-t border-border mt-auto flex items-center justify-between">
+                                <a 
+                                    href={`/destination/${destination.slug}`} 
+                                    class="text-sm font-bold uppercase tracking-wide text-foreground group-hover:text-primary flex items-center transition-all"
+                                >
+                                    Visualizar
+                                    <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
                                 </a>
-
-                                {#if destination.description}
-                                    <p class="text-sm text-muted-foreground line-clamp-3 mb-6 flex-1" title={destination.description}>
-                                        {destination.description}
-                                    </p>
-                                {/if}
-
-                                <div class="pt-4 border-t border-border mt-auto flex items-center justify-between">
-                                    <a 
-                                        href={`/destination/${destination.slug}`} 
-                                        class="text-sm font-bold uppercase tracking-wide text-foreground group-hover:text-primary flex items-center transition-all"
-                                    >
-                                        Visualizar
-                                        <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
-                                    </a>
-                                    
-                                    <Button 
-                                        href={`/destination/create/${destination.id}`} 
-                                        variant="secondary" 
-                                        size="sm"
-                                    >
-                                        Editar
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    {/each}
-                </div>
-            {:else}
-                <div class="text-center py-24 bg-gray-50 dark:bg-gray-900 rounded-xl border border-dashed border-gray-300 dark:border-gray-800">
-                    <p class="text-xl text-foreground font-medium mb-2">Você ainda não cadastrou nenhum destino.</p>
-                    <p class="text-muted-foreground mb-6">Comece a compartilhar seus lugares favoritos com o mundo.</p>
-                    <Button href="/destination/create" size="lg">
-                        Criar Meu Primeiro Destino
-                    </Button>
-                </div>
-            {/if}
+                                
+                                <Button 
+                                    href={`/destination/create/${destination.id}`} 
+                                    variant="secondary" 
+                                    size="sm"
+                                >
+                                    Editar
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                {/each}
+            </div>
         </div>
     </section>
+    {/if}
+
+    <!-- Seção: Online -->
+    {#if data.approved && data.approved.length > 0}
+    <section class="py-8 px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="inline-block w-3 h-3 rounded-full bg-green-500"></span>
+                <h2 class="text-2xl font-bold">Online</h2>
+                <span class="text-sm font-semibold text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                    {data.approved.length}
+                </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {#each data.approved as destination (destination.id)}
+                    {@const totalImagens = destination.images?.length || 0}
+                    <Card class="relative overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col group">
+                        <a href={`/destination/${destination.slug}`} class="h-64 bg-gray-200 dark:bg-gray-800 overflow-hidden block">
+                            {#if totalImagens > 0}
+                                <img
+                                    src={destination.images[0].url}
+                                    alt={destination.name}
+                                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                            {:else}
+                                <div class="w-full h-full flex items-center justify-center text-muted-foreground">
+                                    Sem imagem
+                                </div>
+                            {/if}
+                        </a>
+
+                        <CardContent class="flex-1 flex flex-col pt-6">
+                            {#if destination.categories && destination.categories.length > 0}
+                                <span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1 mb-3 w-fit">
+                                    {destination.categories[0].name || destination.categories[0]}
+                                </span>
+                            {/if}
+
+                            <a href={`/destination/${destination.slug}`} class="hover:underline">
+                                <h3 class="text-xl font-bold line-clamp-1 mb-2" title={destination.name}>
+                                    {destination.name}
+                                </h3>
+                            </a>
+
+                            {#if destination.description}
+                                <p class="text-sm text-muted-foreground line-clamp-3 mb-6 flex-1" title={destination.description}>
+                                    {destination.description}
+                                </p>
+                            {/if}
+
+                            <div class="pt-4 border-t border-border mt-auto flex items-center justify-between">
+                                <a 
+                                    href={`/destination/${destination.slug}`} 
+                                    class="text-sm font-bold uppercase tracking-wide text-foreground group-hover:text-primary flex items-center transition-all"
+                                >
+                                    Visualizar
+                                    <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
+                                </a>
+                                
+                                <Button 
+                                    href={`/destination/create/${destination.id}`} 
+                                    variant="secondary" 
+                                    size="sm"
+                                >
+                                    Editar
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                {/each}
+            </div>
+        </div>
+    </section>
+    {/if}
+
+    <!-- Empty State -->
+    {#if totalDestinos === 0}
+    <section class="py-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center py-24 bg-gray-50 dark:bg-gray-900 rounded-xl border border-dashed border-gray-300 dark:border-gray-800">
+                <p class="text-xl text-foreground font-medium mb-2">Você ainda não cadastrou nenhum destino.</p>
+                <p class="text-muted-foreground mb-6">Comece a compartilhar seus lugares favoritos com o mundo.</p>
+                <Button href="/destination/create" size="lg">
+                    Criar Meu Primeiro Destino
+                </Button>
+            </div>
+        </div>
+    </section>
+    {/if}
 
     <section class="py-12 px-8 border-t border-border/50">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-2 lg:grid-cols-3 gap-12">
                 <div class="text-center">
-                    <p class="text-5xl font-bold mb-2">{data.destinations?.length || 0}</p>
+                    <p class="text-5xl font-bold mb-2">{totalDestinos}</p>
                     <p class="text-muted-foreground">Destinos Registrados</p>
                 </div>
                 <div class="text-center">
-                    <p class="text-5xl font-bold mb-2">Ativo</p> 
-                    <p class="text-muted-foreground">Status da Conta</p>
+                    <p class="text-5xl font-bold mb-2">{data.pending?.length || 0}</p>
+                    <p class="text-muted-foreground">Pendentes</p>
                 </div>
                 <div class="text-center col-span-2 lg:col-span-1">
-                    <p class="text-5xl font-bold mb-2">⭐ 5.0</p>
-                    <p class="text-muted-foreground">Avaliação Média</p>
+                    <p class="text-5xl font-bold mb-2">{data.approved?.length || 0}</p>
+                    <p class="text-muted-foreground">Online</p>
                 </div>
             </div>
         </div>
