@@ -32,11 +32,19 @@ export const load: PageServerLoad = async ({ params }) => {
         throw error(404, "Destino não encontrado");
     }
 
+    const reviews = result.reviews || [];
+    const totalReviews = reviews.length;
+    const averageRating = totalReviews > 0 
+        ? Number((reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1))
+        : null;
+
     const formattedDestination = {
         ...result,
         categories: result.categories.map(c => c.name),
+        averageRating,
+        totalReviews,
         // Simplificando o usuário da review para não expor dados sensíveis
-        reviews: result.reviews?.map(r => ({
+        reviews: reviews.map(r => ({
             id: r.id,
             rating: r.rating,
             comment: r.comment,
@@ -44,7 +52,7 @@ export const load: PageServerLoad = async ({ params }) => {
             usuario: {
                 nome: r.usuario.nome
             }
-        })) || []
+        }))
     };
 
     return {

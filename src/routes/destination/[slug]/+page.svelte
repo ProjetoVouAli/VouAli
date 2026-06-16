@@ -1,6 +1,10 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
+	import { Button } from "$lib/components/ui/button";
+	import * as Card from "$lib/components/ui/card";
+	import { Textarea } from "$lib/components/ui/textarea";
+	import { Label } from "$lib/components/ui/label";
 
 	let { data, form }: { data: PageData, form: ActionData } = $props();
 
@@ -77,10 +81,21 @@
 					<!-- Title -->
 					<div>
 						<h1 class="text-6xl font-bold mb-4 leading-tight">
-						{destination.name}
-					</h1>
-					<p class="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-						{destination.description || 'Conheça este incrível destino.'}
+							{destination.name}
+						</h1>
+						
+						{#if destination.totalReviews > 0}
+							<div class="flex items-center gap-2 mb-6">
+								<div class="flex text-primary text-xl">
+									{'★'.repeat(Math.round(destination.averageRating || 0))}{'☆'.repeat(5 - Math.round(destination.averageRating || 0))}
+								</div>
+								<span class="text-xl font-bold ml-2">{destination.averageRating}</span>
+								<span class="text-muted-foreground text-sm mt-1">({destination.totalReviews} {destination.totalReviews === 1 ? 'avaliação' : 'avaliações'})</span>
+							</div>
+						{/if}
+
+						<p class="text-xl text-muted-foreground leading-relaxed max-w-2xl">
+							{destination.description || 'Conheça este incrível destino.'}
 						</p>
 					</div>
 
@@ -166,17 +181,21 @@
 					{#if destination.reviews && destination.reviews.length > 0}
 						<div class="space-y-6">
 							{#each destination.reviews as review}
-								<div class="p-6 border border-border bg-card text-card-foreground shadow-sm">
-									<div class="flex items-center justify-between mb-4">
-										<div class="font-bold">{review.usuario.nome}</div>
-										<div class="text-primary font-bold">
-											{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+								<Card.Root>
+									<Card.Header class="pb-2">
+										<div class="flex items-center justify-between">
+											<Card.Title class="text-lg">{review.usuario.nome}</Card.Title>
+											<div class="text-primary font-bold text-lg">
+												{'★'.repeat(review.rating)}<span class="text-muted-foreground">{'☆'.repeat(5 - review.rating)}</span>
+											</div>
 										</div>
-									</div>
-									<p class="text-muted-foreground whitespace-pre-line">
-										{review.comment || 'Nenhum comentário.'}
-									</p>
-								</div>
+									</Card.Header>
+									<Card.Content>
+										<p class="text-muted-foreground whitespace-pre-line leading-relaxed">
+											{review.comment || 'Nenhum comentário.'}
+										</p>
+									</Card.Content>
+								</Card.Root>
 							{/each}
 						</div>
 					{:else}
@@ -185,65 +204,70 @@
 
 					<!-- Review Form -->
 					{#if data.user}
-						<div class="mt-12 p-8 border-2 border-primary bg-card/50">
-							<h4 class="text-xl font-bold mb-6 uppercase tracking-wide">Deixe sua avaliação</h4>
-							{#if form?.success}
-								<div class="p-4 mb-6 bg-green-100 text-green-800 border border-green-300 font-bold">
-									Avaliação enviada com sucesso! Obrigado.
-								</div>
-							{/if}
-							{#if form?.message && !form?.success}
-								<div class="p-4 mb-6 bg-red-100 text-red-800 border border-red-300 font-bold">
-									{form.message}
-								</div>
-							{/if}
-
-							<form method="POST" action="?/submitReview" use:enhance class="space-y-6">
-								<div>
-									<span class="block text-sm font-bold uppercase tracking-wide mb-2">Sua Nota</span>
-									<div class="flex gap-2">
-										{#each [1, 2, 3, 4, 5] as star}
-											<button
-												type="button"
-												class="text-3xl transition-colors {star <= (ratingHover || ratingSelected) ? 'text-primary' : 'text-muted'}"
-												onmouseenter={() => ratingHover = star}
-												onmouseleave={() => ratingHover = 0}
-												onclick={() => ratingSelected = star}
-											>
-												★
-											</button>
-										{/each}
+						<Card.Root class="mt-12 border-2 border-primary bg-card/50">
+							<Card.Header>
+								<Card.Title class="text-xl uppercase tracking-wide">Deixe sua avaliação</Card.Title>
+							</Card.Header>
+							<Card.Content>
+								{#if form?.success}
+									<div class="p-4 mb-6 bg-green-100 text-green-800 border border-green-300 font-bold rounded-md">
+										Avaliação enviada com sucesso! Obrigado.
 									</div>
-									<input type="hidden" name="rating" value={ratingSelected} required />
-								</div>
-								
-								<div>
-									<label for="comment" class="block text-sm font-bold uppercase tracking-wide mb-2">Comentário (opcional)</label>
-									<textarea 
-										id="comment" 
-										name="comment" 
-										rows="4" 
-										class="w-full p-4 border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-										placeholder="Conte sobre sua experiência..."
-									></textarea>
-								</div>
+								{/if}
+								{#if form?.message && !form?.success}
+									<div class="p-4 mb-6 bg-red-100 text-red-800 border border-red-300 font-bold rounded-md">
+										{form.message}
+									</div>
+								{/if}
 
-								<button
-									type="submit"
-									disabled={ratingSelected === 0}
-									class="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-								>
-									Enviar Avaliação
-								</button>
-							</form>
-						</div>
+								<form method="POST" action="?/submitReview" use:enhance class="space-y-6">
+									<div class="space-y-2">
+										<Label class="text-sm font-bold uppercase tracking-wide">Sua Nota</Label>
+										<div class="flex gap-2">
+											{#each [1, 2, 3, 4, 5] as star}
+												<button
+													type="button"
+													class="text-3xl transition-colors focus:outline-none {star <= (ratingHover || ratingSelected) ? 'text-primary' : 'text-muted-foreground/30'}"
+													onmouseenter={() => ratingHover = star}
+													onmouseleave={() => ratingHover = 0}
+													onclick={() => ratingSelected = star}
+												>
+													★
+												</button>
+											{/each}
+										</div>
+										<input type="hidden" name="rating" value={ratingSelected} required />
+									</div>
+									
+									<div class="space-y-2">
+										<Label for="comment" class="text-sm font-bold uppercase tracking-wide">Comentário (opcional)</Label>
+										<Textarea 
+											id="comment" 
+											name="comment" 
+											rows={4} 
+											placeholder="Conte sobre sua experiência..."
+										/>
+									</div>
+
+									<Button
+										type="submit"
+										disabled={ratingSelected === 0}
+										class="w-full sm:w-auto px-8 py-6 font-bold text-sm uppercase tracking-wide"
+									>
+										Enviar Avaliação
+									</Button>
+								</form>
+							</Card.Content>
+						</Card.Root>
 					{:else}
-						<div class="mt-12 p-8 border border-border bg-muted/50 text-center">
-							<p class="mb-4 text-muted-foreground">Você precisa estar logado para avaliar este destino.</p>
-							<a href="/login" class="inline-block px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity">
-								Fazer Login
-							</a>
-						</div>
+						<Card.Root class="mt-12 bg-muted/50 text-center border-dashed">
+							<Card.Content class="pt-6 space-y-4">
+								<p class="text-muted-foreground">Você precisa estar logado para avaliar este destino.</p>
+								<Button href="/login" class="px-8 font-bold uppercase tracking-wide">
+									Fazer Login
+								</Button>
+							</Card.Content>
+						</Card.Root>
 					{/if}
 				</div>
 
