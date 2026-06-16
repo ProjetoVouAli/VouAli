@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, Ma
 import { DestinationCategory } from './DestinationCategory';
 import { DestinationImage } from './DestinationImage';
 import { Usuario } from './Usuario';
+import { Review } from './Review';
 
 @Entity('destinations')
 export class Destination {
@@ -73,4 +74,7 @@ export class Destination {
   @ManyToOne(() => Usuario)
   @JoinColumn({ name: 'created_by' })
   createdBy!: Usuario;
+
+  @OneToMany(() => Review, (review) => review.destination)
+  reviews!: Review[];
 }
