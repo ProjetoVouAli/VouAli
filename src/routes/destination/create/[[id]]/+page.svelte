@@ -9,6 +9,7 @@
     import { Textarea } from '$lib/components/ui/textarea';
     import { Button, buttonVariants } from '$lib/components/ui/button';
     import { Separator } from '$lib/components/ui/separator';
+import { browser } from '$app/environment';
 import MapPicker from '$lib/components/map/MapPicker.svelte';
 
     let { data } = $props();
@@ -265,11 +266,17 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
             <input type="hidden" name="latitude" value={$formData.latitude ?? ''} />
             <input type="hidden" name="longitude" value={$formData.longitude ?? ''} />
 
+            {#if browser}
             <MapPicker
                 bind:latitude={mapLat}
                 bind:longitude={mapLng}
                 searchQuery={searchQuery}
             />
+            {:else}
+            <div class="w-full h-72 md:h-80 rounded-lg border border-border bg-muted flex items-center justify-center text-sm text-muted-foreground">
+                Carregando mapa...
+            </div>
+            {/if}
         </div>
 
         <Separator class="my-6" />
