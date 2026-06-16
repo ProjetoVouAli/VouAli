@@ -86,24 +86,33 @@
                                             {/if}
                                         </div>
 
-                                        <!-- Actions -->
-                                        <div class="flex items-center gap-3">
-                                            <form method="POST" action="?/approve" use:enhance={() => {
-                                                return async ({ result }) => {
-                                                    if (result.type === 'success') {
-                                                        flash.set('Destino aprovado com sucesso!');
-                                                        await goto('/apuracoes');
-                                                    }
-                                                };
-                                            }}>
-                                                <input type="hidden" name="id" value={destination.id} />
-                                                <Button type="submit" variant="default" size="sm">
-                                                    Aprovar
-                                                </Button>
-                                            </form>
+                                        <!-- Aprovar -->
+                                        <div class="border-t border-border pt-4 mt-4">
+                                            <div class="flex items-center justify-between">
+                                                <form method="POST" action="?/approve" use:enhance={() => {
+                                                    return async ({ result }) => {
+                                                        if (result.type === 'success') {
+                                                            flash.set('Destino aprovado com sucesso!');
+                                                            await goto('/apuracoes');
+                                                        }
+                                                    };
+                                                }}>
+                                                    <input type="hidden" name="id" value={destination.id} />
+                                                    <Button type="submit" variant="default" size="sm">
+                                                        Aprovar
+                                                    </Button>
+                                                </form>
 
-                                            <div class="flex items-start gap-2">
-                                            <form method="POST" action="?/reject" use:enhance={(data) => {
+                                                <a href={`/destination/create/${destination.id}`}
+                                                   class="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                                                    Editar →
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        <!-- Recusar -->
+                                        <div class="border-t border-destructive/20 pt-4 mt-2">
+                                            <form method="POST" action="?/reject" use:enhance={(formData) => {
                                                 loading = true;
                                                 return async ({ result }) => {
                                                     loading = false;
@@ -112,25 +121,24 @@
                                                         await goto('/apuracoes');
                                                     }
                                                 };
-                                            }} class="flex-1">
+                                            }}>
                                                 <input type="hidden" name="id" value={destination.id} />
-                                                <textarea
-                                                    name="reason"
-                                                    placeholder="Motivo da recusa..."
-                                                    required
-                                                    class="w-full px-3 py-2 text-sm border-2 border-destructive/50 bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-destructive mb-2 resize-none"
-                                                    rows="2"
-                                                ></textarea>
-                                                <Button type="submit" variant="destructive" size="sm">
-                                                    Recusar
-                                                </Button>
+                                                <label class="block text-xs font-bold uppercase tracking-wide text-destructive mb-2">
+                                                    Motivo da recusa
+                                                </label>
+                                                <div class="flex gap-2">
+                                                    <textarea
+                                                        name="reason"
+                                                        placeholder="Descreva o motivo da recusa..."
+                                                        required
+                                                        class="flex-1 px-3 py-2 text-sm border-2 border-destructive/30 bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-destructive resize-none"
+                                                        rows="2"
+                                                    ></textarea>
+                                                    <Button type="submit" variant="destructive" size="default" class="self-end">
+                                                        Recusar
+                                                    </Button>
+                                                </div>
                                             </form>
-                                            </div>
-
-                                            <a href={`/destination/create/${destination.id}`} 
-                                               class="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors ml-auto">
-                                                Editar →
-                                            </a>
                                         </div>
                                     </div>
                                 </div>
