@@ -46,4 +46,12 @@ declare global {
 	}
 }
 
+declare module 'svelte/elements' {
+    export interface HTMLAttributes<T> {
+        // Ensina ao TypeScript que o IMask dispara esses eventos no HTML
+        'onaccept'?: (event: any) => void;
+        'oncomplete'?: (event: any) => void;
+    }
+}
+
 export {};

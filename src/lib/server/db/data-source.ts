@@ -7,6 +7,8 @@ import { Destination } from './entities/Destination';
 import { DestinationImage } from './entities/DestinationImage';
 import { DestinationCategory } from './entities/DestinationCategory';
 import { Usuario } from './entities/Usuario';
+import { SolicitacaoParceiro } from './entities/SolicitacaoParceiro';
+import { TentativaSolicitacaoParceiro } from './entities/TentativaSolicitacaoParceiro';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -18,6 +20,8 @@ export const AppDataSource = new DataSource({
     DestinationImage, 
     DestinationCategory, 
     Usuario,
+    SolicitacaoParceiro,
+    TentativaSolicitacaoParceiro,
   ],
   subscribers: [],
   migrations: [],
