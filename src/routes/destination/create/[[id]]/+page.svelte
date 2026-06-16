@@ -46,9 +46,9 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
         }
     });
 
-    let reverseTimer;
+    let reverseTimer: ReturnType<typeof setTimeout> | undefined;
 
-    async function reverseGeocode(lat, lng) {
+    async function reverseGeocode(lat: number, lng: number) {
         try {
             const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt`;
             const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
@@ -75,7 +75,7 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
         } catch {}
     }
 
-    function onPinMoved(lat, lng) {
+    function onPinMoved(lat: number, lng: number) {
         clearTimeout(reverseTimer);
         reverseTimer = setTimeout(() => reverseGeocode(lat, lng), 500);
     }

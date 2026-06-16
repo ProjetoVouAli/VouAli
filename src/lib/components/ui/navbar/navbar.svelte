@@ -53,7 +53,7 @@
 				Explorar
 			</a>
 
-			{#if user && user.papeis?.includes('ADMINISTRADOR')}
+			{#if user && user.papeis?.includes('ADMINISTRADOR' as any)}
 			<a href="/apuracoes" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Apurações
 			</a>

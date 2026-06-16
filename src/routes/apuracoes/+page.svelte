@@ -10,8 +10,8 @@
 
     let loading = $state(false);
 
-    function formatDate(dateStr: string): string {
-        const d = new Date(dateStr);
+    function formatDate(dateStr: Date | string): string {
+        const d = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
         return d.toLocaleDateString('pt-BR', {
             day: '2-digit', month: 'long', year: 'numeric',
             hour: '2-digit', minute: '2-digit'
