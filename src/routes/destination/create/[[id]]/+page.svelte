@@ -34,7 +34,7 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
     let mapLng = $state($formData.longitude ?? -43.1729);
 
     let searchQuery = $derived.by(() => {
-        const parts = [$formData.neighborhood, $formData.city, $formData.state, $formData.name].filter(Boolean);
+        const parts = [$formData.address, $formData.neighborhood, $formData.city, $formData.state, $formData.name].filter(Boolean);
         return parts.join(', ');
     });
 
@@ -251,6 +251,16 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
                 <Form.FieldErrors />
             </Form.Field>
         </div>
+
+        <Form.Field {form} name="address" class="space-y-2">
+            <Form.Control>
+                {#snippet children({ props })}
+                    <Form.Label>Logradouro (Rua, número)</Form.Label>
+                    <Input {...props} bind:value={$formData.address} placeholder="Rua, número, complemento..." />
+                {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+        </Form.Field>
 
         <div class="space-y-4">
             <div class="flex items-center gap-2">

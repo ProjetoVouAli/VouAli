@@ -21,7 +21,6 @@
         if (!browser) return;
 
         const maplibregl = await import('maplibre-gl');
-        // CSS is auto-loaded by maplibre-gl when using import
 
         map = new maplibregl.Map({
             container: mapContainer,
@@ -33,17 +32,11 @@
         map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
         const el = document.createElement('div');
-        el.style.cssText = 'width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);cursor:grab;';
+        el.style.cssText = 'width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);pointer-events:none;';
 
-        marker = new maplibregl.Marker({ element: el, draggable: true })
+        marker = new maplibregl.Marker({ element: el })
             .setLngLat([longitude || -43.1729, latitude || -22.9068])
             .addTo(map);
-
-        marker.on('dragend', () => {
-            const lngLat = marker.getLngLat();
-            latitude = lngLat.lat;
-            longitude = lngLat.lng;
-        });
 
         map.on('click', (e: any) => {
             marker.setLngLat(e.lngLat);
@@ -66,14 +59,11 @@
         };
     });
 
-    // Atualiza marcador quando lat/lng muda externamente
     $effect(() => {
         if (!marker || latitude == null || longitude == null) return;
         marker.setLngLat([longitude, latitude]);
-        map?.setCenter([longitude, latitude]);
     });
 
-    // Geocoding
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 
     $effect(() => {
@@ -85,19 +75,26 @@
             geocoding = true;
             geocodeError = '';
             try {
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&accept-language=pt`;
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&accept-language=pt&polygon_geojson=1`;
                 const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
                 const data = await res.json();
                 if (data && data.length > 0) {
                     const lon = parseFloat(data[0].lon);
                     const lat = parseFloat(data[0].lat);
                     marker?.setLngLat([lon, lat]);
-                    map?.setCenter([lon, lat]);
-                    map?.setZoom(15);
                     latitude = lat;
                     longitude = lon;
+
+                    // Ajusta zoom para enquadrar a área encontrada
+                    if (data[0].boundingbox) {
+                        const [south, north, west, east] = data[0].boundingbox.map(parseFloat);
+                        map?.fitBounds([[west, south], [east, north]], { padding: 60, maxZoom: 17 });
+                    } else {
+                        map?.setCenter([lon, lat]);
+                        map?.setZoom(15);
+                    }
                 } else {
-                    geocodeError = 'Local não encontrado. Ajuste o pin no mapa.';
+                    geocodeError = 'Local não encontrado. Clique no mapa para posicionar o pin.';
                 }
             } catch {
                 geocodeError = 'Erro ao buscar local.';
@@ -134,7 +131,7 @@
         </span>
         <span class="flex items-center gap-1">
             <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Arraste o pin ou clique no mapa
+            Clique no mapa para posicionar o pin
         </span>
     </div>
 </div>

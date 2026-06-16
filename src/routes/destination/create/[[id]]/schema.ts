@@ -10,6 +10,7 @@ export const destinationSchema = z.object({
     neighborhood: z.string().min(2, 'Bairro é obrigatório'),
     city: z.string().min(2, 'Cidade é obrigatória'),
     state: z.string().length(2, 'Use a sigla de 2 letras'),
+    address: z.string().optional().default(''),
     latitude: z.coerce.number().min(-90).max(90, 'Latitude inválida'),
     longitude: z.coerce.number().min(-180).max(180, 'Longitude inválida'),
     active: z.boolean(),

@@ -29,6 +29,9 @@ export class Destination {
   @Column({ type: 'text', default: 'RJ' })
   state!: string;
 
+  @Column({ type: 'text', nullable: true })
+  address!: string | null;
+
   @Column({ type: 'decimal', precision: 10, scale: 8 })
   latitude!: number;
 
