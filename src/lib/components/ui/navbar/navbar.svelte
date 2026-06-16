@@ -54,7 +54,7 @@
 			</a>
 
 			{#if user && user.papeis?.includes('ADMINISTRADOR' as any)}
-			<a href="/apuracoes" class="text-sm font-medium hover:text-muted-foreground transition-colors">
+			<a href="/apuracoes_destinos" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Apurações
 			</a>
 			{/if}

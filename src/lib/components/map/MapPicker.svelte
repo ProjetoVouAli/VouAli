@@ -10,7 +10,7 @@
 
     let { latitude = $bindable(-22.9068), longitude = $bindable(-43.1729), searchQuery = '', onPinMoved }: Props = $props();
 
-    let mapContainer: HTMLDivElement;
+    let mapContainer: HTMLDivElement | undefined = $state();
     let mapReady = $state(false);
     let geocoding = $state(false);
     let geocodeError = $state('');
@@ -35,7 +35,7 @@
         const startLat = Number(latitude) || -22.9068;
 
         map = new maplibregl.Map({
-            container: mapContainer,
+            container: mapContainer!,
             style: 'https://tiles.openfreemap.org/styles/liberty',
             center: [startLng, startLat],
             zoom: 12,
