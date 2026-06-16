@@ -9,6 +9,7 @@
     import { Textarea } from '$lib/components/ui/textarea';
     import { Button, buttonVariants } from '$lib/components/ui/button';
     import { Separator } from '$lib/components/ui/separator';
+import MapPicker from '$lib/components/map/MapPicker.svelte';
 
     let { data } = $props();
 
@@ -28,6 +29,22 @@
     let imageFiles = $state<File[]>([]);
     let previewUrls = $state<string[]>([]);
     let isDragging = $state(false);
+
+    let mapLat = $state($formData.latitude ?? -22.9068);
+    let mapLng = $state($formData.longitude ?? -43.1729);
+
+    let searchQuery = $derived.by(() => {
+        const parts = [$formData.neighborhood, $formData.city, $formData.state, $formData.name].filter(Boolean);
+        return parts.join(', ');
+    });
+
+    // Sincroniza posição do mapa com o formulário
+    $effect(() => {
+        if (mapLat != null && mapLng != null) {
+            $formData.latitude = mapLat;
+            $formData.longitude = mapLng;
+        }
+    });
 
     let suggestions = $derived(
         tagInput.trim()
@@ -235,26 +252,24 @@
             </Form.Field>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Form.Field {form} name="latitude" class="space-y-2">
-                <Form.Control>
-                    {#snippet children({ props })}
-                        <Form.Label>Latitude</Form.Label>
-                        <Input {...props} type="number" step="any" bind:value={$formData.latitude} />
-                    {/snippet}
-                </Form.Control>
-                <Form.FieldErrors />
-            </Form.Field>
+        <div class="space-y-4">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 rounded-full bg-primary"></span>
+                <h3 class="text-lg font-semibold">Selecione no Mapa</h3>
+            </div>
+            <p class="text-sm text-muted-foreground -mt-2">
+                Preencha os campos de endereço acima e o mapa ajusta automaticamente. Arraste o pin para a posição exata.
+            </p>
 
-            <Form.Field {form} name="longitude" class="space-y-2">
-                <Form.Control>
-                    {#snippet children( {props} )}
-                        <Form.Label>Longitude</Form.Label>
-                        <Input {...props} type="number" step="any" bind:value={$formData.longitude} />
-                    {/snippet}
-                </Form.Control>
-                <Form.FieldErrors />
-            </Form.Field>
+            <!-- Hidden fields para envio do formulário -->
+            <input type="hidden" name="latitude" value={$formData.latitude ?? ''} />
+            <input type="hidden" name="longitude" value={$formData.longitude ?? ''} />
+
+            <MapPicker
+                bind:latitude={mapLat}
+                bind:longitude={mapLng}
+                searchQuery={searchQuery}
+            />
         </div>
 
         <Separator class="my-6" />
