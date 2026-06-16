@@ -1,7 +1,6 @@
 import { AppDataSource } from "$lib/server/db/data-source";
 import { Destination } from "$lib/server/db/entities/Destination";
 import { Review } from "$lib/server/db/entities/Review";
-import { Usuario } from "$lib/server/db/entities/Usuario";
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 
@@ -13,10 +12,7 @@ import type { PageServerLoad, Actions } from "./$types";
  * - Mostra detalhes completos do destino
  * - Usuário é carregado do layout global
  */
-export const load: PageServerLoad = async ({ params, locals }) => {
-    // ✅ Lazy Loading: Carrega usuário se existir (opcional nesta página)
-    const user = await locals.authUser();
-
+export const load: PageServerLoad = async ({ params }) => {
     const destinationRepo = AppDataSource.getRepository(Destination);
 
     const result = await destinationRepo.findOne({
@@ -53,22 +49,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
     return {
         destination: structuredClone(formattedDestination),
-        user,
     };
 };
 
 export const actions: Actions = {
     submitReview: async ({ request, locals, params }) => {
-        const user = await locals.authUser();
-        if (!user) {
-            return fail(401, { message: "Você precisa estar logado para avaliar." });
-        }
-
-        const usuarioRepo = AppDataSource.getRepository(Usuario);
-        const dbUser = await usuarioRepo.findOne({ where: { uid: user.uid } });
-
+        const dbUser = await locals.databaseUser();
+        
         if (!dbUser) {
-            return fail(401, { message: "Usuário não encontrado no banco de dados." });
+            return fail(401, { message: "Você precisa estar logado para avaliar." });
         }
 
         const formData = await request.formData();
