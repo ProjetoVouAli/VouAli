@@ -9,6 +9,7 @@ import { DestinationCategory } from './entities/DestinationCategory';
 import { Usuario } from './entities/Usuario';
 import { SolicitacaoParceiro } from './entities/SolicitacaoParceiro';
 import { TentativaSolicitacaoParceiro } from './entities/TentativaSolicitacaoParceiro';
+import { Review } from './entities/Review';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -22,6 +23,7 @@ export const AppDataSource = new DataSource({
     Usuario,
     SolicitacaoParceiro,
     TentativaSolicitacaoParceiro,
+    Review,
   ],
   subscribers: [],
   migrations: [],

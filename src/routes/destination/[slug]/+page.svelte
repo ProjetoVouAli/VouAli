@@ -1,11 +1,15 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
+	import { enhance } from '$app/forms';
 
-	let { data }: { data: PageData } = $props();
+	let { data, form }: { data: PageData, form: ActionData } = $props();
 
 	const destination = $derived(data.destination);
 	const images = $derived(destination?.images || []);
 	let currentImageIndex = $state(0);
+	
+	let ratingHover = $state(0);
+	let ratingSelected = $state(0);
 
 	function nextImage() {
 		currentImageIndex = (currentImageIndex + 1) % images.length;
@@ -152,6 +156,96 @@
 						</div>
 					</div>
 				{/if}
+
+				<!-- Reviews Section -->
+				<div class="border-t border-border pt-16 space-y-8">
+					<h3 class="text-2xl font-bold uppercase tracking-wide text-center">
+						Avaliações
+					</h3>
+
+					{#if destination.reviews && destination.reviews.length > 0}
+						<div class="space-y-6">
+							{#each destination.reviews as review}
+								<div class="p-6 border border-border bg-card text-card-foreground shadow-sm">
+									<div class="flex items-center justify-between mb-4">
+										<div class="font-bold">{review.usuario.nome}</div>
+										<div class="text-primary font-bold">
+											{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+										</div>
+									</div>
+									<p class="text-muted-foreground whitespace-pre-line">
+										{review.comment || 'Nenhum comentário.'}
+									</p>
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<p class="text-center text-muted-foreground">Seja o primeiro a avaliar este destino!</p>
+					{/if}
+
+					<!-- Review Form -->
+					{#if data.user}
+						<div class="mt-12 p-8 border-2 border-primary bg-card/50">
+							<h4 class="text-xl font-bold mb-6 uppercase tracking-wide">Deixe sua avaliação</h4>
+							{#if form?.success}
+								<div class="p-4 mb-6 bg-green-100 text-green-800 border border-green-300 font-bold">
+									Avaliação enviada com sucesso! Obrigado.
+								</div>
+							{/if}
+							{#if form?.message && !form?.success}
+								<div class="p-4 mb-6 bg-red-100 text-red-800 border border-red-300 font-bold">
+									{form.message}
+								</div>
+							{/if}
+
+							<form method="POST" action="?/submitReview" use:enhance class="space-y-6">
+								<div>
+									<span class="block text-sm font-bold uppercase tracking-wide mb-2">Sua Nota</span>
+									<div class="flex gap-2">
+										{#each [1, 2, 3, 4, 5] as star}
+											<button
+												type="button"
+												class="text-3xl transition-colors {star <= (ratingHover || ratingSelected) ? 'text-primary' : 'text-muted'}"
+												onmouseenter={() => ratingHover = star}
+												onmouseleave={() => ratingHover = 0}
+												onclick={() => ratingSelected = star}
+											>
+												★
+											</button>
+										{/each}
+									</div>
+									<input type="hidden" name="rating" value={ratingSelected} required />
+								</div>
+								
+								<div>
+									<label for="comment" class="block text-sm font-bold uppercase tracking-wide mb-2">Comentário (opcional)</label>
+									<textarea 
+										id="comment" 
+										name="comment" 
+										rows="4" 
+										class="w-full p-4 border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+										placeholder="Conte sobre sua experiência..."
+									></textarea>
+								</div>
+
+								<button
+									type="submit"
+									disabled={ratingSelected === 0}
+									class="px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									Enviar Avaliação
+								</button>
+							</form>
+						</div>
+					{:else}
+						<div class="mt-12 p-8 border border-border bg-muted/50 text-center">
+							<p class="mb-4 text-muted-foreground">Você precisa estar logado para avaliar este destino.</p>
+							<a href="/login" class="inline-block px-8 py-4 bg-primary text-primary-foreground font-bold text-sm uppercase tracking-wide hover:opacity-80 transition-opacity">
+								Fazer Login
+							</a>
+						</div>
+					{/if}
+				</div>
 
 				<!-- CTA Section -->
 				<div class="border-t border-border pt-16 text-center space-y-6">
