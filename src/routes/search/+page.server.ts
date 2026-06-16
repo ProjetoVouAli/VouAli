@@ -26,7 +26,8 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     // 1. Query builder com relacionamentos
     const qb = destinationRepo.createQueryBuilder("destination")
         .leftJoinAndSelect("destination.images", "image")
-        .leftJoinAndSelect("destination.categories", "category"); 
+        .leftJoinAndSelect("destination.categories", "category")
+        .andWhere("destination.status = :status", { status: 'approved' }); 
 
     // 2. Filtro de pesquisa
     if (searchParam) {
