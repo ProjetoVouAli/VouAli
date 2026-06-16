@@ -151,7 +151,6 @@ export const actions: Actions = {
             destinationRepo.merge(existingDestination, destinationData);
             existingDestination.categories = finalCategories;
 
-            // Se estava recusado, reenviar para aprovação
             if (existingDestination.status === 'rejected') {
                 existingDestination.status = 'pending';
                 existingDestination.rejectionReason = null;
