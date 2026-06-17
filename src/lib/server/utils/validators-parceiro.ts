@@ -1,4 +1,4 @@
-import { cpf } from 'cpf-cnpj-validator';
+import { cpf, cnpj } from 'cpf-cnpj-validator';
 
 /**
  * Validadores centralizados para formulário de parceiro
@@ -62,8 +62,8 @@ export function validateTelefone(telefone: string): ValidationResult {
  * Valida se o CNPJ é válido (básico - apenas formato)
  * CNPJ: 14 dígitos no formato XX.XXX.XXX/XXXX-XX
  */
-export function validateCNPJ(cnpj: string): ValidationResult {
-    const digitosApenasNumeros = cnpj.replace(/\D/g, '');
+export function validateCNPJ(cnpjStr: string): ValidationResult {
+    const digitosApenasNumeros = cnpjStr.replace(/\D/g, '');
     
     if (digitosApenasNumeros.length !== 14) {
         return {
@@ -72,8 +72,7 @@ export function validateCNPJ(cnpj: string): ValidationResult {
         };
     }
     
-    // Verificação simples: não pode ser todos números iguais
-    if (/^(\d)\1+$/.test(digitosApenasNumeros)) {
+    if (!cnpj.isValid(digitosApenasNumeros)) {
         return {
             valid: false,
             message: 'CNPJ inválido'
@@ -231,8 +230,8 @@ export function sanitizarEntrada(valor: string, tipo: 'nome' | 'email' | 'url' |
  * @param cnpj - CNPJ com ou sem formatação
  * @returns Resultado da validação
  */
-export function validateCNPJComDigito(cnpj: string): ValidationResult {
-    const digitosApenasNumeros = cnpj.replace(/\D/g, '');
+export function validateCNPJComDigito(valor: string): ValidationResult {
+    const digitosApenasNumeros = valor.replace(/\D/g, '');
 
     // Verificar comprimento
     if (digitosApenasNumeros.length !== 14) {
@@ -242,42 +241,10 @@ export function validateCNPJComDigito(cnpj: string): ValidationResult {
         };
     }
 
-    // Verificação simples: não pode ser todos números iguais
-    if (/^(\d)\1+$/.test(digitosApenasNumeros)) {
+    if (!cnpj.isValid(digitosApenasNumeros)) {
         return {
             valid: false,
-            message: 'CNPJ inválido'
-        };
-    }
-
-    // Cálculo do primeiro dígito verificador
-    let soma = 0;
-    let multiplicador = 5;
-    for (let i = 0; i < 8; i++) {
-        soma += parseInt(digitosApenasNumeros.charAt(i)) * multiplicador;
-        multiplicador -= 1;
-    }
-    let resto = soma % 11;
-    const primeiroDigito = resto < 2 ? 0 : 11 - resto;
-
-    // Cálculo do segundo dígito verificador
-    soma = 0;
-    multiplicador = 6;
-    for (let i = 0; i < 9; i++) {
-        soma += parseInt(digitosApenasNumeros.charAt(i)) * multiplicador;
-        multiplicador -= 1;
-    }
-    resto = soma % 11;
-    const segundoDigito = resto < 2 ? 0 : 11 - resto;
-
-    // Validar dígitos
-    if (
-        primeiroDigito !== parseInt(digitosApenasNumeros.charAt(12)) ||
-        segundoDigito !== parseInt(digitosApenasNumeros.charAt(13))
-    ) {
-        return {
-            valid: false,
-            message: 'CNPJ inválido'
+            message: 'O CNPJ informado é inválido.'
         };
     }
 
