@@ -53,6 +53,10 @@
 				Explorar
 			</a>
 
+			<a href="/parceiro" class="text-sm font-medium hover:text-muted-foreground transition-colors">
+				Parceria
+			</a>
+
 			{#if user && user.papeis?.includes('ADMINISTRADOR' as any)}
 			<a href="/apuracoes_destinos" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Apurações
