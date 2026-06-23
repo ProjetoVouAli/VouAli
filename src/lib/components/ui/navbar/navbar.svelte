@@ -8,7 +8,7 @@
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
 
-	let { initialUser: user } : {initialUser: Usuario | null} = $props();
+	let { initialUser: user }: { initialUser: Usuario | null } = $props();
 
 	let destinoOpen = $state(false);
 	let destinosTriggerRef = $state<HTMLButtonElement>(null!);
@@ -58,24 +58,27 @@
 			</a>
 
 			{#if user && user.papeis?.includes('ADMINISTRADOR' as any)}
-			<a href="/apuracoes_destinos" class="text-sm font-medium hover:text-muted-foreground transition-colors">
-				Apurações
-			</a>
+				<a
+					href="/apuracoes"
+					class="text-sm font-medium hover:text-muted-foreground transition-colors"
+				>
+					Apurações
+				</a>
 			{/if}
 
-			{#if user && user.papeis.find(u => u === 'PARCEIRO' || u === 'ADMINISTRADOR')}
-			<Popover.Root bind:open={destinoOpen}>
-				<Popover.Trigger bind:ref={destinosTriggerRef}>
-					{#snippet child({ props })}
-					<button
-							{...props}
-							role="combobox"
-							aria-expanded={destinoOpen}
-							class="text-sm font-medium hover:text-muted-foreground transition-colors inline-flex items-center gap-1"
-						>
-							Destinos
-							<ChevronsUpDown class="size-4 opacity-50" />
-						</button>
+			{#if user && user.papeis.find((u) => u === 'PARCEIRO' || u === 'ADMINISTRADOR')}
+				<Popover.Root bind:open={destinoOpen}>
+					<Popover.Trigger bind:ref={destinosTriggerRef}>
+						{#snippet child({ props })}
+							<button
+								{...props}
+								role="combobox"
+								aria-expanded={destinoOpen}
+								class="text-sm font-medium hover:text-muted-foreground transition-colors inline-flex items-center gap-1"
+							>
+								Destinos
+								<ChevronsUpDown class="size-4 opacity-50" />
+							</button>
 						{/snippet}
 					</Popover.Trigger>
 					<Popover.Content class="w-[180px] p-0" align="start">
@@ -83,16 +86,10 @@
 							<Command.List>
 								<Command.Empty>Nenhum destino encontrado.</Command.Empty>
 								<Command.Group>
-									<Command.Item
-										value="cadastrados"
-										onSelect={() => irPara('/inventory')}
-									>
+									<Command.Item value="cadastrados" onSelect={() => irPara('/inventory')}>
 										Cadastrados
 									</Command.Item>
-									<Command.Item
-										value="cadastrar"
-										onSelect={() => irPara('/destination/create')}
-									>
+									<Command.Item value="cadastrar" onSelect={() => irPara('/destination/create')}>
 										Cadastrar
 									</Command.Item>
 								</Command.Group>
@@ -100,9 +97,9 @@
 						</Command.Root>
 					</Popover.Content>
 				</Popover.Root>
-			{/if} 
+			{/if}
 		</div>
-		
+
 		<!-- User & Theme -->
 		<div class="flex items-center gap-6">
 			{#if user}
