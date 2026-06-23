@@ -48,6 +48,7 @@
 		"firebase": "^12.11.0",
 		"firebase-admin": "^13.8.0",
 		"intl-tel-input": "^29.0.4",
+		"maplibre-gl": "^5.24.0",
 		"mode-watcher": "^1.1.0",
 		"pg": "^8.20.0",
 		"postgres": "^3.4.5",

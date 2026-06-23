@@ -53,134 +53,111 @@ export interface DatabaseUser extends AuthUser {
  */
 export const handle: Handle = async ({ event, resolve }) => {
     /**
-     * Cache de usuários validados nesta requisição
-     * Evita múltiplas validações do mesmo token
+     * Cache de Promises para validação nesta requisição
+     * Evita a condição de corrida quando MÚLTIPLOS load servers (ex: layout e page)
+     * chamam a função simultaneamente durante o SSR.
      */
-    let cachedAuthUser: AuthUser | null = null;
-    let cachedDatabaseUser: Usuario | null = null;
-    let authValidationAttempted = false;
-    let dbValidationAttempted = false;
+    let authPromise: Promise<AuthUser | null> | null = null;
+    let dbPromise: Promise<Usuario | null> | null = null;
 
     /**
      * Lazy Getter: Valida o token apenas quando acessado
-     * 
-     * Fluxo:
-     * 1. Tenta extrair o token do cookie
-     * 2. Valida o token com Firebase Admin
-     * 3. Cacheia o resultado para evitar re-validação
-     * 
-     * IMPORTANTE: Esta função é assíncrona e deve ser AWAIT'ED
+     * Retorna a mesma Promise se chamada múltiplas vezes em paralelo.
      */
-    const getAuthUser = async (): Promise<AuthUser | null> => {
-        // Se já foi validado nesta requisição, retorna do cache
-        if (authValidationAttempted) {
-            return cachedAuthUser;
-        }
+    const getAuthUser = (): Promise<AuthUser | null> => {
+        if (authPromise) return authPromise;
 
-        authValidationAttempted = true;
+        authPromise = (async () => {
+            try {
+                // 1. EXTRAIR TOKEN DO COOKIE
+                const cookies = event.request.headers.get('cookie') || '';
+                const authTokenMatch = cookies.match(/authToken=([^;]+)/);
+                const authToken = authTokenMatch ? decodeURIComponent(authTokenMatch[1]) : null;
 
-        try {
-            // 1. EXTRAIR TOKEN DO COOKIE
-            const cookies = event.request.headers.get('cookie') || '';
-            const authTokenMatch = cookies.match(/authToken=([^;]+)/);
-            const authToken = authTokenMatch ? decodeURIComponent(authTokenMatch[1]) : null;
+                if (!authToken) {
+                    console.log('[Auth] Nenhum token encontrado no cookie');
+                    return null;
+                }
 
-            if (!authToken) {
-                console.log('[Auth] Nenhum token encontrado no cookie');
-                cachedAuthUser = null;
+                console.log('[Auth] Token encontrado no cookie, validando...');
+
+                // 2. VALIDAR TOKEN COM FIREBASE ADMIN
+                let decodedToken = await verifyIdToken(authToken);
+                
+                // Se falhar, tenta como Session Cookie
+                if (!decodedToken) {
+                    console.log('[Auth] ID Token inválido, tentando Session Cookie...');
+                    decodedToken = await verifySessionCookie(authToken);
+                }
+
+                // Se ambos falharem, token é inválido
+                if (!decodedToken) {
+                    console.warn('[Auth] Token inválido ou expirado');
+                    event.cookies.delete('authToken', { path: '/' });
+                    return null;
+                }
+
+                // 3. CONSTRUIR OBJETO AuthUser
+                const authUser: AuthUser = {
+                    uid: decodedToken.uid,
+                    email: decodedToken.email,
+                    displayName: decodedToken.name,
+                    photoURL: decodedToken.picture,
+                    emailVerified: decodedToken.email_verified || false,
+                };
+
+                console.log(`[Auth] ✓ Usuário autenticado: ${authUser.email}`);
+                return authUser;
+
+            } catch (error) {
+                console.error('[Auth] Erro ao validar autenticação:', error);
                 return null;
             }
+        })();
 
-            console.log('[Auth] Token encontrado no cookie, validando...');
-
-            // 2. VALIDAR TOKEN COM FIREBASE ADMIN
-            // Tenta primeiro como ID Token
-            let decodedToken = await verifyIdToken(authToken);
-            
-            // Se falhar, tenta como Session Cookie
-            if (!decodedToken) {
-                console.log('[Auth] ID Token inválido, tentando Session Cookie...');
-                decodedToken = await verifySessionCookie(authToken);
-            }
-
-            // Se ambos falharem, token é inválido
-            if (!decodedToken) {
-                console.warn('[Auth] Token inválido ou expirado');
-                // Limpar cookie inválido
-                event.cookies.delete('authToken', { path: '/' });
-                cachedAuthUser = null;
-                return null;
-            }
-
-            // 3. CONSTRUIR OBJETO AuthUser (do Firebase)
-            const authUser: AuthUser = {
-                uid: decodedToken.uid,
-                email: decodedToken.email,
-                displayName: decodedToken.name,
-                photoURL: decodedToken.picture,
-                emailVerified: decodedToken.email_verified || false,
-            };
-
-            console.log(`[Auth] ✓ Usuário autenticado: ${authUser.email}`);
-            cachedAuthUser = authUser;
-            return authUser;
-
-        } catch (error) {
-            console.error('[Auth] Erro ao validar autenticação:', error);
-            cachedAuthUser = null;
-            return null;
-        }
+        return authPromise;
     };
 
     /**
      * Função para buscar dados do usuário no banco de dados
-     * Deve ser chamada apenas quando necessário
-     * 
-     * IMPORTANTE: Esta função é assíncrona e deve ser AWAIT'ED
+     * Retorna a mesma Promise se chamada múltiplas vezes em paralelo.
      */
-    const getDatabaseUser = async (): Promise<Usuario | null> => {
-        // Se já foi validado nesta requisição, retorna do cache
-        if (dbValidationAttempted) {
-            return cachedDatabaseUser;
-        }
+    const getDatabaseUser = (): Promise<Usuario | null> => {
+        if (dbPromise) return dbPromise;
 
-        dbValidationAttempted = true;
+        dbPromise = (async () => {
+            try {
+                // Primeiro, valida no Firebase
+                const authUser = await getAuthUser();
+                if (!authUser) return null;
 
-        try {
-            // Primeiro, valida no Firebase
-            const authUser = await getAuthUser();
-            if (!authUser) {
-                cachedDatabaseUser = null;
+                // Busca usuário no banco pelo UID do Firebase
+                const usuarioRepository = AppDataSource.getRepository(Usuario);
+                const usuario = await usuarioRepository.findOne({
+                    where: { uid: authUser.uid },
+                });
+
+                if (!usuario) {
+                    console.warn(`[Auth] Usuário não encontrado no banco para UID: ${authUser.uid}`);
+                    return null;
+                }
+
+                // Construir objeto DatabaseUser
+                const databaseUser: Usuario = {
+                    ...authUser,
+                    ...usuario,
+                };
+
+                console.log(`[Auth] ✓ Dados do banco carregados para: ${usuario.email}`);
+                return databaseUser;
+
+            } catch (error) {
+                console.error('[Auth] Erro ao buscar usuário no banco:', error);
                 return null;
             }
+        })();
 
-            // Busca usuário no banco pelo UID do Firebase
-            const usuarioRepository = AppDataSource.getRepository(Usuario);
-            const usuario = await usuarioRepository.findOne({
-                where: { uid: authUser.uid },
-            });
-
-            if (!usuario) {
-                console.warn(`[Auth] Usuário não encontrado no banco para UID: ${authUser.uid}`);
-                cachedDatabaseUser = null;
-                return null;
-            }
-
-            // Construir objeto DatabaseUser
-            const databaseUser: Usuario = {
-                ...authUser,
-                ...usuario,
-            };
-
-            console.log(`[Auth] ✓ Dados do banco carregados para: ${usuario.email}`);
-            cachedDatabaseUser = databaseUser;
-            return databaseUser;
-
-        } catch (error) {
-            console.error('[Auth] Erro ao buscar usuário no banco:', error);
-            cachedDatabaseUser = null;
-            return null;
-        }
+        return dbPromise;
     };
 
     /**
