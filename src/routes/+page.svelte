@@ -4,48 +4,14 @@
 	import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
 	const { data }: { data: PageData } = $props();
+
+	import HeroBanner from '$lib/components/hero/HeroBanner.svelte';
 </script>
 
 <!-- Nike: Hero Section com design moderno -->
 <div class="min-h-screen bg-background">
-	<!-- Hero Section -->
-	<section class="pt-40 pb-20 px-8">
-		<div class="max-w-7xl mx-auto">
-			<!-- Hero Content -->
-			<div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
-				<!-- Left: Text -->
-				<div class="space-y-8">
-					<div>
-						<h1 class="text-6xl lg:text-7xl font-bold leading-tight tracking-tight mb-4">
-							Descubra o mundo
-						</h1>
-						<p class="text-xl text-muted-foreground leading-relaxed max-w-lg">
-							Explore os mais incríveis destinos turísticos. Planeje sua próxima aventura com VouAli.
-						</p>
-					</div>
-
-					<!-- CTA Button -->
-					<div class="flex gap-4 flex-wrap">
-						<Button href="/search">
-							Explorar Destinos
-						</Button>
-						<Button href="#destinations" variant="outline">
-							Saiba Mais
-						</Button>
-					</div>
-				</div>
-
-				<!-- Right: Image -->
-				<div class="h-96 lg:h-full rounded-none overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center">
-					<img
-						src="/home-background.jpeg"
-						alt="Destino Hero"
-						class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-					/>
-				</div>
-			</div>
-		</div>
-	</section>
+	<!-- Dynamic Hero Banner -->
+	<HeroBanner />
 
 	<!-- Featured Destinations Section -->
 	<section id="destinations" class="py-20 px-8 bg-gradient-to-b from-background to-gray-50 dark:from-background dark:to-gray-950">
