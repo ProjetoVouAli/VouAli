@@ -38,7 +38,7 @@ export async function getUserLocation(): Promise<GeoLocation> {
 			},
 			{
 				enableHighAccuracy: false,
-				timeout: 5000,
+				timeout: 15000,
 				maximumAge: 3600000 // 1 hour cache at browser level
 			}
 		);
@@ -72,4 +72,16 @@ export function getThemeForRegion(region: Region): string {
 		default:
 			return 'default';
 	}
+}
+
+// Calcula a distância em km entre duas coordenadas usando a fórmula de Haversine
+export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+	const R = 6371; // Raio da Terra em km
+	const dLat = (lat2 - lat1) * Math.PI / 180;
+	const dLon = (lon2 - lon1) * Math.PI / 180;
+	const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+		      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+		      Math.sin(dLon/2) * Math.sin(dLon/2);
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+	return R * c;
 }

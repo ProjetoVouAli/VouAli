@@ -11,7 +11,7 @@
 <!-- Nike: Hero Section com design moderno -->
 <div class="min-h-screen bg-background">
 	<!-- Dynamic Hero Banner -->
-	<HeroBanner />
+	<HeroBanner destinations={data.destinations} />
 
 	<!-- Featured Destinations Section -->
 	<section id="destinations" class="py-20 px-8 bg-gradient-to-b from-background to-gray-50 dark:from-background dark:to-gray-950">

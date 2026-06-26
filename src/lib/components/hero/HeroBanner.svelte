@@ -7,12 +7,18 @@
     import HeroElements from './HeroElements.svelte';
     import HeroContent from './HeroContent.svelte';
 
+    let { destinations } = $props();
+
     onMount(() => {
-        initializeHeroBanner();
+        initializeHeroBanner(destinations);
     });
 
     function handleExplore() {
-        goto('/search');
+        if ($heroTheme?.destinationSlug) {
+            goto(`/destination/${$heroTheme.destinationSlug}`);
+        } else {
+            goto('/search');
+        }
     }
 
     function handleLearnMore() {
@@ -31,8 +37,9 @@
         <div class="max-w-7xl mx-auto w-full relative z-20">
             <HeroContent 
                 theme={$heroTheme}
-                title="Descubra o mundo"
-                tagline="Explore os mais incríveis destinos turísticos. Planeje sua próxima aventura com VouAli."
+                title={$heroTheme.destinationSlug ? $heroTheme.image.alt : "Descubra o mundo"}
+                tagline={$heroTheme.destinationSlug ? "Confira os detalhes deste lugar incrível e planeje sua viagem." : "Explore os mais incríveis destinos turísticos. Planeje sua próxima aventura com VouAli."}
+                exploreText={$heroTheme.destinationSlug ? "Ver Destino" : "Explorar Destinos"}
                 onExplore={handleExplore}
                 onLearnMore={handleLearnMore}
             />

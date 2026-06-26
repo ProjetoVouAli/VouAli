@@ -30,6 +30,7 @@ export interface ThemeTypography {
 export interface HeroTheme {
 	id: string;
 	name: string;
+	destinationSlug?: string;
 	colors: ThemeColors;
 	image: ThemeImage;
 	elements: ThemeElements;
