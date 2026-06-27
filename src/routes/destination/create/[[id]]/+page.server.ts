@@ -8,7 +8,9 @@ import { AppDataSource } from '$lib/server/db/data-source';
 import { Destination } from '$lib/server/db/entities/Destination';
 import { destinationSchema } from './schema';
 import { DestinationCategory } from '$lib/server/db/entities/DestinationCategory';
+import { City } from '$lib/server/db/entities/City';
 import { DestinationImage } from '$lib/server/db/entities/DestinationImage';
+import { AvailabilitySlot, DayOfWeek } from '$lib/server/db/entities/AvailabilitySlot';
 import { In } from 'typeorm';
 import fs from 'fs';
 import path from 'path';
@@ -28,6 +30,7 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
 
     let initialData: Record<string, unknown> = {
         state: 'RJ',
+        city: 'Saquarema',
         active: true,
         latitude: -22.9068,
         longitude: -43.1729,
@@ -80,12 +83,32 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
         url: image.url
     }));
 
+    const allCities = await AppDataSource.getRepository(City).find({
+        where: { active: true },
+        order: { state: 'ASC', name: 'ASC' }
+    });
+
+    // Load existing schedule slots when editing
+    let existingSlots: any[] = [];
+    if (params.id) {
+        const slotRepo = AppDataSource.getRepository(AvailabilitySlot);
+        const destId = parseInt(params.id);
+        if (!isNaN(destId)) {
+            existingSlots = await slotRepo.find({
+                where: { destination: { id: destId }, active: true },
+                order: { dayOfWeek: 'ASC', startTime: 'ASC' }
+            });
+        }
+    }
+
     return {
         form,
         isEdit: !!params.id,
         categories,
         existingImages: imagesData,
-        destinationStatus
+        destinationStatus,
+        cities: structuredClone(allCities),
+        existingSlots: structuredClone(existingSlots)
     };
 };
 
@@ -229,6 +252,39 @@ export const actions: Actions = {
                     await imageRepo.save(destinationImage);
                 }
             }
+        }
+
+        // 5. Process Schedule Slots
+        const scheduleData = form.data.scheduleData;
+        const scheduleEnabled = form.data.scheduleEnabled;
+        const slotRepo = AppDataSource.getRepository(AvailabilitySlot);
+
+        // Remove existing slots if schedule changed
+        if (scheduleEnabled) {
+            let slotsToParse = [] as Array<{ dayOfWeek: string; startTime: string; endTime: string }>;
+            try {
+                const parsed = JSON.parse(scheduleData as string);
+                if (Array.isArray(parsed)) slotsToParse = parsed;
+            } catch {}
+
+            // Delete old slots, create new ones
+            await slotRepo.delete({ destination: { id: destinationId } });
+
+            for (const s of slotsToParse) {
+                if (s.dayOfWeek && s.startTime && s.endTime) {
+                    const slot = slotRepo.create({
+                        destination: { id: destinationId } as any,
+                        dayOfWeek: s.dayOfWeek as DayOfWeek,
+                        startTime: s.startTime,
+                        endTime: s.endTime,
+                        maxReservations: 1,
+                    });
+                    await slotRepo.save(slot);
+                }
+            }
+        } else {
+            // Remove all slots for this destination
+            await slotRepo.delete({ destination: { id: destinationId } });
         }
 
         throw redirect(303, `/destination/create/${destinationId}`);

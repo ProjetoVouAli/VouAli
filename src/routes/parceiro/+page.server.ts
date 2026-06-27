@@ -1,5 +1,5 @@
-import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import type { PageServerLoad, Actions } from "./$types";
 import { saveSolicitacaoParceiro } from "$lib/server/auth/parceiro";
 import {
     validateEmail,
@@ -30,7 +30,6 @@ import {
  * - Não cria conta imediata (fica PENDENTE)
  */
 export const load: PageServerLoad = async () => {
-    // Página aberta ao público, sem redirecionamentos
     return {
         title: 'Solicitação de Parceria'
     };
@@ -329,7 +328,7 @@ export const actions: Actions = {
             };
 
         } catch (error: any) {
-            console.error('[PARCEIRO] Erro ao salvar solicitação:', error);
+            console.error('[PARCEIRO] Erro ao salvar solicitação:');
 
             // Registrar tentativa com erro
             await registrarTentativa({

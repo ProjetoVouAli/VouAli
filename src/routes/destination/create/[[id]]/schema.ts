@@ -16,5 +16,7 @@ export const destinationSchema = z.object({
     active: z.boolean(),
     categories: z.array(z.string()).min(1, 'Adicione pelo menos uma categoria'),
     images: z.array(z.instanceof(File)).optional().default([]),
-    imagesToDelete: z.array(z.number()).optional().default([])
+    imagesToDelete: z.array(z.number()).optional().default([]),
+    scheduleEnabled: z.boolean().optional().default(false),
+    scheduleData: z.string().optional().default('[]')
 });

@@ -49,16 +49,15 @@
 			<a href="/" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Home
 			</a>
-			{#if !user || !user.papeis?.includes('ADMINISTRADOR' as any)}
-				<a href="/parceiro" class="text-sm font-medium hover:text-muted-foreground transition-colors">
-					Parceria
-				</a>
-			{/if}
 			<a href="/search" class="text-sm font-medium hover:text-muted-foreground transition-colors">
 				Explorar
 			</a>
 
-
+			{#if user && user.papeis?.includes('ADMINISTRADOR' as any)}
+				<a href="/parceiro" class="text-sm font-medium hover:text-muted-foreground transition-colors">
+					Parceria
+				</a>
+			{/if}
 
 			{#if user && user.papeis?.includes('ADMINISTRADOR' as any)}
 				<a

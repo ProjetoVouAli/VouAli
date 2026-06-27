@@ -172,7 +172,32 @@
 					</div>
 				{/if}
 
-				<!-- Reviews Section -->
+				<!-- Horários Section -->
+				{#if data.slots && data.slots.length > 0}
+					<!-- Group slots by day -->
+					{@const dayOrder = ['MON','TUE','WED','THU','FRI','SAT','SUN']}
+					{@const dayNames: Record<string,string> = {'MON':'Segunda-feira','TUE':'Terça-feira','WED':'Quarta-feira','THU':'Quinta-feira','FRI':'Sexta-feira','SAT':'Sábado','SUN':'Domingo'}}
+					{@const grouped = dayOrder.map(d => ({ day: d, slots: data.slots.filter((s:any) => s.dayOfWeek === d) })).filter(g => g.slots.length > 0)}
+					<div class="border-t border-border pt-16 space-y-8">
+						<h3 class="text-2xl font-bold uppercase tracking-wide text-center">
+							Horários de Funcionamento
+						</h3>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+							{#each grouped as group (group.day)}
+								<div class="flex items-center justify-between p-4 bg-muted/30 rounded-lg border border-border">
+									<p class="font-semibold">{dayNames[group.day]}</p>
+									<p class="text-sm font-bold text-primary text-right">
+										{#each group.slots as slot, i (slot.id)}
+											{slot.startTime} - {slot.endTime}{i < group.slots.length - 1 ? ', ' : ''}
+										{/each}
+									</p>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
+					<!-- Reviews Section -->
 				<div class="border-t border-border pt-16 space-y-8">
 					<h3 class="text-2xl font-bold uppercase tracking-wide text-center">
 						Avaliações

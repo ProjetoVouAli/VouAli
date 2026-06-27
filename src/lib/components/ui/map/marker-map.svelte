@@ -1,61 +1,56 @@
 <script lang="ts">
-	import maplibregl from 'maplibre-gl';
-	import { MapPin } from '@lucide/svelte';
-	import { MapLibre, Marker, Popup } from 'svelte-maplibre-gl';
-	import { mode } from 'mode-watcher';
-	import type { Destination } from '$lib/server/db/entities/Destination';
+  import L from 'leaflet';
+  import { onMount } from 'svelte';
+  import type { Destination } from '$lib/server/db/entities/Destination';
 
-	const { destinations }: { destinations: Destination[] } = $props();
+  const { destinations }: { destinations: Destination[] } = $props();
 
-	let offset = $state(24);
+  let mapContainer: HTMLDivElement;
+  let map: L.Map;
 
-	let offsets: maplibregl.Offset = $derived({
-		top: [0, offset],
-		bottom: [0, -offset],
-		left: [offset + 12, 0],
-		right: [-offset - 12, 0],
-		center: [0, 0],
-		'top-left': [offset, offset],
-		'top-right': [-offset, offset],
-		'bottom-left': [offset, -offset],
-		'bottom-right': [-offset, -offset]
-	});
+  onMount(() => {
+    map = L.map(mapContainer, {
+      zoomControl: true,
+      attributionControl: false,
+    });
 
-	const mapStyle = $derived(
-		mode.current == 'dark'
-			? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
-			: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json'
-	);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
 
-	const mapBounds = $derived.by(() => {
-		const bounds = new maplibregl.LngLatBounds();
-		for (const { latitude, longitude } of destinations) {
-			bounds.extend([Number(longitude), Number(latitude)]);
-		}
-		return bounds;
-	});
+    const bounds = L.latLngBounds();
+    const pinIcon = L.divIcon({
+      html: `<div style="width:24px;height:24px;background:#dc2626;border:3px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
+      className: '',
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+    });
+
+    for (const dest of destinations) {
+      const lat = Number(dest.latitude);
+      const lng = Number(dest.longitude);
+      if (isNaN(lat) || isNaN(lng)) continue;
+
+      const marker = L.marker([lat, lng], { icon: pinIcon }).addTo(map);
+      marker.bindPopup(`<b>${dest.name}</b><br/><a href="/destination/${dest.slug}">Clique para mais detalhes</a>`);
+      bounds.extend([lat, lng]);
+    }
+
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 11 });
+    } else {
+      map.setView([-22.9068, -43.1729], 11);
+    }
+
+    const observer = new MutationObserver(() => map.invalidateSize());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      observer.disconnect();
+      map.remove();
+    };
+  });
 </script>
 
-<MapLibre
-	bounds={mapBounds}
-	style={mapStyle}
-	class="w-full h-full"
-	fitBoundsOptions={{maxZoom:11}}
-	maxPitch={85}
-	attributionControl={false}
->
-	{#each destinations as { name,slug, longitude, latitude, }}
-		<Marker lnglat={[Number(longitude), Number(latitude)]}>
-			{#snippet content()}
-				<div class="items-center *:last:hidden hover:*:last:block leading-none ">
-					<MapPin class="w-full" />
-					<p>{name}</p>
-				</div>
-			{/snippet}
-			<Popup class="text-center text-foreground w-36 h-36"   open={false} offset={offsets}>
-				<p>{name}</p>
-				<p>Clique para mais detalhes</p>
-			</Popup>
-		</Marker>
-	{/each}
-</MapLibre>
+<div bind:this={mapContainer} class="w-full h-full rounded-lg overflow-hidden"></div>
