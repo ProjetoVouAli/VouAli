@@ -7,6 +7,8 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
+import UserIcon from '@lucide/svelte/icons/user';
+import SettingsIcon from '@lucide/svelte/icons/settings';
 
 	let { initialUser: user }: { initialUser: Usuario | null } = $props();
 
@@ -116,8 +118,17 @@
 		<!-- User & Theme -->
 		<div class="flex items-center gap-6">
 			{#if user}
-				<div class="hidden sm:block">
-					<p class="text-sm font-semibold">{user.nome || user.email}</p>
+				<div class="hidden sm:flex items-center gap-2">
+					<a href="/settings" class="flex items-center gap-2 hover:opacity-70 transition-opacity" title="Configurações">
+						{#if user.avatarUrl}
+							<img src={user.avatarUrl} alt="" class="w-8 h-8 rounded-full object-cover border border-border" />
+						{:else}
+							<div class="w-8 h-8 rounded-full bg-muted flex items-center justify-center border border-border">
+								<UserIcon class="size-4 text-muted-foreground" />
+							</div>
+						{/if}
+						<p class="text-sm font-semibold">{user.nome || user.email}</p>
+					</a>
 				</div>
 				<button
 					onclick={logout}

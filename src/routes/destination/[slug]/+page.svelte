@@ -1,4 +1,5 @@
 <script lang="ts">
+	import UserIcon from "@lucide/svelte/icons/user";
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { Button } from "$lib/components/ui/button";
@@ -209,7 +210,16 @@
 								<Card.Root>
 									<Card.Header class="pb-2">
 										<div class="flex items-center justify-between">
-											<Card.Title class="text-lg">{review.usuario.nome}</Card.Title>
+											<Card.Title class="text-lg flex items-center gap-2">
+							{#if review.usuario.avatarUrl}
+								<img src={review.usuario.avatarUrl} alt="" class="w-6 h-6 rounded-full object-cover border" />
+							{:else}
+								<div class="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
+									<UserIcon class="size-3 text-muted-foreground" />
+								</div>
+							{/if}
+							{review.usuario.nome}
+						</Card.Title>
 											<div class="text-primary font-bold text-lg">
 												{'★'.repeat(review.rating)}<span class="text-muted-foreground">{'☆'.repeat(5 - review.rating)}</span>
 											</div>

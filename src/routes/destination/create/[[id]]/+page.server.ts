@@ -10,6 +10,7 @@ import { destinationSchema } from './schema';
 import { DestinationCategory } from '$lib/server/db/entities/DestinationCategory';
 import { City } from '$lib/server/db/entities/City';
 import { DestinationImage } from '$lib/server/db/entities/DestinationImage';
+import { uploadImage } from '$lib/server/cloudinary';
 import { AvailabilitySlot, DayOfWeek } from '$lib/server/db/entities/AvailabilitySlot';
 import { In } from 'typeorm';
 import fs from 'fs';
@@ -223,32 +224,15 @@ export const actions: Actions = {
             }
         }
 
-        // 4. Processamento e Upload de Novas Imagens
+        // 4. Upload de Novas Imagens para Cloudinary
         if (uploadedFiles && uploadedFiles.length > 0) {
-            const uploadDir = path.join(process.cwd(), 'static', 'upload');
-            
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
-
             for (const file of uploadedFiles) {
                 if (file instanceof File && file.size > 0 && file.name !== 'undefined') {
-                    const timestamp = Date.now();
-                    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-                    const fileName = `${timestamp}-${sanitizedName}`;
-                    const filePath = path.join(uploadDir, fileName);
-
-                    // Escrita do buffer em disco
-                    const buffer = Buffer.from(await file.arrayBuffer());
-                    fs.writeFileSync(filePath, buffer);
-
-                    // Geração da URL estática e vinculo com o ID na tabela
-                    const publicUrl = `/upload/${fileName}`;
+                    const result = await uploadImage(file, 'vouali/destinations');
                     const destinationImage = imageRepo.create({
-                        url: publicUrl,
+                        url: result.url,
                         destinationId: destinationId
                     });
-                    
                     await imageRepo.save(destinationImage);
                 }
             }

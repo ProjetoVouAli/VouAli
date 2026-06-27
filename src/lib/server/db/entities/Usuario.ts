@@ -32,6 +32,12 @@ export class Usuario {
     @Column('boolean', { default: true })
     estaAutenticado!: boolean;
 
+    @Column('varchar', { length: 500, nullable: true })
+    avatarUrl!: string | null;
+
+    @Column('text', { nullable: true })
+    bio!: string | null;
+
     @Column({
         type: 'enum',
         enum: TipoUsuario,
