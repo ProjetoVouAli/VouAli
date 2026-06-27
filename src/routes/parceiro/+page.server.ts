@@ -29,10 +29,14 @@ import {
  * - Salva solicitação para revisão do admin
  * - Não cria conta imediata (fica PENDENTE)
  */
-export const load: PageServerLoad = async () => {
-    // Página aberta ao público, sem redirecionamentos
+export const load: PageServerLoad = async ({ locals }) => {
+    // Tenta pegar o usuário logado para pré-preencher e travar os campos
+    const user = await locals.databaseUser();
+
     return {
-        title: 'Solicitação de Parceria'
+        title: 'Solicitação de Parceria',
+        userEmail: user?.email || '',
+        userNome: user?.nome || ''
     };
 };
 

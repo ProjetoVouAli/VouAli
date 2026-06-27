@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { env } from '$env/dynamic/private';
 
 // Serviço de envio de emails híbrido (Nodemailer + Resend)
 const transporter = nodemailer.createTransport({
@@ -7,7 +8,7 @@ const transporter = nodemailer.createTransport({
   port: 465,
   auth: {
     user: 'resend',
-    pass: import.meta.env.VITE_RESEND_API_KEY || process.env.RESEND_API_KEY || '', 
+    pass: env.RESEND_API_KEY || '', 
   },
   tls: {
     // Evita erro de 'self-signed certificate in certificate chain' em redes locais/Windows
