@@ -11,9 +11,11 @@
     import { Separator } from '$lib/components/ui/separator';
 import MapPicker from '$lib/components/map/MapPicker.svelte';
 
+    import { untrack } from 'svelte';
+
     let { data } = $props();
 
-    const form = superForm(data.form, {
+    const form = superForm(untrack(() => data.form), {
         validators: zodClient(destinationSchema),
         dataType: 'json',
         resetForm: false
@@ -196,13 +198,16 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
 
 
 <div class="container max-w-4xl mx-auto py-10 px-4">
-    <div class="mb-8 pb-4">
-        <h1 class="text-3xl font-bold tracking-tight text-foreground">
-            {data.isEdit ? 'Editar Destino' : 'Criar Novo Destino'}
-        </h1>
-        <p class="text-muted-foreground mt-1">
-            {data.isEdit ? 'Atualize as informações e mídias do seu atrativo.' : 'Preencha os dados e suba fotos para publicar um novo local.'}
-        </p>
+    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-foreground">
+                {data.isEdit ? 'Editar Destino' : 'Criar Novo Destino'}
+            </h1>
+            <p class="text-muted-foreground mt-1">
+                {data.isEdit ? 'Atualize as informações e mídias do seu atrativo.' : 'Preencha os dados e suba fotos para publicar um novo local.'}
+            </p>
+        </div>
+        <Button variant="outline" onclick={() => history.back()}>Voltar</Button>
     </div>
 
     <Separator class="mb-8" />

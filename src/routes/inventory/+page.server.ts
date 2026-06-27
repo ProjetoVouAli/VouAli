@@ -18,9 +18,10 @@ export const load: PageServerLoad = async ({ parent }) => {
     // 3. Get the TypeORM repository for Destination
     const destinationRepo = AppDataSource.getRepository(Destination);
 
-    // 4. Find all destinations where the 'createdBy' relation matches the user's ID
+    // 4. Se for Admin, busca todos. Se não, busca apenas os criados pelo usuário.
+    const isAdmin = user.papeis.includes('ADMINISTRADOR' as any);
     const userDestinations = await destinationRepo.find({
-        where: {
+        where: isAdmin ? {} : {
             createdBy: {
                 id: user.id
             }

@@ -2,6 +2,8 @@
     import type { PageData } from './$types';
     import { Button } from '$lib/components/ui/button';
     import { Card, CardContent } from '$lib/components/ui/card';
+    import { CardHeader, CardTitle } from '$lib/components/ui/card';
+    import { MapPin, CheckCircle, Clock, XCircle } from 'lucide-svelte';
 
     const { data }: { data: PageData } = $props();
 
@@ -9,14 +11,14 @@
 </script>
 
 <div class="min-h-screen bg-background">
-    <section class="pt-32 pb-12 px-8 bg-gradient-to-b from-gray-50 to-background dark:from-gray-950 dark:to-background">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+    <section class="pt-32 pb-8 px-8 bg-gradient-to-b from-gray-50 to-background dark:from-gray-950 dark:to-background">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
             <div>
                 <h1 class="text-5xl lg:text-6xl font-bold leading-tight tracking-tight mb-4">
-                    Meus Destinos
+                    Painel B2B
                 </h1>
                 <p class="text-lg text-muted-foreground max-w-2xl">
-                    Gerencie os locais que você compartilhou na plataforma. Edite informações ou adicione novas aventuras.
+                    Gerencie seus destinos, acompanhe status e veja suas métricas.
                 </p>
             </div>
             
@@ -25,6 +27,49 @@
                     + Novo Destino
                 </Button>
             </div>
+        </div>
+
+        <!-- Estatísticas (Cards) -->
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle class="text-sm font-medium">Total de Destinos</CardTitle>
+                    <MapPin class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold">{totalDestinos}</div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle class="text-sm font-medium">Aprovados</CardTitle>
+                    <CheckCircle class="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold text-green-500">{data.approved?.length || 0}</div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle class="text-sm font-medium">Em Análise</CardTitle>
+                    <Clock class="h-4 w-4 text-yellow-500" />
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold text-yellow-500">{data.pending?.length || 0}</div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle class="text-sm font-medium">Rejeitados</CardTitle>
+                    <XCircle class="h-4 w-4 text-red-500" />
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold text-red-500">{data.rejected?.length || 0}</div>
+                </CardContent>
+            </Card>
         </div>
     </section>
 
@@ -261,28 +306,7 @@
     </section>
     {/if}
 
-    <section class="py-12 px-8 border-t border-border/50">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-12">
-                <div class="text-center">
-                    <p class="text-5xl font-bold mb-2">{totalDestinos}</p>
-                    <p class="text-muted-foreground">Destinos Registrados</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-5xl font-bold mb-2">{data.pending?.length || 0}</p>
-                    <p class="text-muted-foreground">Pendentes</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-5xl font-bold mb-2">{data.approved?.length || 0}</p>
-                    <p class="text-muted-foreground">Online</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-5xl font-bold mb-2">{data.rejected?.length || 0}</p>
-                    <p class="text-muted-foreground">Recusados</p>
-                </div>
-            </div>
-        </div>
-    </section>
+
 </div>
 
 <style>
