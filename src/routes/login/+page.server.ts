@@ -14,7 +14,7 @@ import { Usuario } from '$lib/server/db/entities/Usuario';
  * - Se não está logado, mostra formulário
  */
 export const load: PageServerLoad = async ({ locals, parent }) => {
-    
+
     // ✅ Lazy Loading: Verifica apenas se está logado
     const user = await locals.authUser();
 
@@ -30,7 +30,7 @@ export const load: PageServerLoad = async ({ locals, parent }) => {
 };
 
 export const actions: Actions = {
-    default: async ({ request, cookies }) => {
+    login: async ({ request, cookies }) => {
         const data = await request.formData();
         const email = data.get('email')?.toString().trim() ?? '';
         const password = data.get('password')?.toString().trim() ?? '';
@@ -101,6 +101,71 @@ export const actions: Actions = {
             return fail(500, {
                 message: 'Erro interno ao fazer login.'
             })
+        }
+    },
+
+    google: async ({ request, cookies }) => {
+        const data = await request.formData();
+        const idToken = data.get('idToken')?.toString().trim();
+
+        if (!idToken) {
+            return fail(400, { message: 'Token do Google ausente' });
+        }
+
+        try {
+            // No servidor, usaremos o admin do Firebase para validar o token
+            // Como importar o firebase-admin? 
+            // O ideal seria que ele fosse injetado no Locals ou temos import do server
+            const { verifyIdToken } = await import('$lib/server/firebase-admin');
+            const decodedToken = await verifyIdToken(idToken);
+
+            if (!decodedToken) {
+                return fail(401, { message: 'Token do Google inválido ou expirado' });
+            }
+
+            const email = decodedToken.email;
+            if (!email) {
+                return fail(400, { message: 'Conta do Google sem email associado' });
+            }
+
+            // GUARDA O TOKEN NO COOKIE SVELTE (Para a sessão)
+            setAuthCookie(cookies, idToken);
+
+            const userRepository = AppDataSource.getRepository(Usuario);
+            let usuario = await userRepository.findOne({ where: { email } });
+
+            // Se o usuário não existir no banco relacional, criamos ele!
+            if (!usuario) {
+                // Aqui nós injetamos a verificação de aprovação de parceiro
+                const { SolicitacaoParceiro, StatusSolicitacao } = await import('$lib/server/db/entities/SolicitacaoParceiro');
+                const solicitacaoRepository = AppDataSource.getRepository(SolicitacaoParceiro);
+                const solicitacao = await solicitacaoRepository.findOne({
+                    where: { emailResponsavel: email, status: StatusSolicitacao.APROVADA }
+                });
+
+                // Define os papeis básicos, ou adiciona PARCEIRO se tiver solicitação aprovada
+                const { TipoUsuario } = await import('$lib/server/db/entities/Usuario');
+                const papeis = [TipoUsuario.VIAJANTE];
+                if (solicitacao) {
+                    papeis.push(TipoUsuario.PARCEIRO);
+                }
+
+                usuario = userRepository.create({
+                    uid: decodedToken.uid,
+                    email: email,
+                    nome: decodedToken.name || email.split('@')[0],
+                    sexo: 'O', // Default
+                    estaAutenticado: true,
+                    papeis: papeis
+                });
+
+                await userRepository.save(usuario);
+            }
+
+            return buildAuthSuccessResponse(usuario, '✅ Login com Google realizado com sucesso!');
+        } catch (error: any) {
+            console.error('Erro no Login com Google:', error);
+            return fail(500, { message: 'Erro ao validar token do Google.' });
         }
     }
 };

@@ -43,7 +43,7 @@ export class Destination {
   @Column({ type: 'boolean', default: true })
   active!: boolean;
 
-  @Column({ type: 'varchar', length: 20, default: 'approved' })
+  @Column({ type: 'varchar', length: 20, default: 'pending' })
   status!: string;
 
   @Column({ type: 'text', nullable: true })

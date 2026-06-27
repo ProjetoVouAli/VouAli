@@ -10,8 +10,15 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import MapPicker from '$lib/components/map/MapPicker.svelte';
+    import { untrack } from 'svelte';
 
-	let { data } = $props();
+    let { data } = $props();
+
+    const form = superForm(untrack(() => data.form), {
+        validators: zodClient(destinationSchema),
+        dataType: 'json',
+        resetForm: false
+    }); 89e565d670d04b776326f8f36c5c2f9aefa4be7b
 
 	const form = superForm(data.form, {
 		validators: zodClient(destinationSchema),
@@ -253,16 +260,17 @@
 </script>
 
 <div class="container max-w-4xl mx-auto py-10 px-4">
-	<div class="mb-8 pb-4">
-		<h1 class="text-3xl font-bold tracking-tight text-foreground">
-			{data.isEdit ? 'Editar Destino' : 'Criar Novo Destino'}
-		</h1>
-		<p class="text-muted-foreground mt-1">
-			{data.isEdit
-				? 'Atualize as informações e mídias do seu atrativo.'
-				: 'Preencha os dados e suba fotos para publicar um novo local.'}
-		</p>
-	</div>
+    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-foreground">
+                {data.isEdit ? 'Editar Destino' : 'Criar Novo Destino'}
+            </h1>
+            <p class="text-muted-foreground mt-1">
+                {data.isEdit ? 'Atualize as informações e mídias do seu atrativo.' : 'Preencha os dados e suba fotos para publicar um novo local.'}
+            </p>
+        </div>
+        <Button variant="outline" onclick={() => history.back()}>Voltar</Button>
+    </div> 89e565d670d04b776326f8f36c5c2f9aefa4be7b
 
 	<Separator class="mb-8" />
 

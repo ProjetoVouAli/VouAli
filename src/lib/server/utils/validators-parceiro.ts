@@ -115,7 +115,7 @@ export function validateCamposObrigatorios(dados: {
         if (!dados[campo as keyof typeof dados]) {
             return {
                 valid: false,
-                message: 'Todos os campos obrigatórios devem ser preenchidos'
+                message: `O campo obrigatório "${campo}" não foi preenchido.`
             };
         }
     }

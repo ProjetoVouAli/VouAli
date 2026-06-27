@@ -7,22 +7,79 @@
     import { Button } from '$lib/components/ui/button';
     import { Input } from '$lib/components/ui/input';
 
-    let nome = '';
-    let email = '';
-    let password = '';
-    let confirmPassword = '';
-    let sexo = '';
-    let mostrarSenha = false;
-    let mostrarConfirm = false;
-    let loading = false;
-    let senhaMatch = true;
+    import { googleProvider, auth } from '$lib/firebase';
+    import { signInWithPopup, type UserCredential } from 'firebase/auth';
+
+    // Lê parâmetros da URL caso tenha vindo do link do email de aprovação de parceiro
+    let emailParams = page.url.searchParams.get('email') || '';
+    let nomeParams = page.url.searchParams.get('nome') || '';
+
+    let nome = $state(nomeParams);
+    let email = $state(emailParams);
+    let password = $state('');
+    let confirmPassword = $state('');
+    let sexo = $state('');
+    let mostrarSenha = $state(false);
+    let mostrarConfirm = $state(false);
+    let loading = $state(false);
+    let senhaMatch = $state(true);
 
     function verificarSenha() {
         senhaMatch = password === confirmPassword;
     }
 
     const { registerWithEmail, registerWithGoogle } = page.data;
+
+    let googleTokenInput: HTMLInputElement;
+    let googleForm: HTMLFormElement;
+
+    async function handleGoogleLogin() {
+        try {
+            loading = true;
+            const result: UserCredential = await signInWithPopup(auth, googleProvider);
+            const idToken = await result.user.getIdToken();
+            
+            // Submete o formulário oculto
+            googleTokenInput.value = idToken;
+            googleForm.requestSubmit();
+        } catch (error) {
+            console.error('Erro Google Auth:', error);
+            flash.set('Erro ao autenticar com o Google.');
+            loading = false;
+        }
+    }
 </script>
+
+<!-- Form oculto para submeter o token do Google pro SvelteKit action ?/google -->
+<form 
+    bind:this={googleForm} 
+    action="?/google" 
+    method="POST" 
+    class="hidden"
+    use:enhance={() => {
+        return async ({ result }) => {
+            loading = false;
+            if (result.type === 'redirect') {
+                await goto(result.location);
+                return;
+            }
+            if (result.type === 'error') {
+                flash.set('Erro interno ao validar Google Auth.');
+                return;
+            }
+            const data = result.data as any;
+            if (result.type === 'success' && data?.success && data?.user) {
+                user.set(data.user);
+                flash.set(data.message);
+                await goto('/');
+            } else if (result.type === 'failure' && data?.message) {
+                flash.set(data.message);
+            }
+        };
+    }}
+>
+    <input type="hidden" name="idToken" bind:this={googleTokenInput} />
+</form>
 
 <!-- Nike: Design minimalista, preto/branco -->
 <div class="min-h-screen bg-background pt-32 pb-16">
@@ -38,10 +95,34 @@
         </div>
 
         <!-- Form Container -->
-        <form 
-            method="POST"
-            class="space-y-6"
-            use:enhance={({ formData }) => {
+        <div class="space-y-6">
+            {#if registerWithGoogle}
+            <Button
+                type="button"
+                variant="outline"
+                disabled={loading}
+                class="w-full flex items-center justify-center gap-2"
+                onclick={handleGoogleLogin}
+            >
+                <svg viewBox="0 0 24 24" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+                {loading ? 'Entrando...' : 'Criar conta com Google'}
+            </Button>
+            
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-border"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-background text-muted-foreground">ou</span>
+                </div>
+            </div>
+            {/if}
+
+            <form 
+                action="?/register"
+                method="POST"
+                class="space-y-6"
+                use:enhance={({ formData }) => {
                 loading = true;
                 return async ({ result }) => {
                     loading = false;
@@ -183,7 +264,8 @@
             >
                 {loading ? 'Criando conta...' : 'Criar conta'}
             </Button>
-        </form>
+            </form>
+        </div>
 
         <!-- Sign In Link -->
         <div class="mt-8 text-center">

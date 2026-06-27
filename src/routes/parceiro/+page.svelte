@@ -8,6 +8,10 @@
     import TelephoneInput from '$lib/components/ui/telephone-input/telephone-input.svelte';
     import DocumentInput from '$lib/components/ui/document-input/document-input.svelte';
     import { imask } from '@imask/svelte';
+    import type { PageData } from './$types';
+    import { untrack } from 'svelte';
+
+    let { data } = $props<{ data: PageData }>();
 
     // Estados do formulário
     let docValido = $state<boolean | null>(null);
@@ -15,8 +19,8 @@
     let loadingCep = $state(false);
 
     let formData = $state({
-        nomeResponsavel: '',
-        emailResponsavel: '',
+        nomeResponsavel: untrack(() => data.userNome) || '',
+        emailResponsavel: untrack(() => data.userEmail) || '',
         telefoneResponsavel: '',
         nomeEmpresa: '',
         razaoSocial: '',
@@ -276,10 +280,11 @@
                             onblur={() => handleValidarCampo('nomeResponsavel')}
                             max="40"
                             required
+                            readonly={!!data.userNome}
                             disabled={loading}
                             placeholder="Seu nome completo"
                             aria-invalid={camposInvalidos.has('nomeResponsavel')}
-                            class={camposInvalidos.has('nomeResponsavel') ? 'border-destructive' : ''}
+                            class="{camposInvalidos.has('nomeResponsavel') ? 'border-destructive' : ''} {data.userNome ? 'bg-muted cursor-not-allowed opacity-70' : ''}"
                         />
                         {#if erros.nomeResponsavel}
                             <p class="text-xs text-destructive mt-1">{erros.nomeResponsavel}</p>
@@ -300,10 +305,11 @@
                             onblur={() => handleValidarCampo('emailResponsavel')}
                             max="100"
                             required
+                            readonly={!!data.userEmail}
                             disabled={loading}
                             placeholder="seu@email.com"
                             aria-invalid={camposInvalidos.has('emailResponsavel')}
-                            class={camposInvalidos.has('emailResponsavel') ? 'border-destructive' : ''}
+                            class="{camposInvalidos.has('emailResponsavel') ? 'border-destructive' : ''} {data.userEmail ? 'bg-muted cursor-not-allowed opacity-70' : ''}"
                         />
                         {#if erros.emailResponsavel}
                             <p class="text-xs text-destructive mt-1">{erros.emailResponsavel}</p>
@@ -473,19 +479,19 @@
 
                     <!-- Telefone da Empresa-->
                     <div>
-                        <label for="telefoneResponsavel" class="block text-sm font-semibold mb-2">
-                            Telefone/WhatsApp da Empresa *
+                        <label for="whatsapp" class="block text-sm font-semibold mb-2">
+                            WhatsApp da Empresa (Opcional)
                         </label>
                         <TelephoneInput
-                            bind:value={formData.telefoneResponsavel}
+                            bind:value={formData.whatsapp}
                             disabled={loading}
                             placeholder="(11) 9XXXX-XXXX"
                         />
-                        <!-- Campo hidden para enviar o telefone no formulário -->
+                        <!-- Campo hidden para enviar o whatsapp no formulário -->
                         <input 
                             type="hidden" 
-                            name="telefoneResponsavel" 
-                            value={formData.telefoneResponsavel}
+                            name="whatsapp" 
+                            value={formData.whatsapp}
                         />
                         {#if erros.telefoneResponsavel}
                             <p class="text-xs text-destructive mt-1">{erros.telefoneResponsavel}</p>
