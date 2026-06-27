@@ -11,9 +11,17 @@ import { SolicitacaoParceiro } from './entities/SolicitacaoParceiro';
 import { TentativaSolicitacaoParceiro } from './entities/TentativaSolicitacaoParceiro';
 import { Review } from './entities/Review';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  url: env.DATABASE_URL, 
+  url: isProduction ? env.DATABASE_URL_NEON : env.DATABASE_URL, 
+  ssl: isProduction ? true : false,
+  extra: isProduction ? {
+    ssl: {
+      rejectUnauthorized: false
+    }
+  } : undefined,
   synchronize: true, // ATENÇÃO: use apenas em desenvolvimento!
   logging: ['error'], // Mostra apenas erros, não as queries
   entities: [
