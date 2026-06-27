@@ -3,7 +3,7 @@
     import { Button } from '$lib/components/ui/button';
     import { Card, CardContent } from '$lib/components/ui/card';
     import { CardHeader, CardTitle } from '$lib/components/ui/card';
-    import { MapPin, CheckCircle, Clock, XCircle } from 'lucide-svelte';
+    import { MapPin, CheckCircle, Clock, XCircle } from '@lucide/svelte';
 
     const { data }: { data: PageData } = $props();
 

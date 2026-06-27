@@ -77,8 +77,8 @@
 				>
 					Parceria
 				</a>
-			{/if} 89e565d670d04b776326f8f36c5c2f9aefa4be7b
-				</a>
+			{/if}
+			{#if user && user.papeis?.includes('ADMINISTRADOR' as any)}
 				<a
 					href="/admin/config"
 					class="text-sm font-medium hover:text-muted-foreground transition-colors"
