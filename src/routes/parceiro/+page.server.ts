@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     // Tenta pegar o usuário logado para pré-preencher e travar os campos
     const user = await locals.databaseUser();
 
- 89e565d670d04b776326f8f36c5c2f9aefa4be7b
+ 
     return {
         title: 'Solicitação de Parceria',
         userEmail: user?.email || '',

@@ -14,12 +14,6 @@
 
     let { data } = $props();
 
-    const form = superForm(untrack(() => data.form), {
-        validators: zodClient(destinationSchema),
-        dataType: 'json',
-        resetForm: false
-    }); 89e565d670d04b776326f8f36c5c2f9aefa4be7b
-
 	const form = superForm(data.form, {
 		validators: zodClient(destinationSchema),
 		dataType: 'json',
