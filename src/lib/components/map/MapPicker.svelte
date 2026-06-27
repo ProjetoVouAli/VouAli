@@ -68,6 +68,7 @@
             .addTo(map);
 
         map.on('click', (e: any) => {
+            ignoreSearchUntil = Date.now() + 4000;
             const lng = e.lngLat.lng;
             const lat = e.lngLat.lat;
             marker.setLngLat(e.lngLat);
@@ -97,10 +98,14 @@
     });
 
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+    let ignoreSearchUntil = 0;
 
     $effect(() => {
         const q = searchQuery?.trim();
         if (!q || q.length < 5 || !mapReady) return;
+
+        // Se o usuário acabou de clicar no mapa, ignoramos buscas automáticas (evita loop do reverse geocode)
+        if (Date.now() < ignoreSearchUntil) return;
 
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(async () => {
