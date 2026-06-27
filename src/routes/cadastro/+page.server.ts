@@ -28,7 +28,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-    default: async ({ request, cookies }) => {
+    register: async ({ request, cookies }) => {
         const data = await request.formData();
         const email =  data.get('email')?.toString().trim()  ??  '';
         const password = data.get('password')?.toString().trim() ?? '';
@@ -112,6 +112,65 @@ export const actions: Actions = {
                 email,
                 message: 'Erro ao processar cadastro'
             })
+        }
+    },
+    
+    google: async ({ request, cookies }) => {
+        const data = await request.formData();
+        const idToken = data.get('idToken')?.toString().trim();
+
+        if (!idToken) {
+            return fail(400, { message: 'Token do Google ausente' });
+        }
+
+        try {
+            const { verifyIdToken } = await import('$lib/server/firebase-admin');
+            const decodedToken = await verifyIdToken(idToken);
+            
+            if (!decodedToken) {
+                return fail(401, { message: 'Token do Google inválido ou expirado' });
+            }
+
+            const email = decodedToken.email;
+            if (!email) {
+                return fail(400, { message: 'Conta do Google sem email associado' });
+            }
+
+            setAuthCookie(cookies, idToken);
+
+            const { AppDataSource } = await import('$lib/server/db/data-source');
+            const { Usuario, TipoUsuario } = await import('$lib/server/db/entities/Usuario');
+            const userRepository = AppDataSource.getRepository(Usuario);
+            let usuario = await userRepository.findOne({ where: { email } });
+
+            if (!usuario) {
+                const { SolicitacaoParceiro, StatusSolicitacao } = await import('$lib/server/db/entities/SolicitacaoParceiro');
+                const solicitacaoRepository = AppDataSource.getRepository(SolicitacaoParceiro);
+                const solicitacao = await solicitacaoRepository.findOne({
+                    where: { emailResponsavel: email, status: StatusSolicitacao.APROVADA }
+                });
+
+                const papeis = [TipoUsuario.VIAJANTE];
+                if (solicitacao) {
+                    papeis.push(TipoUsuario.PARCEIRO);
+                }
+
+                usuario = userRepository.create({
+                    uid: decodedToken.uid,
+                    email: email,
+                    nome: decodedToken.name || email.split('@')[0],
+                    sexo: 'O',
+                    estaAutenticado: true,
+                    papeis: papeis
+                });
+
+                await userRepository.save(usuario);
+            }
+
+            return buildAuthSuccessResponse(usuario, '✅ Cadastro com Google realizado com sucesso!');
+        } catch (error: any) {
+            console.error('Erro no Cadastro com Google:', error);
+            return fail(500, { message: 'Erro ao validar token do Google.' });
         }
     }
 };
