@@ -7,9 +7,9 @@
 	import Navbar from '$lib/components/ui/navbar/navbar.svelte';
 	import { flash } from '$lib/stores/flash';
 
+	import Footer from '$lib/components/ui/footer/footer.svelte';
+
 	let { data, children } = $props();
-
-
 
 	$effect(() => {
 		if ($flash) {
@@ -33,6 +33,10 @@
 	</div>
 {/if}
 
-<main class="flex flex-col *:pl-5 *:pr-5 min-h-screen max-w-content-width overflow-clip w-full pt-20 m-auto">
-	{@render children?.()}
-</main>
+<div class="flex flex-col min-h-screen">
+	<main class="flex-grow *:pl-5 *:pr-5 max-w-content-width overflow-clip w-full pt-20 m-auto">
+		{@render children?.()}
+	</main>
+
+	<Footer />
+</div>
