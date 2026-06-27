@@ -258,6 +258,31 @@ import MapPicker from '$lib/components/map/MapPicker.svelte';
 
         <Separator class="my-6" />
 
+        <h3 class="text-lg font-semibold">Informações Úteis</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Form.Field {form} name="price" class="space-y-2">
+                <Form.Control>
+                    {#snippet children({ props })}
+                        <Form.Label>Preço Médio / Entrada</Form.Label>
+                        <Input {...props} bind:value={$formData.price} placeholder="Ex: Gratuito, A partir de R$ 50..." />
+                    {/snippet}
+                </Form.Control>
+                <Form.FieldErrors />
+            </Form.Field>
+
+            <Form.Field {form} name="openingHours" class="space-y-2">
+                <Form.Control>
+                    {#snippet children({ props })}
+                        <Form.Label>Horário de Funcionamento</Form.Label>
+                        <Input {...props} bind:value={$formData.openingHours} placeholder="Ex: Seg a Sex, 08h às 18h..." />
+                    {/snippet}
+                </Form.Control>
+                <Form.FieldErrors />
+            </Form.Field>
+        </div>
+
+        <Separator class="my-6" />
+
         <h3 class="text-lg font-semibold">Localização</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Form.Field {form} name="neighborhood" class="space-y-2">

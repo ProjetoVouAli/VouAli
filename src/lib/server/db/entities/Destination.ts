@@ -42,6 +42,12 @@ export class Destination {
   @Column({ type: 'boolean', default: true })
   active!: boolean;
 
+  @Column({ type: 'text', nullable: true })
+  price!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  openingHours!: string | null;
+
   @Column({ type: 'varchar', length: 20, default: 'pending' })
   status!: string;
 

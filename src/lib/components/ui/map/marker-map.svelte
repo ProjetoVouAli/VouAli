@@ -3,9 +3,15 @@
 	import { MapPin } from '@lucide/svelte';
 	import { MapLibre, Marker, Popup } from 'svelte-maplibre-gl';
 	import { mode } from 'mode-watcher';
-	import type { Destination } from '$lib/server/db/entities/Destination';
+	
+	interface MapMarker {
+		name: string;
+		slug: string;
+		latitude: number | string;
+		longitude: number | string;
+	}
 
-	const { destinations }: { destinations: Destination[] } = $props();
+	const { destinations }: { destinations: MapMarker[] } = $props();
 
 	let offset = $state(24);
 

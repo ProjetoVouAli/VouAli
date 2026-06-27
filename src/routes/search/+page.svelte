@@ -5,6 +5,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Card, CardContent } from '$lib/components/ui/card';
+	import { Clock, CircleDollarSign } from 'lucide-svelte';
 
 	const searchParams = $state(page.url.searchParams);
 	let searchParam = $state(searchParams.get('search') || '');
@@ -154,12 +155,27 @@
 										</h3>
 
 										{#if destination.description}
-											<p class="text-sm text-muted-foreground line-clamp-3 mb-4 cursor-help flex-1" title={destination.description}>
+											<p class="text-sm text-muted-foreground line-clamp-2 mb-4 cursor-help flex-1" title={destination.description}>
 												{destination.description}
 											</p>
 										{/if}
 
-										<div class="pt-4 border-t border-border mt-auto">
+										<div class="flex flex-col gap-1 mb-4 mt-auto">
+											{#if destination.openingHours}
+												<div class="flex items-center text-xs text-muted-foreground gap-1.5">
+													<Clock class="w-3.5 h-3.5" />
+													<span class="truncate">{destination.openingHours}</span>
+												</div>
+											{/if}
+											{#if destination.price}
+												<div class="flex items-center text-xs text-muted-foreground gap-1.5">
+													<CircleDollarSign class="w-3.5 h-3.5" />
+													<span class="truncate">{destination.price}</span>
+												</div>
+											{/if}
+										</div>
+
+										<div class="pt-4 border-t border-border">
 											<span class="text-xs font-bold uppercase tracking-wide text-foreground group-hover:gap-2 flex items-center transition-all">
 												Saiba Mais
 												<span class="ml-2">→</span>

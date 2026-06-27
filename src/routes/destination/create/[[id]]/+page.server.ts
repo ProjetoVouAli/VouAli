@@ -33,7 +33,9 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
         longitude: -43.1729,
         categories: [],
         images: [],
-        imagesToDelete: [] // Adicionado fallback para deleção
+        imagesToDelete: [], // Adicionado fallback para deleção
+        price: '',
+        openingHours: ''
     };
 
     let destinationStatus: string | null = null;

@@ -13,6 +13,8 @@ export const destinationSchema = z.object({
     address: z.string().optional().default(''),
     latitude: z.coerce.number().min(-90).max(90, 'Latitude inválida'),
     longitude: z.coerce.number().min(-180).max(180, 'Longitude inválida'),
+    price: z.string().optional().default(''),
+    openingHours: z.string().optional().default(''),
     active: z.boolean(),
     categories: z.array(z.string()).min(1, 'Adicione pelo menos uma categoria'),
     images: z.array(z.instanceof(File)).optional().default([]),
