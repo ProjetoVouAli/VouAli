@@ -15,6 +15,18 @@ export async function saveUserToDatabase(
         throw new Error('Email já cadastrado');
     }
 
+    const { SolicitacaoParceiro, StatusSolicitacao } = await import('../db/entities/SolicitacaoParceiro');
+    const solicitacaoRepo = AppDataSource.getRepository(SolicitacaoParceiro);
+    const solicitacao = await solicitacaoRepo.findOne({
+        where: { emailResponsavel: email, status: StatusSolicitacao.APROVADA }
+    });
+
+    const papeis = [TipoUsuario.VIAJANTE];
+    if (solicitacao) {
+        papeis.push(TipoUsuario.PARCEIRO);
+        console.log(`[AUTOMAÇÃO] Conta criada e promovida a Parceiro automaticamente (${email})`);
+    }
+
     // Criar usuário com uid do Firebase (Firebase gerencia a senha)
     const usuario = userRepository.create({
         uid: firebaseUid,  // ✅ UID do Firebase
@@ -22,7 +34,7 @@ export async function saveUserToDatabase(
         nome,
         sexo,
         estaAutenticado: true,
-        papeis: [TipoUsuario.VIAJANTE]
+        papeis: papeis
     });
 
     await userRepository.save(usuario);

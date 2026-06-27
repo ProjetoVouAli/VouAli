@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { AppDataSource } from '$lib/server/db/data-source';
 import { Destination } from '$lib/server/db/entities/Destination';
-import { TipoUsuario } from '$lib/server/db/entities/Usuario';
+import { TipoUsuario, Usuario } from '$lib/server/db/entities/Usuario';
 import { SolicitacaoParceiro, StatusSolicitacao } from '$lib/server/db/entities/SolicitacaoParceiro';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
@@ -77,9 +77,33 @@ export const actions: Actions = {
         const id = parseInt(data.get('id') as string);
 
         const repo = AppDataSource.getRepository(SolicitacaoParceiro);
-        await repo.update(id, { status: StatusSolicitacao.APROVADA, dataAprovaçao: new Date() });
+        const solicitacao = await repo.findOne({ where: { id } });
+        if (!solicitacao) {
+            throw error(404, 'Solicitação não encontrada');
+        }
 
-        // Ideia: Aqui seria o lugar ideal para enviar email de aprovação e talvez já criar a conta do parceiro ou atualizar o papel de um usuário existente.
+        solicitacao.status = StatusSolicitacao.APROVADA;
+        solicitacao.dataAprovaçao = new Date();
+        await repo.save(solicitacao);
+
+        // O "Pulo do Gato": Procurar o usuário pelo email
+        const userRepo = AppDataSource.getRepository(Usuario);
+        const parceiroUser = await userRepo.findOne({ where: { email: solicitacao.emailResponsavel } });
+        let jaPossuiConta = false;
+
+        if (parceiroUser) {
+            jaPossuiConta = true;
+            // Se o usuário existir, adiciona o cargo de Parceiro se ele ainda não tiver
+            if (!parceiroUser.papeis.includes(TipoUsuario.PARCEIRO)) {
+                parceiroUser.papeis.push(TipoUsuario.PARCEIRO);
+                await userRepo.save(parceiroUser);
+            }
+        }
+
+        // Dispara o email assincronamente (não precisa dar await para não travar a UI)
+        import('$lib/server/services/email.server').then(({ sendPartnerApprovalEmail }) => {
+            sendPartnerApprovalEmail(solicitacao.emailResponsavel, solicitacao.nomeEmpresa, jaPossuiConta);
+        });
 
         return { success: true };
     },
