@@ -70,6 +70,9 @@ export const actions: Actions = {
         const cidade = sanitizarEntrada(data.get('cidade')?.toString() ?? '', 'nome');
         const estado = (data.get('estado')?.toString() ?? '').toUpperCase();
         const endereco = sanitizarEntrada(data.get('endereco')?.toString() ?? '', 'texto');
+        const street = sanitizarEntrada(data.get('street')?.toString() ?? '', 'texto');
+        const number = sanitizarEntrada(data.get('number')?.toString() ?? '', 'texto');
+        const complement = sanitizarEntrada(data.get('complement')?.toString() ?? '', 'texto');
         const aceiteTermos = data.get('aceiteTermos') === 'on';
 
         // ===== VALIDAÇÕES CRÍTICAS DE SEGURANÇA =====
@@ -313,6 +316,9 @@ export const actions: Actions = {
                 cidade,
                 estado,
                 endereco: endereco || undefined,
+                street: street || undefined,
+                number: number || undefined,
+                complement: complement || undefined,
                 aceiteTermos
             });
 

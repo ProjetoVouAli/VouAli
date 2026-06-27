@@ -93,6 +93,9 @@
 					<h2 class="text-2xl font-bold mb-4">Sobre o destino</h2>
 					{#if destination.categories && destination.categories.length > 0}
 						<div class="flex gap-2 mb-4 flex-wrap">
+							<span class="{destination.isPublic ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'} text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full border border-current">
+								{destination.isPublic ? 'Público' : 'Privado'}
+							</span>
 							{#each destination.categories as cat}
 								<span class="bg-primary/10 text-primary text-xs font-bold uppercase tracking-wide px-3 py-1 rounded-full">{cat}</span>
 							{/each}
@@ -110,7 +113,7 @@
 					<h2 class="text-2xl font-bold mb-6">Onde você estará</h2>
 					<p class="text-muted-foreground mb-4 flex items-center gap-2">
 						<MapPin class="w-5 h-5 text-primary" />
-						{destination.address ? `${destination.address}, ` : ''}{destination.neighborhood ? `${destination.neighborhood} - ` : ''}{destination.city} / {destination.state}
+						{destination.street ? destination.street : destination.address}{destination.number ? `, ${destination.number}` : ''}{destination.complement ? ` - ${destination.complement}` : ''}{destination.neighborhood ? ` - ${destination.neighborhood}` : ''} - {destination.city} / {destination.state}
 					</p>
 					<div class="w-full h-[400px] rounded-2xl overflow-hidden border shadow-sm relative z-0 bg-muted">
 						{#if destination.latitude && destination.longitude}
@@ -172,14 +175,16 @@
 						<Card.Content class="p-8">
 							<!-- Price & Hours -->
 							<div class="space-y-6 mb-6">
-								<div>
-									<span class="text-muted-foreground text-xs font-bold uppercase tracking-widest">Valor</span>
-									<div class="flex items-center text-2xl font-black mt-1 text-foreground">
-										<CircleDollarSign class="w-6 h-6 mr-2 text-primary shrink-0" />
-										{destination.price || 'Não informado'}
+								{#if !destination.isPublic}
+									<div>
+										<span class="text-muted-foreground text-xs font-bold uppercase tracking-widest">Valor</span>
+										<div class="flex items-center text-2xl font-black mt-1 text-foreground">
+											<CircleDollarSign class="w-6 h-6 mr-2 text-primary shrink-0" />
+											{destination.price || 'Não informado'}
+										</div>
 									</div>
-								</div>
-								<Separator />
+									<Separator />
+								{/if}
 								<div>
 									<span class="text-muted-foreground text-xs font-bold uppercase tracking-widest">Funcionamento</span>
 									<div class="flex items-center text-lg font-medium mt-1 text-foreground">

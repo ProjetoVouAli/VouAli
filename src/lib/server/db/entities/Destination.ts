@@ -33,6 +33,15 @@ export class Destination {
   @Column({ type: 'text', nullable: true })
   address!: string | null;
 
+  @Column({ type: 'text', nullable: true })
+  street!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  number!: string | null;
+
+  @Column({ type: 'text', nullable: true })
+  complement!: string | null;
+
   @Column({ type: 'decimal', precision: 10, scale: 8 })
   latitude!: number;
 
@@ -41,6 +50,9 @@ export class Destination {
 
   @Column({ type: 'boolean', default: true })
   active!: boolean;
+
+  @Column({ type: 'boolean', default: true })
+  isPublic!: boolean;
 
   @Column({ type: 'text', nullable: true })
   price!: string | null;

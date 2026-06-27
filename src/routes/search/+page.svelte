@@ -144,11 +144,16 @@
 									</div>
 
 									<CardContent class="p-6 flex-1 flex flex-col">
-										{#if destination.categories && destination.categories.length > 0}
-											<span class="inline-block text-xs font-bold uppercase tracking-wide text-muted-foreground border border-border px-3 py-1 mb-3 w-fit">
-												{destination.categories[0]}
+										<div class="flex gap-2 flex-wrap mb-3">
+											<span class="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-1 {destination.isPublic ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+												{destination.isPublic ? 'Público' : 'Privado'}
 											</span>
-										{/if}
+											{#if destination.categories && destination.categories.length > 0}
+												<span class="inline-block text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border px-2 py-1">
+													{destination.categories[0]}
+												</span>
+											{/if}
+										</div>
 
 										<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 mb-2 cursor-help" title={destination.name}>
 											{destination.name}
@@ -167,7 +172,7 @@
 													<span class="truncate">{destination.openingHours}</span>
 												</div>
 											{/if}
-											{#if destination.price}
+											{#if !destination.isPublic && destination.price}
 												<div class="flex items-center text-xs text-muted-foreground gap-1.5">
 													<CircleDollarSign class="w-3.5 h-3.5" />
 													<span class="truncate">{destination.price}</span>

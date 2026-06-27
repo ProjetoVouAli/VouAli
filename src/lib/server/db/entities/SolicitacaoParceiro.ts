@@ -58,6 +58,15 @@ export class SolicitacaoParceiro {
     @Column('text', { nullable: true })
     endereco?: string;
 
+    @Column({ type: 'text', nullable: true })
+    street?: string;
+
+    @Column({ type: 'text', nullable: true })
+    number?: string;
+
+    @Column({ type: 'text', nullable: true })
+    complement?: string;
+
     @Column('boolean', { default: false })
     aceiteTermos!: boolean;
 

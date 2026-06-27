@@ -33,7 +33,10 @@
         cep: '',
         cidade: '',
         estado: '',
-        endereco: '',
+        endereco: '', // Mantido por retrocompatibilidade
+        street: '',
+        number: '',
+        complement: '',
         aceiteTermos: false
     });
 
@@ -51,6 +54,9 @@
         cnpj: { min: 18, max: 18 },
         cidade: { min: 2, max: 50 },
         endereco: { min: 0, max: 255 },
+        street: { min: 2, max: 255 },
+        number: { min: 1, max: 20 },
+        complement: { min: 0, max: 100 },
         descricaoNegocio: { min: 20, max: 1000 }
     };
 
@@ -89,8 +95,11 @@
                 
                 // Monta o endereço inicial (Rua + Bairro)
                 formData.endereco = data.logradouro;
+                formData.street = data.logradouro;
                 if (data.bairro) {
                     formData.endereco += ` - ${data.bairro}`;
+                    // Pode manter o bairro apenas no endereço se quiser, ou adicionar no street, 
+                    // mas o correto é que street é apenas a rua.
                 }
 
                 // Remove possíveis erros antigos da tela
@@ -98,10 +107,12 @@
                 camposInvalidos.delete('cidade');
                 camposInvalidos.delete('estado');
                 camposInvalidos.delete('endereco');
+                camposInvalidos.delete('street');
                 delete erros.cep;
                 delete erros.cidade;
                 delete erros.estado;
                 delete erros.endereco;
+                delete erros.street;
             } else {
                 erros.cep = 'CEP não encontrado.';
                 camposInvalidos.add('cep');
@@ -581,28 +592,63 @@
                         </select>
                     </div>
 
-                    <!-- Endereço -->
-                    <div>
-                        <label for="endereco" class="block text-sm font-semibold mb-2">
-                            Endereço Completo
-                        </label>
-                        <Input
-                            id="endereco"
-                            type="text"
-                            name="endereco"
-                            bind:value={formData.endereco}
-                            onblur={() => handleValidarCampo('endereco')}
-                            max="255"
-                            disabled={loading}
-                            placeholder="Rua, número, complemento"
-                            aria-invalid={camposInvalidos.has('endereco')}
-                            class={camposInvalidos.has('endereco') ? 'border-destructive' : ''}
-                        />
-                        {#if erros.endereco}
-                            <p class="text-xs text-destructive mt-1">{erros.endereco}</p>
-                        {/if}
-                        <p class="text-xs text-muted-foreground mt-1">{formData.endereco.length}/255</p>
+                    <!-- Rua e Número na mesma linha -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-3">
+                            <label for="street" class="block text-sm font-semibold mb-2">Rua / Avenida *</label>
+                            <Input
+                                id="street"
+                                type="text"
+                                name="street"
+                                bind:value={formData.street}
+                                onblur={() => handleValidarCampo('street')}
+                                max="255"
+                                required
+                                disabled={loading}
+                                placeholder="Ex: Av. Atlântica"
+                                aria-invalid={camposInvalidos.has('street')}
+                                class={camposInvalidos.has('street') ? 'border-destructive' : ''}
+                            />
+                            {#if erros.street}
+                                <p class="text-xs text-destructive mt-1">{erros.street}</p>
+                            {/if}
+                        </div>
+                        <div class="md:col-span-1">
+                            <label for="number" class="block text-sm font-semibold mb-2">Número *</label>
+                            <Input
+                                id="number"
+                                type="text"
+                                name="number"
+                                bind:value={formData.number}
+                                onblur={() => handleValidarCampo('number')}
+                                max="20"
+                                required
+                                disabled={loading}
+                                placeholder="S/N"
+                                aria-invalid={camposInvalidos.has('number')}
+                                class={camposInvalidos.has('number') ? 'border-destructive' : ''}
+                            />
+                        </div>
                     </div>
+
+                    <!-- Complemento -->
+                    <div>
+                        <label for="complement" class="block text-sm font-semibold mb-2">Complemento</label>
+                        <Input
+                            id="complement"
+                            type="text"
+                            name="complement"
+                            bind:value={formData.complement}
+                            onblur={() => handleValidarCampo('complement')}
+                            max="100"
+                            disabled={loading}
+                            placeholder="Apto, Sala, Bloco..."
+                            aria-invalid={camposInvalidos.has('complement')}
+                            class={camposInvalidos.has('complement') ? 'border-destructive' : ''}
+                        />
+                    </div>
+                    
+                    <input type="hidden" name="endereco" value={formData.endereco} />
                 </CardContent>
             </Card>
 

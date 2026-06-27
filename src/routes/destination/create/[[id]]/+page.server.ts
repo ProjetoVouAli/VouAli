@@ -35,7 +35,11 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
         images: [],
         imagesToDelete: [], // Adicionado fallback para deleção
         price: '',
-        openingHours: ''
+        openingHours: '',
+        isPublic: true,
+        street: 'Atualizar rua',
+        number: 'S/N',
+        complement: ''
     };
 
     let destinationStatus: string | null = null;
@@ -59,6 +63,9 @@ export const load: PageServerLoad = async ({ locals, parent, params }) => {
 
         initialData = {
             ...destination,
+            street: destination.street ?? '',
+            number: destination.number ?? '',
+            complement: destination.complement ?? '',
             categories: destination.categories?.map(category => category.name) ?? [],
             images: [],
             imagesToDelete: []
@@ -101,6 +108,7 @@ export const actions: Actions = {
         const form = await superValidate(request, zod(destinationSchema));
 
         if (!form.valid) {
+            console.error('Validation failed!', JSON.stringify(form.errors, null, 2));
             return fail(400, { form });
         }
 

@@ -17,6 +17,9 @@ export async function saveSolicitacaoParceiro(dados: {
     cidade: string;
     estado: string;
     endereco?: string;
+    street?: string;
+    number?: string;
+    complement?: string;
     aceiteTermos: boolean;
 }) {
     const solicitacaoRepository = AppDataSource.getRepository(SolicitacaoParceiro);
@@ -56,6 +59,9 @@ export async function saveSolicitacaoParceiro(dados: {
         cidade: dados.cidade,
         estado: dados.estado,
         endereco: dados.endereco,
+        street: dados.street,
+        number: dados.number,
+        complement: dados.complement,
         aceiteTermos: dados.aceiteTermos,
         status: StatusSolicitacao.PENDENTE
     });
