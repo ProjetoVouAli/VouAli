@@ -9,6 +9,10 @@ const transporter = nodemailer.createTransport({
     user: 'resend',
     pass: import.meta.env.VITE_RESEND_API_KEY || process.env.RESEND_API_KEY || '', 
   },
+  tls: {
+    // Evita erro de 'self-signed certificate in certificate chain' em redes locais/Windows
+    rejectUnauthorized: false
+  }
 });
 
 const DEFAULT_SENDER = 'VouAli <onboarding@resend.dev>'; // Substitua pelo seu domínio validado no Resend futuramente
