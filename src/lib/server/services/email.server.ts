@@ -21,13 +21,10 @@ const DEFAULT_SENDER = 'VouAli <onboarding@resend.dev>'; // Substitua pelo seu d
 /**
  * Envia o email informando que a empresa foi aprovada
  */
-export async function sendPartnerApprovalEmail(email: string, nomeEmpresa: string, jaPossuiConta: boolean) {
+export async function sendPartnerApprovalEmail(email: string, nomeEmpresa: string, jaPossuiConta: boolean, baseUrl: string) {
   const subject = jaPossuiConta 
     ? 'Sua conta de Parceiro foi ativada!' 
     : 'Sua empresa foi aprovada! Crie sua conta.';
-
-  // Usa a URL do ambiente (Produção ou Local)
-  const baseUrl = import.meta.env.VITE_APP_URL || 'http://localhost:5173';
 
   const html = jaPossuiConta 
     ? `
@@ -42,7 +39,7 @@ export async function sendPartnerApprovalEmail(email: string, nomeEmpresa: strin
       <p>Temos uma ótima notícia: a sua solicitação de parceria no VouAli foi <strong>aprovada</strong>.</p>
       <p>Para ativar os seus benefícios e começar a postar seus destinos, basta criar a sua conta na plataforma utilizando este exato email (${email}).</p>
       <p>Nós detectaremos a sua conta automaticamente e liberaremos as permissões B2B.</p>
-      <a href="${baseUrl}/cadastro" style="display:inline-block;padding:10px 20px;background-color:#000;color:#fff;text-decoration:none;border-radius:5px;">Criar Conta de Parceiro</a>
+      <a href="${baseUrl}/cadastro?email=${encodeURIComponent(email)}&nome=${encodeURIComponent(nomeEmpresa)}" style="display:inline-block;padding:10px 20px;background-color:#000;color:#fff;text-decoration:none;border-radius:5px;">Criar Conta de Parceiro</a>
     `;
 
   try {

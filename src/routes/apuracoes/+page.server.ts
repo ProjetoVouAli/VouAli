@@ -100,9 +100,12 @@ export const actions: Actions = {
             }
         }
 
+        // Extrai a URL base do request para que o link do email se adapte automaticamente (localhost, produção, porta customizada, etc)
+        const baseUrl = new URL(request.url).origin;
+
         // Dispara o email assincronamente (não precisa dar await para não travar a UI)
         import('$lib/server/services/email.server').then(({ sendPartnerApprovalEmail }) => {
-            sendPartnerApprovalEmail(solicitacao.emailResponsavel, solicitacao.nomeEmpresa, jaPossuiConta);
+            sendPartnerApprovalEmail(solicitacao.emailResponsavel, solicitacao.nomeEmpresa, jaPossuiConta, baseUrl);
         });
 
         return { success: true };

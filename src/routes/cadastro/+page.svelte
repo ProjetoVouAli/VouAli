@@ -10,15 +10,19 @@
     import { googleProvider, auth } from '$lib/firebase';
     import { signInWithPopup, type UserCredential } from 'firebase/auth';
 
-    let nome = '';
-    let email = '';
-    let password = '';
-    let confirmPassword = '';
-    let sexo = '';
-    let mostrarSenha = false;
-    let mostrarConfirm = false;
-    let loading = false;
-    let senhaMatch = true;
+    // Lê parâmetros da URL caso tenha vindo do link do email de aprovação de parceiro
+    let emailParams = page.url.searchParams.get('email') || '';
+    let nomeParams = page.url.searchParams.get('nome') || '';
+
+    let nome = $state(nomeParams);
+    let email = $state(emailParams);
+    let password = $state('');
+    let confirmPassword = $state('');
+    let sexo = $state('');
+    let mostrarSenha = $state(false);
+    let mostrarConfirm = $state(false);
+    let loading = $state(false);
+    let senhaMatch = $state(true);
 
     function verificarSenha() {
         senhaMatch = password === confirmPassword;
