@@ -264,7 +264,7 @@
             </p>
         </div>
         <Button variant="outline" onclick={() => history.back()}>Voltar</Button>
-    </div> 89e565d670d04b776326f8f36c5c2f9aefa4be7b
+    </div> 
 
 	<Separator class="mb-8" />
 

@@ -228,12 +228,17 @@ export const actions: Actions = {
         if (uploadedFiles && uploadedFiles.length > 0) {
             for (const file of uploadedFiles) {
                 if (file instanceof File && file.size > 0 && file.name !== 'undefined') {
-                    const result = await uploadImage(file, 'vouali/destinations');
-                    const destinationImage = imageRepo.create({
-                        url: result.url,
-                        destinationId: destinationId
-                    });
-                    await imageRepo.save(destinationImage);
+                    try {
+                        const result = await uploadImage(file, 'vouali/destinations');
+                        const destinationImage = imageRepo.create({
+                            url: result.url,
+                            destinationId: destinationId
+                        });
+                        await imageRepo.save(destinationImage);
+                        console.log(`[CLOUDINARY] Upload OK: ${result.url}`);
+                    } catch (e: any) {
+                        console.error('[CLOUDINARY] Upload failed:', e.message);
+                    }
                 }
             }
         }

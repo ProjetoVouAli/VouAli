@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { imask } from '@imask/svelte';
+    import { imask } from '$lib/actions/imask';
     import { cpf, cnpj } from 'cpf-cnpj-validator';
 
     // O valor limpo apenas com números (ex: 12345678909) - Ideal para salvar no banco de dados!

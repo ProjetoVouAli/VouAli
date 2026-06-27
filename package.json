@@ -44,12 +44,12 @@
     "vite": "^7.0.4"
   },
   "dependencies": {
-    "@imask/svelte": "^7.6.1",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
     "cpf-cnpj-validator": "^2.1.2",
     "firebase": "^12.11.0",
     "firebase-admin": "^13.8.0",
+    "imask": "^7.6.1",
     "intl-tel-input": "^29.0.4",
     "leaflet": "^1.9.4",
     "lucide-svelte": "^1.0.1",
