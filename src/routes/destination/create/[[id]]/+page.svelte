@@ -60,10 +60,36 @@
 		'Sempre aberto (24h)',
 		'Horário Comercial (08h às 18h)',
 		'Apenas Finais de Semana',
-		'Aberto apenas durante o dia'
+		'Aberto apenas durante o dia',
+		'Apenas à noite (18h às 02h)',
+		'Madrugada (22h às 06h)'
 	];
 	let hoursPreset = $state(hoursOptions.includes(initialHours) ? initialHours : 'Outro');
 	let customHours = $state(hoursOptions.includes(initialHours) ? '' : initialHours);
+
+	// Variáveis para o construtor visual de horários
+	const daysOfWeek = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+	let customDays = $state<string[]>([]);
+	let customTimeStart = $state('');
+	let customTimeEnd = $state('');
+
+	function toggleDay(day: string) {
+		if (customDays.includes(day)) {
+			customDays = customDays.filter((d) => d !== day);
+		} else {
+			customDays = [...customDays, day];
+		}
+		buildCustomHoursString();
+	}
+
+	function buildCustomHoursString() {
+		let parts = [];
+		if (customDays.length > 0) parts.push(customDays.join(', '));
+		if (customTimeStart && customTimeEnd) parts.push(`(${customTimeStart} às ${customTimeEnd})`);
+		else if (customTimeStart) parts.push(`(A partir das ${customTimeStart})`);
+		
+		customHours = parts.join(' ');
+	}
 
 	// Sincroniza as horas dinamicamente
 	$effect(() => {
@@ -473,22 +499,47 @@
 						<option value="Horário Comercial (08h às 18h)">Horário Comercial (08h às 18h)</option>
 						<option value="Apenas Finais de Semana">Apenas Finais de Semana</option>
 						<option value="Aberto apenas durante o dia">Aberto apenas durante o dia</option>
+						<option value="Apenas à noite (18h às 02h)">Apenas à noite (18h às 02h)</option>
+						<option value="Madrugada (22h às 06h)">Madrugada (22h às 06h)</option>
 						<option value="Outro">Outro (Especificar)</option>
 					</select>
 				</div>
 
-				<div class="space-y-2 mt-2">
-					<Label
-						class="text-sm font-medium leading-none {hoursPreset !== 'Outro'
-							? 'text-muted-foreground'
-							: ''}">Especificar Horário</Label
-					>
-					<Input
-						bind:value={customHours}
-						placeholder="Ex: Seg a Sex, das 09h às 17h"
-						disabled={hoursPreset !== 'Outro'}
-					/>
-				</div>
+				{#if hoursPreset === 'Outro'}
+					<div class="space-y-4 mt-4 p-4 border rounded-md bg-muted/30">
+						<Label class="text-sm font-medium">Dias de Funcionamento</Label>
+						<div class="flex flex-wrap gap-2">
+							{#each daysOfWeek as day}
+								<button
+									type="button"
+									class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors border {customDays.includes(day) ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-background hover:bg-muted border-border'}"
+									onclick={() => toggleDay(day)}
+								>
+									{day}
+								</button>
+							{/each}
+						</div>
+						
+						<div class="flex gap-4">
+							<div class="space-y-2 flex-1">
+								<Label class="text-xs">Abertura</Label>
+								<Input type="time" bind:value={customTimeStart} onchange={buildCustomHoursString} />
+							</div>
+							<div class="space-y-2 flex-1">
+								<Label class="text-xs">Fechamento</Label>
+								<Input type="time" bind:value={customTimeEnd} onchange={buildCustomHoursString} />
+							</div>
+						</div>
+
+						<div class="space-y-2">
+							<Label class="text-xs text-muted-foreground">Ou digite o horário livremente</Label>
+							<Input
+								bind:value={customHours}
+								placeholder="Ex: Seg a Sex, das 09h às 17h"
+							/>
+						</div>
+					</div>
+				{/if}
 			</div>
 
 			<input type="hidden" name="price" value={$formData.price} />

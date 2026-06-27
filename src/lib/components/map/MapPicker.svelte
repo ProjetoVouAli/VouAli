@@ -69,6 +69,7 @@
 
         map.on('click', (e: any) => {
             ignoreSearchUntil = Date.now() + 4000;
+            geocodeError = ''; // Limpa o erro se o usuário corrigiu na mão
             const lng = e.lngLat.lng;
             const lat = e.lngLat.lat;
             marker.setLngLat(e.lngLat);
@@ -100,21 +101,45 @@
     let debounceTimer: ReturnType<typeof setTimeout> | undefined;
     let ignoreSearchUntil = 0;
 
+    // Função auxiliar para buscar no Nominatim
+    async function fetchGeocode(query: string) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&accept-language=pt`;
+        const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
+        return await res.json();
+    }
+
     $effect(() => {
         const q = searchQuery?.trim();
         if (!q || q.length < 5 || !mapReady) return;
 
-        // Se o usuário acabou de clicar no mapa, ignoramos buscas automáticas (evita loop do reverse geocode)
-        if (Date.now() < ignoreSearchUntil) return;
+        // Se o usuário acabou de clicar no mapa, ignoramos buscas automáticas
+        if (Date.now() < ignoreSearchUntil) {
+            geocodeError = ''; // Garante que a mensagem suma
+            return;
+        }
 
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(async () => {
             geocoding = true;
             geocodeError = '';
             try {
-                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&accept-language=pt`;
-                const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
-                const data = await res.json();
+                let data = await fetchGeocode(q);
+
+                // Fallback: se não achar com o número, tenta sem o número (caso tenha)
+                // Assumindo que a query é "Rua, Numero, Bairro..."
+                if ((!data || data.length === 0) && q.includes(',')) {
+                    const parts = q.split(',').map(p => p.trim());
+                    // Remove o segundo elemento (geralmente o número) se for curto
+                    if (parts.length >= 3 && parts[1].length <= 5 && !isNaN(Number(parts[1]))) {
+                        parts.splice(1, 1);
+                        const fallbackQ = parts.join(', ');
+                        data = await fetchGeocode(fallbackQ);
+                        if (data && data.length > 0) {
+                            geocodeError = 'Número não encontrado exatamente. O pino foi movido para a rua. Ajuste manualmente.';
+                        }
+                    }
+                }
+
                 if (data && data.length > 0) {
                     const lon = parseFloat(data[0].lon);
                     const lat = parseFloat(data[0].lat);
@@ -130,14 +155,14 @@
                         map?.setZoom(15);
                     }
                 } else {
-                    geocodeError = 'Local não encontrado. Clique no mapa para posicionar o pin.';
+                    geocodeError = 'Local não encontrado automaticamente. Clique no mapa para posicionar o pin.';
                 }
             } catch {
                 geocodeError = 'Erro ao buscar local.';
             } finally {
                 geocoding = false;
             }
-        }, 600);
+        }, 800);
     });
 </script>
 
