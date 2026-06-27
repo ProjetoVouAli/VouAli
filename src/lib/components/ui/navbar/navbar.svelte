@@ -18,7 +18,7 @@
 
 	function closeAndFocusDestinos() {
 		destinoOpen = false;
-		tick().then(() => destinosTriggerRef.focus());
+		tick().then(() => destinosTriggerRef?.focus());
 	}
 
 	function irPara(path: string) {

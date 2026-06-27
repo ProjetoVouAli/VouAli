@@ -7,7 +7,8 @@
     import { Button } from '$lib/components/ui/button';
     import { Input } from '$lib/components/ui/input';
     import { googleProvider, auth } from '$lib/firebase';
-    import { signInWithPopup, type UserCredential } from 'firebase/auth';
+    import { signInWithRedirect, getRedirectResult, type UserCredential } from 'firebase/auth';
+    import { onMount } from 'svelte';
 
     let email = '';
     let password = '';
@@ -19,18 +20,29 @@
     let googleTokenInput: HTMLInputElement;
     let googleForm: HTMLFormElement;
 
+    onMount(() => {
+        // Verifica se o usuário acabou de voltar do redirect do Google
+        getRedirectResult(auth).then(async (result) => {
+            if (result && result.user) {
+                loading = true;
+                const idToken = await result.user.getIdToken();
+                // Submete o formulário oculto
+                googleTokenInput.value = idToken;
+                googleForm.requestSubmit();
+            }
+        }).catch((error) => {
+            console.error('Erro no Redirect do Google:', error);
+            flash.set('Erro ao autenticar com o Google após redirecionamento.');
+        });
+    });
+
     async function handleGoogleLogin() {
         try {
             loading = true;
-            const result: UserCredential = await signInWithPopup(auth, googleProvider);
-            const idToken = await result.user.getIdToken();
-            
-            // Submete o formulário oculto
-            googleTokenInput.value = idToken;
-            googleForm.requestSubmit();
+            await signInWithRedirect(auth, googleProvider);
         } catch (error) {
             console.error('Erro Google Auth:', error);
-            flash.set('Erro ao autenticar com o Google.');
+            flash.set('Erro ao iniciar login com o Google.');
             loading = false;
         }
     }

@@ -4,13 +4,55 @@
     import { Card, CardContent } from '$lib/components/ui/card';
     import { CardHeader, CardTitle } from '$lib/components/ui/card';
     import { MapPin, CheckCircle, Clock, XCircle } from 'lucide-svelte';
+    import { page } from '$app/stores';
+    import { onMount } from 'svelte';
+    import { slide } from 'svelte/transition';
 
     const { data }: { data: PageData } = $props();
 
     let totalDestinos = $derived((data.pending?.length || 0) + (data.approved?.length || 0) + (data.rejected?.length || 0));
+
+    let showSuccess = $state(false);
+    let isAdminAction = $state(false);
+
+    onMount(() => {
+        if ($page.url.searchParams.get('success') === 'destino_salvo') {
+            showSuccess = true;
+            isAdminAction = $page.url.searchParams.get('admin') === 'true';
+            
+            // Remove o parametro da url para não piscar no F5
+            const url = new URL(window.location.href);
+            url.searchParams.delete('success');
+            url.searchParams.delete('admin');
+            window.history.replaceState({}, '', url);
+
+            setTimeout(() => {
+                showSuccess = false;
+            }, 5000);
+        }
+    });
 </script>
 
 <div class="min-h-screen bg-background">
+    {#if showSuccess}
+        <div transition:slide={{ duration: 400 }} class="fixed bottom-6 right-6 z-50 bg-green-500 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3">
+            <CheckCircle class="w-6 h-6" />
+            <div>
+                <p class="font-bold">Sucesso!</p>
+                <p class="text-sm text-green-50">
+                    {#if isAdminAction}
+                        Local salvo com sucesso (Aprovado).
+                    {:else}
+                        Local salvo e enviado para aprovação.
+                    {/if}
+                </p>
+            </div>
+            <button onclick={() => showSuccess = false} class="ml-4 opacity-70 hover:opacity-100">
+                <XCircle class="w-5 h-5" />
+            </button>
+        </div>
+    {/if}
+
     <section class="pt-32 pb-8 px-8 bg-gradient-to-b from-gray-50 to-background dark:from-gray-950 dark:to-background">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
             <div>

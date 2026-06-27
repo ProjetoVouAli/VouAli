@@ -123,13 +123,23 @@
 			const data = await res.json();
 			if (data?.address) {
 				const addr = data.address;
-				const road = [addr.road, addr.house_number].filter(Boolean).join(', ');
-				if (road) $formData.address = road;
+				
+				if (addr.road) $formData.street = addr.road;
+				if (addr.house_number) $formData.number = addr.house_number;
+				if (addr.postcode) {
+					const cep = addr.postcode.replace(/\D/g, '');
+					if (cep.length === 8) {
+						cepInput = cep.substring(0, 5) + '-' + cep.substring(5, 8);
+					}
+				}
+
 				if (addr.suburb) $formData.neighborhood = addr.suburb;
 				else if (addr.neighbourhood) $formData.neighborhood = addr.neighbourhood;
+				
 				if (addr.city) $formData.city = addr.city;
 				else if (addr.town) $formData.city = addr.town;
 				else if (addr.village) $formData.city = addr.village;
+				
 				if (addr.state) {
 					const ufMatch = addr.state.match(/\(([A-Z]{2})\)/);
 					if (ufMatch) {

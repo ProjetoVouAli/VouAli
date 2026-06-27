@@ -116,8 +116,8 @@ export const actions: Actions = {
         const categoryRepo = AppDataSource.getRepository(DestinationCategory);
         const imageRepo = AppDataSource.getRepository(DestinationImage);
 
-        // Separação de arquivos para upload, ids para deleção e dados comuns
-        const { categories: inputCategoryNames, images: uploadedFiles, imagesToDelete, ...destinationData } = form.data;
+        // Separação de arquivos para upload, ids para deleção, id do form, e dados comuns
+        const { categories: inputCategoryNames, images: uploadedFiles, imagesToDelete, id: formId, ...destinationData } = form.data;
 
         // 1. Processamento das Tags/Categorias
         let finalCategories: DestinationCategory[] = [];
@@ -241,6 +241,7 @@ export const actions: Actions = {
             }
         }
 
-        throw redirect(303, `/destination/create/${destinationId}`);
+        const isAdminAction = user.papeis.includes(TipoUsuario.ADMINISTRADOR);
+        throw redirect(303, `/inventory?success=destino_salvo&admin=${isAdminAction}`);
     }
 };
