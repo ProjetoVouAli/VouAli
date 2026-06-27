@@ -32,7 +32,12 @@
 
 	// Inicializa presets com base nos dados que vieram do servidor
 	const initialPrice = untrack(() => $formData.price) || 'Gratuito';
-	const priceOptions = ['Gratuito', 'A partir de R$ 50', 'A partir de R$ 100', 'A partir de R$ 250'];
+	const priceOptions = [
+		'Gratuito',
+		'A partir de R$ 50',
+		'A partir de R$ 100',
+		'A partir de R$ 250'
+	];
 	let pricePreset = $state(priceOptions.includes(initialPrice) ? initialPrice : 'Outro');
 	let customPrice = $state(priceOptions.includes(initialPrice) ? '' : initialPrice);
 
@@ -41,9 +46,9 @@
 		const isPub = $formData.isPublic;
 		const pp = pricePreset;
 		const cp = customPrice;
-		
+
 		untrack(() => {
-			const newPrice = isPub ? 'Gratuito' : (pp === 'Outro' ? cp : pp);
+			const newPrice = isPub ? 'Gratuito' : pp === 'Outro' ? cp : pp;
 			if ($formData.price !== newPrice) {
 				$formData.price = newPrice;
 			}
@@ -51,7 +56,12 @@
 	});
 
 	const initialHours = untrack(() => $formData.openingHours) || 'Sempre aberto (24h)';
-	const hoursOptions = ['Sempre aberto (24h)', 'Horário Comercial (08h às 18h)', 'Apenas Finais de Semana', 'Aberto apenas durante o dia'];
+	const hoursOptions = [
+		'Sempre aberto (24h)',
+		'Horário Comercial (08h às 18h)',
+		'Apenas Finais de Semana',
+		'Aberto apenas durante o dia'
+	];
 	let hoursPreset = $state(hoursOptions.includes(initialHours) ? initialHours : 'Outro');
 	let customHours = $state(hoursOptions.includes(initialHours) ? '' : initialHours);
 
@@ -59,7 +69,7 @@
 	$effect(() => {
 		const hp = hoursPreset;
 		const ch = customHours;
-		
+
 		untrack(() => {
 			const newHours = hp === 'Outro' ? ch : hp;
 			if ($formData.openingHours !== newHours) {
@@ -80,11 +90,11 @@
 
 	let searchQuery = $derived.by(() => {
 		const parts = [
-			$formData.address,
+			$formData.street || $formData.address,
+			$formData.number,
 			$formData.neighborhood,
 			$formData.city,
-			$formData.state,
-			$formData.name
+			$formData.state
 		].filter(Boolean);
 		return parts.join(', ');
 	});
@@ -93,7 +103,7 @@
 	$effect(() => {
 		const lat = mapLat;
 		const lng = mapLng;
-		
+
 		untrack(() => {
 			if (lat != null && $formData.latitude !== lat) {
 				$formData.latitude = lat;
@@ -138,15 +148,64 @@
 		reverseTimer = setTimeout(() => reverseGeocode(lat, lng), 500);
 	}
 
+	let showSuggestions = $state(false);
+
 	let suggestions = $derived(
-		tagInput.trim()
-			? data.categories.filter(
-					(c) =>
-						c.name.toLowerCase().includes(tagInput.toLowerCase()) &&
-						!($formData.categories || []).includes(c.name)
-				)
-			: []
+		data.categories.filter((c) => {
+			const notSelected = !($formData.categories || []).includes(c.name);
+			const matchesInput =
+				!tagInput.trim() || c.name.toLowerCase().includes(tagInput.toLowerCase());
+			return notSelected && matchesInput;
+		})
 	);
+
+	function formatCurrency(e: Event) {
+		const input = e.target as HTMLInputElement;
+		let value = input.value.replace(/\D/g, '');
+		if (value) {
+			const numberValue = parseInt(value, 10) / 100;
+			customPrice = new Intl.NumberFormat('pt-BR', {
+				style: 'currency',
+				currency: 'BRL'
+			}).format(numberValue);
+		} else {
+			customPrice = '';
+		}
+	}
+
+	let cepInput = $state('');
+	let loadingCep = $state(false);
+
+	async function buscarCep(cepLimpo: string) {
+		if (cepLimpo.length !== 8) return;
+		loadingCep = true;
+		try {
+			const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+			const data = await response.json();
+			if (!data.erro) {
+				if (data.localidade) $formData.city = data.localidade;
+				if (data.uf) $formData.state = data.uf;
+				if (data.logradouro) $formData.street = data.logradouro;
+				if (data.bairro) $formData.neighborhood = data.bairro;
+			}
+		} catch (error) {
+			console.error('Erro ao buscar o CEP:', error);
+		} finally {
+			loadingCep = false;
+		}
+	}
+
+	function handleCepChange(e: Event) {
+		const input = e.target as HTMLInputElement;
+		let val = input.value.replace(/\D/g, '');
+		if (val.length > 5) {
+			val = val.substring(0, 5) + '-' + val.substring(5, 8);
+		}
+		cepInput = val;
+		if (val.replace(/\D/g, '').length === 8) {
+			buscarCep(val.replace(/\D/g, ''));
+		}
+	}
 
 	function autoGenerateSlug() {
 		if (!data.isEdit && $formData.name) {
@@ -292,7 +351,12 @@
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Slug (URL Amigável)</Form.Label>
-						<Input {...props} bind:value={$formData.slug} readonly={data.isEdit} class={data.isEdit ? "bg-muted cursor-not-allowed opacity-50" : ""} />
+						<Input
+							{...props}
+							bind:value={$formData.slug}
+							readonly={data.isEdit}
+							class={data.isEdit ? 'bg-muted cursor-not-allowed opacity-50' : ''}
+						/>
 					{/snippet}
 				</Form.Control>
 				<Form.FieldErrors />
@@ -327,7 +391,9 @@
 
 		<div class="flex items-center justify-between mb-4">
 			<h3 class="text-lg font-semibold">Informações Úteis</h3>
-			<div class="flex flex-row items-center gap-2 space-y-0 rounded-md border p-2 shadow-sm bg-background">
+			<div
+				class="flex flex-row items-center gap-2 space-y-0 rounded-md border p-2 shadow-sm bg-background"
+			>
 				<input
 					type="checkbox"
 					name="isPublic"
@@ -371,8 +437,17 @@
 				</div>
 
 				<div class="space-y-2 mt-2">
-					<Label class="text-sm font-medium leading-none {pricePreset !== 'Outro' || $formData.isPublic ? 'text-muted-foreground' : ''}">Especificar Valor</Label>
-					<Input bind:value={customPrice} placeholder="Ex: R$ 35,00 por adulto" disabled={pricePreset !== 'Outro' || $formData.isPublic} />
+					<Label
+						class="text-sm font-medium leading-none {pricePreset !== 'Outro' || $formData.isPublic
+							? 'text-muted-foreground'
+							: ''}">Especificar Valor</Label
+					>
+					<Input
+						bind:value={customPrice}
+						placeholder="Ex: R$ 35,00 por adulto"
+						disabled={pricePreset !== 'Outro' || $formData.isPublic}
+						oninput={formatCurrency}
+					/>
 				</div>
 			</div>
 
@@ -393,8 +468,16 @@
 				</div>
 
 				<div class="space-y-2 mt-2">
-					<Label class="text-sm font-medium leading-none {hoursPreset !== 'Outro' ? 'text-muted-foreground' : ''}">Especificar Horário</Label>
-					<Input bind:value={customHours} placeholder="Ex: Seg a Sex, das 09h às 17h" disabled={hoursPreset !== 'Outro'} />
+					<Label
+						class="text-sm font-medium leading-none {hoursPreset !== 'Outro'
+							? 'text-muted-foreground'
+							: ''}">Especificar Horário</Label
+					>
+					<Input
+						bind:value={customHours}
+						placeholder="Ex: Seg a Sex, das 09h às 17h"
+						disabled={hoursPreset !== 'Outro'}
+					/>
 				</div>
 			</div>
 
@@ -404,19 +487,26 @@
 
 		<Separator class="my-6" />
 
-		<h3 class="text-lg font-semibold">Localização</h3>
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-			<Form.Field {form} name="neighborhood" class="space-y-2">
-				<Form.Control>
-					{#snippet children({ props })}
-						<Form.Label>Bairro</Form.Label>
-						<Input {...props} bind:value={$formData.neighborhood} />
-					{/snippet}
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
+		<h3 class="text-lg font-semibold mb-4">Localização</h3>
 
-			<Form.Field {form} name="city" class="space-y-2">
+		<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+			<!-- Linha 1: CEP, Cidade, Estado -->
+			<div class="space-y-2 md:col-span-3">
+				<Label class="text-sm font-medium leading-none">CEP</Label>
+				<Input
+					type="text"
+					placeholder="00000-000"
+					value={cepInput}
+					oninput={handleCepChange}
+					maxlength={9}
+					disabled={loadingCep}
+				/>
+				{#if loadingCep}
+					<p class="text-xs text-muted-foreground mt-1">Buscando endereço...</p>
+				{/if}
+			</div>
+
+			<Form.Field {form} name="city" class="space-y-2 md:col-span-7">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Cidade</Form.Label>
@@ -426,7 +516,7 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-			<Form.Field {form} name="state" class="space-y-2">
+			<Form.Field {form} name="state" class="space-y-2 md:col-span-2">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Estado (UF)</Form.Label>
@@ -435,10 +525,19 @@
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-		</div>
 
-		<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-			<Form.Field {form} name="street" class="space-y-2 md:col-span-7">
+			<!-- Linha 2: Bairro, Rua -->
+			<Form.Field {form} name="neighborhood" class="space-y-2 md:col-span-4">
+				<Form.Control>
+					{#snippet children({ props })}
+						<Form.Label>Bairro</Form.Label>
+						<Input {...props} bind:value={$formData.neighborhood} />
+					{/snippet}
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+
+			<Form.Field {form} name="street" class="space-y-2 md:col-span-8">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Rua / Avenida</Form.Label>
@@ -448,7 +547,8 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-			<Form.Field {form} name="number" class="space-y-2 md:col-span-2">
+			<!-- Linha 3: Número, Complemento -->
+			<Form.Field {form} name="number" class="space-y-2 md:col-span-3">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Número</Form.Label>
@@ -458,7 +558,7 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-			<Form.Field {form} name="complement" class="space-y-2 md:col-span-3">
+			<Form.Field {form} name="complement" class="space-y-2 md:col-span-9">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Complemento</Form.Label>
@@ -660,6 +760,8 @@
 								type="text"
 								bind:value={tagInput}
 								onkeydown={handleTagKeydown}
+								onfocus={() => (showSuggestions = true)}
+								onblur={() => setTimeout(() => (showSuggestions = false), 150)}
 								placeholder={$formData.categories?.length
 									? 'Adicionar mais...'
 									: 'Escreva uma categoria...'}
@@ -667,7 +769,7 @@
 							/>
 						</div>
 
-						{#if suggestions.length > 0}
+						{#if showSuggestions && suggestions.length > 0}
 							<ul
 								class="absolute z-50 w-full mt-1 bg-popover text-popover-foreground border rounded-md shadow-md max-h-60 overflow-y-auto p-1 space-y-0.5"
 							>
@@ -697,9 +799,7 @@
 		<Separator class="my-6" />
 
 		<div class="flex justify-end space-x-4 pt-2">
-			<Button type="button" variant="outline" onclick={() => history.back()}>
-				Cancelar
-			</Button>
+			<Button type="button" variant="outline" onclick={() => history.back()}>Cancelar</Button>
 			<Form.Button disabled={$delayed}>
 				{#if $delayed}
 					Salvando...
