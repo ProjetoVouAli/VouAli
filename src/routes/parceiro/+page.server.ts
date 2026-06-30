@@ -1,5 +1,5 @@
-import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
+import type { PageServerLoad, Actions } from "./$types";
 import { saveSolicitacaoParceiro } from "$lib/server/auth/parceiro";
 import {
     validateEmail,
@@ -33,6 +33,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     // Tenta pegar o usuário logado para pré-preencher e travar os campos
     const user = await locals.databaseUser();
 
+ 
     return {
         title: 'Solicitação de Parceria',
         userEmail: user?.email || '',
@@ -339,7 +340,7 @@ export const actions: Actions = {
             };
 
         } catch (error: any) {
-            console.error('[PARCEIRO] Erro ao salvar solicitação:', error);
+            console.error('[PARCEIRO] Erro ao salvar solicitação:');
 
             // Registrar tentativa com erro
             await registrarTentativa({

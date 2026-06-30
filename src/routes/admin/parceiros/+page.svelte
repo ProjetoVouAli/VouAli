@@ -4,7 +4,7 @@
     import { Button } from '$lib/components/ui/button';
     import { Input } from '$lib/components/ui/input';
     import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '$lib/components/ui/card';
-    import { Search, UserX } from 'lucide-svelte';
+    import { Search, UserX } from '@lucide/svelte';
     import * as Dialog from '$lib/components/ui/dialog';
 
     let { data, form } = $props<{ data: PageData; form: ActionData }>();

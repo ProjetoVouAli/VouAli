@@ -175,13 +175,22 @@
                                     <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
                                 </a>
                                 
-                                <Button 
-                                    href={`/destination/create/${destination.id}`} 
-                                    variant="secondary" 
-                                    size="sm"
-                                >
-                                    Editar
-                                </Button>
+                                <div class="flex gap-2">
+                                    <Button 
+                                        href={`/inventory/schedule/${destination.id}`}
+                                        variant="outline" 
+                                        size="sm"
+                                    >
+                                        Agenda
+                                    </Button>
+                                    <Button 
+                                        href={`/destination/create/${destination.id}`} 
+                                        variant="secondary" 
+                                        size="sm"
+                                    >
+                                        Editar
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -248,13 +257,22 @@
                                     <span class="ml-2 transition-transform group-hover:translate-x-1">→</span>
                                 </a>
                                 
-                                <Button 
-                                    href={`/destination/create/${destination.id}`} 
-                                    variant="secondary" 
-                                    size="sm"
-                                >
-                                    Editar
-                                </Button>
+                                <div class="flex gap-2">
+                                    <Button 
+                                        href={`/inventory/schedule/${destination.id}`}
+                                        variant="outline" 
+                                        size="sm"
+                                    >
+                                        Agenda
+                                    </Button>
+                                    <Button 
+                                        href={`/destination/create/${destination.id}`} 
+                                        variant="secondary" 
+                                        size="sm"
+                                    >
+                                        Editar
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

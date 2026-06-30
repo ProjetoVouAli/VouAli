@@ -10,6 +10,9 @@ import { Usuario } from './entities/Usuario';
 import { SolicitacaoParceiro } from './entities/SolicitacaoParceiro';
 import { TentativaSolicitacaoParceiro } from './entities/TentativaSolicitacaoParceiro';
 import { Review } from './entities/Review';
+import { AvailabilitySlot } from './entities/AvailabilitySlot';
+import { City } from './entities/City';
+import { PlatformConfig } from './entities/PlatformConfig';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -32,6 +35,9 @@ export const AppDataSource = new DataSource({
     SolicitacaoParceiro,
     TentativaSolicitacaoParceiro,
     Review,
+    AvailabilitySlot,
+    City,
+    PlatformConfig,
   ],
   subscribers: [],
   migrations: [],

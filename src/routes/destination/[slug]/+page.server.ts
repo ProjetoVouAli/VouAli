@@ -1,6 +1,7 @@
 import { AppDataSource } from "$lib/server/db/data-source";
 import { Destination } from "$lib/server/db/entities/Destination";
 import { Review } from "$lib/server/db/entities/Review";
+import { AvailabilitySlot } from "$lib/server/db/entities/AvailabilitySlot";
 import { error, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 
@@ -24,7 +25,8 @@ export const load: PageServerLoad = async ({ params }) => {
             categories: true,
             reviews: {
                 usuario: true
-            }
+            },
+            availabilitySlots: true
         }
     });
 
@@ -55,8 +57,16 @@ export const load: PageServerLoad = async ({ params }) => {
         }))
     };
 
+    // Load availability slots
+    const slotRepo = AppDataSource.getRepository(AvailabilitySlot);
+    const slots = await slotRepo.find({
+        where: { destination: { id: result.id }, active: true },
+        order: { dayOfWeek: 'ASC', startTime: 'ASC' }
+    });
+
     return {
         destination: structuredClone(formattedDestination),
+        slots: structuredClone(slots),
     };
 };
 

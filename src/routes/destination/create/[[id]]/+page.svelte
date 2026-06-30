@@ -2,7 +2,6 @@
 	import { superForm } from 'sveltekit-superforms';
 	import { zod4Client as zodClient } from 'sveltekit-superforms/adapters';
 	import { destinationSchema } from './schema';
-
 	import * as Form from '$lib/components/ui/form';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
@@ -10,11 +9,8 @@
 	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import MapPicker from '$lib/components/map/MapPicker.svelte';
-
 	import { untrack } from 'svelte';
-
 	let { data } = $props();
-
 	const form = superForm(
 		untrack(() => data.form),
 		{
@@ -23,30 +19,19 @@
 			resetForm: false
 		}
 	);
-
 	const { form: formData, enhance, delayed } = form;
-
 	// Estados locais das tags
 	let tagInput = $state('');
 	let ratingSelected = $state(0);
-
-	// Inicializa presets com base nos dados que vieram do servidor
+	// Inicializa presets de PREÇO
 	const initialPrice = untrack(() => $formData.price) || 'Gratuito';
-	const priceOptions = [
-		'Gratuito',
-		'A partir de R$ 50',
-		'A partir de R$ 100',
-		'A partir de R$ 250'
-	];
+	const priceOptions = ['Gratuito', 'A partir de R$ 50', 'A partir de R$ 100', 'A partir de R$ 250'];
 	let pricePreset = $state(priceOptions.includes(initialPrice) ? initialPrice : 'Outro');
 	let customPrice = $state(priceOptions.includes(initialPrice) ? '' : initialPrice);
-
-	// Sincroniza o preço dinamicamente
 	$effect(() => {
 		const isPub = $formData.isPublic;
 		const pp = pricePreset;
 		const cp = customPrice;
-
 		untrack(() => {
 			const newPrice = isPub ? 'Gratuito' : pp === 'Outro' ? cp : pp;
 			if ($formData.price !== newPrice) {
@@ -54,7 +39,7 @@
 			}
 		});
 	});
-
+	// Presets de HORÁRIO (Texto)
 	const initialHours = untrack(() => $formData.openingHours) || 'Sempre aberto (24h)';
 	const hoursOptions = [
 		'Sempre aberto (24h)',
@@ -66,13 +51,10 @@
 	];
 	let hoursPreset = $state(hoursOptions.includes(initialHours) ? initialHours : 'Outro');
 	let customHours = $state(hoursOptions.includes(initialHours) ? '' : initialHours);
-
-	// Variáveis para o construtor visual de horários
 	const daysOfWeek = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
 	let customDays = $state<string[]>([]);
 	let customTimeStart = $state('');
 	let customTimeEnd = $state('');
-
 	function toggleDay(day: string) {
 		if (customDays.includes(day)) {
 			customDays = customDays.filter((d) => d !== day);
@@ -81,21 +63,16 @@
 		}
 		buildCustomHoursString();
 	}
-
 	function buildCustomHoursString() {
 		let parts = [];
 		if (customDays.length > 0) parts.push(customDays.join(', '));
 		if (customTimeStart && customTimeEnd) parts.push(`(${customTimeStart} às ${customTimeEnd})`);
 		else if (customTimeStart) parts.push(`(A partir das ${customTimeStart})`);
-		
 		customHours = parts.join(' ');
 	}
-
-	// Sincroniza as horas dinamicamente
 	$effect(() => {
 		const hp = hoursPreset;
 		const ch = customHours;
-
 		untrack(() => {
 			const newHours = hp === 'Outro' ? ch : hp;
 			if ($formData.openingHours !== newHours) {
@@ -103,18 +80,44 @@
 			}
 		});
 	});
-
+	// SCHEDULE SLOTS (JSON estruturado adicionado pelo outro dev)
+	interface SlotItem { dayOfWeek: string; startTime: string; endTime: string; }
+	let scheduleSlots = $state<SlotItem[]>(loadExistingSlots());
+	function loadExistingSlots(): SlotItem[] {
+		try {
+			if (data.existingSlots && data.existingSlots.length > 0) {
+				return data.existingSlots.map((s: any) => ({
+					dayOfWeek: s.dayOfWeek || 'MON',
+					startTime: s.startTime || '08:00',
+					endTime: s.endTime || '18:00',
+				}));
+			}
+		} catch {}
+		return [];
+	}
+	let scheduleJson = $derived(JSON.stringify(scheduleSlots));
+	$effect(() => { $formData.scheduleData = scheduleJson; });
+	$effect(() => {
+		if (data.existingSlots && data.existingSlots.length > 0) {
+			$formData.scheduleEnabled = true;
+		}
+	});
+	function addSlot() { scheduleSlots = [...scheduleSlots, { dayOfWeek: 'MON', startTime: '08:00', endTime: '18:00' }]; }
+	function removeSlot(idx: number) { scheduleSlots = scheduleSlots.filter((_, i) => i !== idx); }
+	// Imagens e sugestões
 	let activeSuggestionIndex = $state(-1);
-
-	// Estados locais de imagens para upload e preview temporário
 	let imageFiles = $state<File[]>([]);
 	let previewUrls = $state<string[]>([]);
 	let isDragging = $state(false);
-
+	let geoStatus = $state('');
+	let manualPlacement = $state(false);
 	let mapLat = $state(Number($formData.latitude) || -22.9068);
 	let mapLng = $state(Number($formData.longitude) || -43.1729);
-
+	// Estados e cidades do banco administrado
+	let allStates = $derived([...new Set(data.cities?.map((c: any) => c.state)?.filter(Boolean) ?? [])].sort());
+	let filteredCities = $derived(data.cities?.filter((c: any) => c.state === $formData.state) ?? []);
 	let searchQuery = $derived.by(() => {
+		if (manualPlacement) return '';
 		const parts = [
 			$formData.street || $formData.address,
 			$formData.number,
@@ -124,53 +127,37 @@
 		].filter(Boolean);
 		return parts.join(', ');
 	});
-
-	// Sincroniza posição do mapa com o formulário
 	$effect(() => {
 		const lat = mapLat;
 		const lng = mapLng;
-
 		untrack(() => {
-			if (lat != null && $formData.latitude !== lat) {
-				$formData.latitude = lat;
-			}
-			if (lng != null && $formData.longitude !== lng) {
-				$formData.longitude = lng;
-			}
+			if (lat != null && $formData.latitude !== lat) $formData.latitude = lat;
+			if (lng != null && $formData.longitude !== lng) $formData.longitude = lng;
 		});
 	});
-
 	let reverseTimer: ReturnType<typeof setTimeout> | undefined;
-
 	async function reverseGeocode(lat: number, lng: number) {
 		try {
 			const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=pt`;
 			const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
-			const data = await res.json();
-			if (data?.address) {
-				const addr = data.address;
-				
+			const json = await res.json();
+			if (json?.address) {
+				const addr = json.address;
 				if (addr.road) $formData.street = addr.road;
 				if (addr.house_number) $formData.number = addr.house_number;
 				if (addr.postcode) {
 					const cep = addr.postcode.replace(/\D/g, '');
-					if (cep.length === 8) {
-						cepInput = cep.substring(0, 5) + '-' + cep.substring(5, 8);
-					}
+					if (cep.length === 8) cepInput = cep.substring(0, 5) + '-' + cep.substring(5, 8);
 				}
-
 				if (addr.suburb) $formData.neighborhood = addr.suburb;
 				else if (addr.neighbourhood) $formData.neighborhood = addr.neighbourhood;
-				
 				if (addr.city) $formData.city = addr.city;
 				else if (addr.town) $formData.city = addr.town;
 				else if (addr.village) $formData.city = addr.village;
-				
 				if (addr.state) {
 					const ufMatch = addr.state.match(/\(([A-Z]{2})\)/);
-					if (ufMatch) {
-						$formData.state = ufMatch[1];
-					} else if (addr['ISO3166-2-lvl4']) {
+					if (ufMatch) $formData.state = ufMatch[1];
+					else if (addr['ISO3166-2-lvl4']) {
 						const uf = addr['ISO3166-2-lvl4'].split('-')[1];
 						if (uf) $formData.state = uf;
 					}
@@ -178,51 +165,41 @@
 			}
 		} catch {}
 	}
-
 	function onPinMoved(lat: number, lng: number) {
+		manualPlacement = true;
 		clearTimeout(reverseTimer);
 		reverseTimer = setTimeout(() => reverseGeocode(lat, lng), 500);
 	}
-
 	let showSuggestions = $state(false);
-
 	let suggestions = $derived(
-		data.categories.filter((c) => {
-			const notSelected = !($formData.categories || []).includes(c.name);
-			const matchesInput =
-				!tagInput.trim() || c.name.toLowerCase().includes(tagInput.toLowerCase());
-			return notSelected && matchesInput;
-		})
+		tagInput.trim()
+			? data.categories.filter((c) =>
+				c.name.toLowerCase().includes(tagInput.toLowerCase()) &&
+				!($formData.categories || []).includes(c.name)
+			)
+			: []
 	);
-
 	function formatCurrency(e: Event) {
 		const input = e.target as HTMLInputElement;
 		let value = input.value.replace(/\D/g, '');
 		if (value) {
 			const numberValue = parseInt(value, 10) / 100;
-			customPrice = new Intl.NumberFormat('pt-BR', {
-				style: 'currency',
-				currency: 'BRL'
-			}).format(numberValue);
-		} else {
-			customPrice = '';
-		}
+			customPrice = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(numberValue);
+		} else customPrice = '';
 	}
-
 	let cepInput = $state('');
 	let loadingCep = $state(false);
-
 	async function buscarCep(cepLimpo: string) {
 		if (cepLimpo.length !== 8) return;
 		loadingCep = true;
 		try {
 			const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
-			const data = await response.json();
-			if (!data.erro) {
-				if (data.localidade) $formData.city = data.localidade;
-				if (data.uf) $formData.state = data.uf;
-				if (data.logradouro) $formData.street = data.logradouro;
-				if (data.bairro) $formData.neighborhood = data.bairro;
+			const resData = await response.json();
+			if (!resData.erro) {
+				if (resData.localidade) $formData.city = resData.localidade;
+				if (resData.uf) $formData.state = resData.uf;
+				if (resData.logradouro) $formData.street = resData.logradouro;
+				if (resData.bairro) $formData.neighborhood = resData.bairro;
 			}
 		} catch (error) {
 			console.error('Erro ao buscar o CEP:', error);
@@ -230,125 +207,78 @@
 			loadingCep = false;
 		}
 	}
-
 	function handleCepChange(e: Event) {
 		const input = e.target as HTMLInputElement;
 		let val = input.value.replace(/\D/g, '');
-		if (val.length > 5) {
-			val = val.substring(0, 5) + '-' + val.substring(5, 8);
-		}
+		if (val.length > 5) val = val.substring(0, 5) + '-' + val.substring(5, 8);
 		cepInput = val;
-		if (val.replace(/\D/g, '').length === 8) {
-			buscarCep(val.replace(/\D/g, ''));
-		}
+		if (val.replace(/\D/g, '').length === 8) buscarCep(val.replace(/\D/g, ''));
 	}
-
 	function autoGenerateSlug() {
 		if (!data.isEdit && $formData.name) {
 			$formData.slug = (<string>$formData.name)
-				.toLowerCase()
-				.trim()
-				.normalize('NFD')
-				.replace(/[\u0300-\u036f]/g, '')
-				.replace(/[^a-z0-9 -]/g, '')
-				.replace(/\s+/g, '-')
-				.replace(/-+/g, '-');
+				.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+				.replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
 		}
 	}
-
 	function addTag(tagName: string) {
 		if (!$formData.categories) $formData.categories = [];
-		if (!$formData.categories.includes(tagName)) {
-			$formData.categories = [...$formData.categories, tagName];
-		}
+		if (!$formData.categories.includes(tagName)) $formData.categories = [...$formData.categories, tagName];
 		tagInput = '';
 		activeSuggestionIndex = -1;
 	}
-
 	function handleTagKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
 			e.preventDefault();
 			if (activeSuggestionIndex >= 0 && activeSuggestionIndex < suggestions.length) {
-				addTag(suggestions[activeSuggestionIndex].name);
-				return;
+				addTag(suggestions[activeSuggestionIndex].name); return;
 			}
 			const trimmed = tagInput.trim();
 			if (trimmed) addTag(trimmed);
 		} else if (e.key === 'ArrowDown') {
 			e.preventDefault();
-			if (suggestions.length > 0) {
-				activeSuggestionIndex = (activeSuggestionIndex + 1) % suggestions.length;
-			}
+			if (suggestions.length > 0) activeSuggestionIndex = (activeSuggestionIndex + 1) % suggestions.length;
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
-			if (suggestions.length > 0) {
-				activeSuggestionIndex =
-					(activeSuggestionIndex - 1 + suggestions.length) % suggestions.length;
-			}
+			if (suggestions.length > 0) activeSuggestionIndex = (activeSuggestionIndex - 1 + suggestions.length) % suggestions.length;
 		} else if (e.key === 'Escape') {
 			e.preventDefault();
 			tagInput = '';
 			activeSuggestionIndex = -1;
 		}
 	}
-
 	function removeTag(tagToRemove: string) {
 		$formData.categories = $formData.categories.filter((t: string) => t !== tagToRemove);
 	}
-
-	// Gerenciamento dos arquivos de imagens
 	function handleFiles(files: FileList | null) {
 		if (!files) return;
-
 		const validFiles = Array.from(files).filter((file) => file.type.startsWith('image/'));
-
 		imageFiles = [...imageFiles, ...validFiles];
-		// Sincroniza diretamente os arquivos com a propriedade de array do Superforms
 		$formData.images = imageFiles;
-
 		validFiles.forEach((file) => {
 			const reader = new FileReader();
 			reader.onload = (e) => {
-				if (e.target?.result) {
-					previewUrls = [...previewUrls, e.target.result as string];
-				}
+				if (e.target?.result) previewUrls = [...previewUrls, e.target.result as string];
 			};
 			reader.readAsDataURL(file);
 		});
 	}
-
 	function removeExistingImage(id: number) {
-		if (!$formData.imagesToDelete) {
-			$formData.imagesToDelete = [];
-		}
-		// Adiciona o ID no array do Superforms que será enviado pro servidor
+		if (!$formData.imagesToDelete) $formData.imagesToDelete = [];
 		$formData.imagesToDelete = [...$formData.imagesToDelete, id];
 	}
-
 	function removePreview(index: number) {
 		imageFiles = imageFiles.filter((_, i) => i !== index);
 		previewUrls = previewUrls.filter((_, i) => i !== index);
 		$formData.images = imageFiles;
 	}
-
-	function onDragOver(e: DragEvent) {
-		e.preventDefault();
-		isDragging = true;
-	}
-
-	function onDragLeave() {
-		isDragging = false;
-	}
-
+	function onDragOver(e: DragEvent) { e.preventDefault(); isDragging = true; }
+	function onDragLeave() { isDragging = false; }
 	function onDrop(e: DragEvent) {
-		e.preventDefault();
-		isDragging = false;
-		if (e.dataTransfer?.files) {
-			handleFiles(e.dataTransfer.files);
-		}
+		e.preventDefault(); isDragging = false;
+		if (e.dataTransfer?.files) handleFiles(e.dataTransfer.files);
 	}
 </script>
-
 <div class="container max-w-4xl mx-auto py-10 px-4">
 	<div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
 		<div>
@@ -363,15 +293,8 @@
 		</div>
 		<Button variant="outline" onclick={() => history.back()}>Voltar</Button>
 	</div>
-
 	<Separator class="mb-8" />
-
-	<form
-		method="POST"
-		use:enhance
-		enctype="multipart/form-data"
-		class="space-y-6 bg-card text-card-foreground p-6 rounded-lg border shadow-sm"
-	>
+	<form method="POST" use:enhance enctype="multipart/form-data" class="space-y-6 bg-card text-card-foreground p-6 rounded-lg border shadow-sm">
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			<Form.Field {form} name="name" class="space-y-2">
 				<Form.Control>
@@ -382,37 +305,25 @@
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-
 			<Form.Field {form} name="slug" class="space-y-2">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Slug (URL Amigável)</Form.Label>
-						<Input
-							{...props}
-							bind:value={$formData.slug}
-							readonly={data.isEdit}
-							class={data.isEdit ? 'bg-muted cursor-not-allowed opacity-50' : ''}
-						/>
+						<Input {...props} bind:value={$formData.slug} readonly={data.isEdit} class={data.isEdit ? 'bg-muted cursor-not-allowed opacity-50' : ''} />
 					{/snippet}
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
 		</div>
-
 		<Form.Field {form} name="summary" class="space-y-2">
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Resumo Curto</Form.Label>
-					<Input
-						{...props}
-						bind:value={$formData.summary}
-						placeholder="Uma frase chamativa sobre o local..."
-					/>
+					<Input {...props} bind:value={$formData.summary} placeholder="Uma frase chamativa sobre o local..." />
 				{/snippet}
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-
 		<Form.Field {form} name="description" class="space-y-2">
 			<Form.Control>
 				{#snippet children({ props })}
@@ -422,44 +333,21 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-
 		<Separator class="my-6" />
-
+		<!-- Bloco de Preço e Horário Texto -->
 		<div class="flex items-center justify-between mb-4">
 			<h3 class="text-lg font-semibold">Informações Úteis</h3>
-			<div
-				class="flex flex-row items-center gap-2 space-y-0 rounded-md border p-2 shadow-sm bg-background"
-			>
-				<input
-					type="checkbox"
-					name="isPublic"
-					id="isPublic"
-					bind:checked={$formData.isPublic}
-					onchange={() => {
-						if ($formData.isPublic) {
-							pricePreset = 'Gratuito';
-						}
-					}}
-					class="w-4 h-4 accent-primary"
-				/>
+			<div class="flex flex-row items-center gap-2 space-y-0 rounded-md border p-2 shadow-sm bg-background">
+				<input type="checkbox" name="isPublic" id="isPublic" bind:checked={$formData.isPublic}
+					onchange={() => { if ($formData.isPublic) pricePreset = 'Gratuito'; }} class="w-4 h-4 accent-primary" />
 				<Label for="isPublic" class="font-bold cursor-pointer">Lugar Público?</Label>
 			</div>
 		</div>
-
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<!-- Bloco de Preço -->
 			<div class="space-y-4">
 				<div class="space-y-2">
-					<Label
-						class="text-sm font-medium leading-none {$formData.isPublic
-							? 'text-muted-foreground'
-							: ''}">Preço Médio / Entrada</Label
-					>
-					<select
-						bind:value={pricePreset}
-						disabled={$formData.isPublic}
-						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-					>
+					<Label class="text-sm font-medium leading-none {$formData.isPublic ? 'text-muted-foreground' : ''}">Preço Médio / Entrada</Label>
+					<select bind:value={pricePreset} disabled={$formData.isPublic} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
 						{#if $formData.isPublic}
 							<option value="Gratuito">Gratuito (Local Público)</option>
 						{:else}
@@ -471,144 +359,122 @@
 						{/if}
 					</select>
 				</div>
-
 				<div class="space-y-2 mt-2">
-					<Label
-						class="text-sm font-medium leading-none {pricePreset !== 'Outro' || $formData.isPublic
-							? 'text-muted-foreground'
-							: ''}">Especificar Valor</Label
-					>
-					<Input
-						bind:value={customPrice}
-						placeholder="Ex: R$ 35,00 por adulto"
-						disabled={pricePreset !== 'Outro' || $formData.isPublic}
-						oninput={formatCurrency}
-					/>
+					<Label class="text-sm font-medium leading-none {pricePreset !== 'Outro' || $formData.isPublic ? 'text-muted-foreground' : ''}">Especificar Valor</Label>
+					<Input bind:value={customPrice} placeholder="Ex: R$ 35,00 por adulto" disabled={pricePreset !== 'Outro' || $formData.isPublic} oninput={formatCurrency} />
 				</div>
 			</div>
-
-			<!-- Bloco de Horários -->
 			<div class="space-y-4">
 				<div class="space-y-2">
-					<Label class="text-sm font-medium leading-none">Horário de Funcionamento</Label>
-					<select
-						bind:value={hoursPreset}
-						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-					>
+					<Label class="text-sm font-medium leading-none">Horário Geral (Texto)</Label>
+					<select bind:value={hoursPreset} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
 						<option value="Sempre aberto (24h)">Sempre aberto (24h)</option>
 						<option value="Horário Comercial (08h às 18h)">Horário Comercial (08h às 18h)</option>
 						<option value="Apenas Finais de Semana">Apenas Finais de Semana</option>
-						<option value="Aberto apenas durante o dia">Aberto apenas durante o dia</option>
 						<option value="Apenas à noite (18h às 02h)">Apenas à noite (18h às 02h)</option>
 						<option value="Madrugada (22h às 06h)">Madrugada (22h às 06h)</option>
 						<option value="Outro">Outro (Especificar)</option>
 					</select>
 				</div>
-
 				{#if hoursPreset === 'Outro'}
 					<div class="space-y-4 mt-4 p-4 border rounded-md bg-muted/30">
 						<Label class="text-sm font-medium">Dias de Funcionamento</Label>
 						<div class="flex flex-wrap gap-2">
 							{#each daysOfWeek as day}
-								<button
-									type="button"
-									class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors border {customDays.includes(day) ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-background hover:bg-muted border-border'}"
-									onclick={() => toggleDay(day)}
-								>
+								<button type="button" class="px-3 py-1.5 rounded-full text-xs font-medium border {customDays.includes(day) ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-background hover:bg-muted border-border'}" onclick={() => toggleDay(day)}>
 									{day}
 								</button>
 							{/each}
 						</div>
-						
 						<div class="flex gap-4">
-							<div class="space-y-2 flex-1">
-								<Label class="text-xs">Abertura</Label>
-								<Input type="time" bind:value={customTimeStart} onchange={buildCustomHoursString} />
-							</div>
-							<div class="space-y-2 flex-1">
-								<Label class="text-xs">Fechamento</Label>
-								<Input type="time" bind:value={customTimeEnd} onchange={buildCustomHoursString} />
-							</div>
+							<div class="space-y-2 flex-1"><Label class="text-xs">Abertura</Label><Input type="time" bind:value={customTimeStart} onchange={buildCustomHoursString} /></div>
+							<div class="space-y-2 flex-1"><Label class="text-xs">Fechamento</Label><Input type="time" bind:value={customTimeEnd} onchange={buildCustomHoursString} /></div>
 						</div>
-
-						<div class="space-y-2">
-							<Label class="text-xs text-muted-foreground">Ou digite o horário livremente</Label>
-							<Input
-								bind:value={customHours}
-								placeholder="Ex: Seg a Sex, das 09h às 17h"
-							/>
-						</div>
+						<div class="space-y-2"><Label class="text-xs text-muted-foreground">Ou digite livremente</Label><Input bind:value={customHours} placeholder="Ex: Seg a Sex, das 09h às 17h" /></div>
 					</div>
 				{/if}
 			</div>
-
 			<input type="hidden" name="price" value={$formData.price} />
 			<input type="hidden" name="openingHours" value={$formData.openingHours} />
 		</div>
-
 		<Separator class="my-6" />
-
+		<!-- Schedule Slots Avançado (Do outro dev) -->
+		<div class="space-y-4">
+			<div class="flex items-center gap-3">
+				<input type="checkbox" id="scheduleToggle" bind:checked={$formData.scheduleEnabled} class="w-5 h-5 accent-primary cursor-pointer" />
+				<label for="scheduleToggle" class="text-lg font-semibold cursor-pointer">Definir Escala Detalhada (Slots JSON)</label>
+			</div>
+			{#if $formData.scheduleEnabled}
+				<div class="space-y-3 pl-8">
+					{#each scheduleSlots as slot, idx (idx)}
+						<div class="flex flex-wrap gap-3 items-end p-3 bg-muted/20 rounded-lg border border-border">
+							<div>
+								<label class="block text-xs font-semibold mb-1">Dia</label>
+								<select bind:value={slot.dayOfWeek} class="px-3 py-2 border bg-background rounded-md text-sm">
+									<option value="MON">Segunda</option><option value="TUE">Terça</option><option value="WED">Quarta</option>
+									<option value="THU">Quinta</option><option value="FRI">Sexta</option><option value="SAT">Sábado</option><option value="SUN">Domingo</option>
+								</select>
+							</div>
+							<div><label class="block text-xs font-semibold mb-1">Início</label><input type="time" bind:value={slot.startTime} class="px-3 py-2 border bg-background rounded-md text-sm" /></div>
+							<div><label class="block text-xs font-semibold mb-1">Fim</label><input type="time" bind:value={slot.endTime} class="px-3 py-2 border bg-background rounded-md text-sm" /></div>
+							<button type="button" onclick={() => removeSlot(idx)} class="px-3 py-2 text-sm text-destructive border border-destructive hover:bg-destructive hover:text-white rounded-md">Remover</button>
+						</div>
+					{/each}
+					<button type="button" onclick={addSlot} class="px-4 py-2 text-sm border border-primary text-foreground hover:bg-primary hover:text-white rounded-md">+ Adicionar Horário</button>
+				</div>
+			{/if}
+		</div>
+		<Separator class="my-6" />
 		<h3 class="text-lg font-semibold mb-4">Localização</h3>
-
 		<div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-			<!-- Linha 1: CEP, Cidade, Estado -->
 			<div class="space-y-2 md:col-span-3">
 				<Label class="text-sm font-medium leading-none">CEP</Label>
-				<Input
-					type="text"
-					placeholder="00000-000"
-					value={cepInput}
-					oninput={handleCepChange}
-					maxlength={9}
-					disabled={loadingCep}
-				/>
-				{#if loadingCep}
-					<p class="text-xs text-muted-foreground mt-1">Buscando endereço...</p>
-				{/if}
+				<Input type="text" placeholder="00000-000" value={cepInput} oninput={handleCepChange} maxlength={9} disabled={loadingCep} />
+				{#if loadingCep}<p class="text-xs text-muted-foreground mt-1">Buscando endereço...</p>{/if}
 			</div>
-
-			<Form.Field {form} name="city" class="space-y-2 md:col-span-7">
-				<Form.Control>
-					{#snippet children({ props })}
-						<Form.Label>Cidade</Form.Label>
-						<Input {...props} bind:value={$formData.city} />
-					{/snippet}
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
-
+			
 			<Form.Field {form} name="state" class="space-y-2 md:col-span-2">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Estado (UF)</Form.Label>
-						<Input {...props} bind:value={$formData.state} maxlength={2} />
+						<select {...props} bind:value={$formData.state} onchange={() => (manualPlacement = false)} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+							<option value="">UF</option>
+							{#each allStates as st}<option value={st}>{st}</option>{/each}
+						</select>
 					{/snippet}
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-
-			<!-- Linha 2: Bairro, Rua -->
+			<Form.Field {form} name="city" class="space-y-2 md:col-span-7">
+				<Form.Control>
+					{#snippet children({ props })}
+						<Form.Label>Cidade</Form.Label>
+						<select {...props} bind:value={$formData.city} onchange={() => (manualPlacement = false)} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+							<option value="">Selecione a cidade</option>
+							{#each filteredCities as city}<option value={city.name}>{city.name}</option>{/each}
+						</select>
+					{/snippet}
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
 			<Form.Field {form} name="neighborhood" class="space-y-2 md:col-span-4">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Bairro</Form.Label>
-						<Input {...props} bind:value={$formData.neighborhood} />
+						<Input {...props} bind:value={$formData.neighborhood} oninput={() => (manualPlacement = false)} />
 					{/snippet}
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-
 			<Form.Field {form} name="street" class="space-y-2 md:col-span-8">
 				<Form.Control>
 					{#snippet children({ props })}
-						<Form.Label>Rua / Avenida</Form.Label>
-						<Input {...props} bind:value={$formData.street} placeholder="Ex: Av. Atlântica" />
+						<Form.Label>Logradouro / Rua</Form.Label>
+						<Input {...props} bind:value={$formData.street} oninput={() => { $formData.address = $formData.street; manualPlacement = false; }} placeholder="Ex: Av. Atlântica" />
 					{/snippet}
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-
-			<!-- Linha 3: Número, Complemento -->
 			<Form.Field {form} name="number" class="space-y-2 md:col-span-3">
 				<Form.Control>
 					{#snippet children({ props })}
@@ -618,7 +484,6 @@
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
-
 			<Form.Field {form} name="complement" class="space-y-2 md:col-span-9">
 				<Form.Control>
 					{#snippet children({ props })}
@@ -629,65 +494,31 @@
 				<Form.FieldErrors />
 			</Form.Field>
 		</div>
-
-		<!-- Mantido logradouro antigo oculto para evitar quebrar banco enquanto não formatamos, mas o bind atualiza a busca do mapa se quisermos -->
 		<input type="hidden" name="address" value={$formData.address} />
-
 		<div class="space-y-4">
 			<div class="flex items-center gap-2">
 				<span class="inline-block w-3 h-3 rounded-full bg-primary"></span>
 				<h3 class="text-lg font-semibold">Selecione no Mapa</h3>
 			</div>
-			<p class="text-sm text-muted-foreground -mt-2">
-				Preencha os campos de endereço acima e o mapa ajusta automaticamente. Arraste o pin para a
-				posição exata.
-			</p>
-
-			<!-- Hidden fields para envio do formulário -->
+			<p class="text-sm text-muted-foreground -mt-2">Preencha os campos de endereço acima e o mapa ajusta automaticamente. Arraste o pin para a posição exata.</p>
+			{#if geoStatus && geoStatus !== '✓' && !geoStatus.startsWith('✓')}<p class="text-xs text-muted-foreground bg-muted px-3 py-1 rounded inline-block">{geoStatus}</p>{/if}
 			<input type="hidden" name="latitude" value={$formData.latitude ?? ''} />
 			<input type="hidden" name="longitude" value={$formData.longitude ?? ''} />
-
 			<MapPicker bind:latitude={mapLat} bind:longitude={mapLng} {searchQuery} {onPinMoved} />
 		</div>
-
 		<Separator class="my-6" />
-
 		<div class="space-y-4">
 			<Label class="text-base font-semibold">Galeria de Imagens</Label>
-
 			{#if data.isEdit && data.existingImages && data.existingImages.length > 0}
 				<div class="space-y-2">
 					<span class="text-sm text-muted-foreground font-medium">Imagens já salvas:</span>
 					<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 border p-4 bg-muted/30 rounded-md">
 						{#each data.existingImages as img}
 							{#if !($formData.imagesToDelete || []).includes(img.id)}
-								<div
-									class="relative group aspect-video rounded-md overflow-hidden border bg-background"
-								>
+								<div class="relative group aspect-video rounded-md overflow-hidden border bg-background">
 									<img src={img.url} alt="Imagem do Destino" class="object-cover w-full h-full" />
-
-									<Button
-										variant="destructive"
-										onclick={() => removeExistingImage(img.id)}
-										class="absolute top-1 right-1 bg-destructive/90 hover:bg-destructive text-destructive-foreground p-1 rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
-									>
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											width="14"
-											height="14"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="2.5"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											><line x1="18" x2="6" y1="6" y2="18" /><line
-												x1="6"
-												x2="18"
-												y1="6"
-												y2="18"
-											/></svg
-										>
+									<Button variant="destructive" onclick={() => removeExistingImage(img.id)} class="absolute top-1 right-1 bg-destructive/90 hover:bg-destructive text-destructive-foreground p-1 rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+										X
 									</Button>
 								</div>
 							{/if}
@@ -695,90 +526,21 @@
 					</div>
 				</div>
 			{/if}
-
 			<Form.Field {form} name="images" class="space-y-2">
 				<Form.Control>
 					{#snippet children({ props })}
-						<div
-							role="button"
-							tabindex="0"
-							class="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors
-                            {isDragging
-								? 'border-primary bg-primary/5'
-								: 'border-muted-foreground/20 hover:border-primary/50'}"
-							ondragover={onDragOver}
-							ondragleave={onDragLeave}
-							ondrop={onDrop}
-							onclick={() => document.getElementById('file-upload')?.click()}
-							onkeydown={(e) =>
-								e.key === 'Enter' && document.getElementById('file-upload')?.click()}
-						>
-							<input
-								id="file-upload"
-								type="file"
-								accept="image/*"
-								multiple
-								class="hidden"
-								onchange={(e) => handleFiles(e.currentTarget.files)}
-							/>
-
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="28"
-								height="28"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								class="text-muted-foreground mb-2"
-								><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline
-									points="17 8 12 3 7 8"
-								/><line x1="12" x2="12" y1="3" y2="15" /></svg
-							>
-							<p class="text-sm font-medium text-foreground">
-								Arraste novas imagens aqui ou clique para selecionar
-							</p>
-							<p class="text-xs text-muted-foreground mt-0.5">
-								Apenas arquivos de imagem são aceitos
-							</p>
+						<div role="button" tabindex="0" class="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors {isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/20 hover:border-primary/50'}" ondragover={onDragOver} ondragleave={onDragLeave} ondrop={onDrop} onclick={() => document.getElementById('file-upload')?.click()} onkeydown={(e) => e.key === 'Enter' && document.getElementById('file-upload')?.click()}>
+							<input id="file-upload" type="file" accept="image/*" multiple class="hidden" onchange={(e) => handleFiles(e.currentTarget.files)} />
+							<p class="text-sm font-medium text-foreground">Arraste novas imagens aqui ou clique para selecionar</p>
 						</div>
-
 						{#if previewUrls.length > 0}
 							<div class="space-y-2 pt-2">
-								<span class="text-sm text-muted-foreground font-medium"
-									>Novas mídias selecionadas para envio:</span
-								>
+								<span class="text-sm text-muted-foreground font-medium">Novas mídias:</span>
 								<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
 									{#each previewUrls as url, index}
-										<div
-											class="relative group aspect-video rounded-md overflow-hidden border shadow-sm bg-background"
-										>
+										<div class="relative group aspect-video rounded-md overflow-hidden border shadow-sm bg-background">
 											<img src={url} alt="Nova prévia" class="object-cover w-full h-full" />
-											<Button
-												variant="destructive"
-												onclick={() => removePreview(index)}
-												class="absolute top-1 right-1 bg-destructive/90 hover:bg-destructive text-destructive-foreground p-1 rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity"
-											>
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													width="14"
-													height="14"
-													viewBox="0 0 24 24"
-													fill="none"
-													stroke="currentColor"
-													stroke-width="2.5"
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													><line x1="18" x2="6" y1="6" y2="18" /><line
-														x1="6"
-														x2="18"
-														y1="6"
-														y2="18"
-													/></svg
-												>
-											</Button>
+											<Button variant="destructive" onclick={() => removePreview(index)} class="absolute top-1 right-1 bg-destructive/90 hover:bg-destructive p-1 rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100">X</Button>
 										</div>
 									{/each}
 								</div>
@@ -789,63 +551,27 @@
 				<Form.FieldErrors />
 			</Form.Field>
 		</div>
-
 		<Separator class="my-6" />
-
 		<Form.Field {form} name="categories" class="space-y-2">
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label class="text-base">Categorias</Form.Label>
-
 					<div class="relative w-full">
-						<div
-							class="flex flex-wrap gap-2 p-2 bg-background border border-input rounded-md min-h-[42px] focus-within:ring-1 focus-within:ring-ring focus-within:border-ring transition-shadow"
-						>
+						<div class="flex flex-wrap gap-2 p-2 bg-background border border-input rounded-md min-h-[42px]">
 							{#each $formData.categories || [] as tag}
-								<div
-									class="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground text-xs font-semibold pl-2.5 pr-1.5 py-1 rounded-md border border-border"
-								>
+								<div class="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground text-xs font-semibold pl-2.5 pr-1.5 py-1 rounded-md border border-border">
 									{tag}
-									<button
-										type="button"
-										onclick={() => removeTag(tag)}
-										class="text-muted-foreground hover:text-foreground rounded-full p-0.5 hover:bg-muted transition-colors font-bold text-sm"
-									>
-										&times;
-									</button>
+									<button type="button" onclick={() => removeTag(tag)} class="text-muted-foreground hover:text-foreground rounded-full p-0.5 hover:bg-muted transition-colors font-bold text-sm">&times;</button>
 								</div>
 							{/each}
-
-							<input
-								{...props}
-								type="text"
-								bind:value={tagInput}
-								onkeydown={handleTagKeydown}
-								onfocus={() => (showSuggestions = true)}
-								onblur={() => setTimeout(() => (showSuggestions = false), 150)}
-								placeholder={$formData.categories?.length
-									? 'Adicionar mais...'
-									: 'Escreva uma categoria...'}
-								class="flex-1 bg-transparent border-0 outline-none focus:ring-0 p-1 text-sm min-w-[180px] text-foreground placeholder:text-muted-foreground"
-							/>
+							<input {...props} type="text" bind:value={tagInput} onkeydown={handleTagKeydown} onfocus={() => (showSuggestions = true)} onblur={() => setTimeout(() => (showSuggestions = false), 150)} placeholder={$formData.categories?.length ? 'Adicionar mais...' : 'Escreva uma categoria...'} class="flex-1 bg-transparent border-0 outline-none focus:ring-0 p-1 text-sm min-w-[180px]" />
 						</div>
-
 						{#if showSuggestions && suggestions.length > 0}
-							<ul
-								class="absolute z-50 w-full mt-1 bg-popover text-popover-foreground border rounded-md shadow-md max-h-60 overflow-y-auto p-1 space-y-0.5"
-							>
+							<ul class="absolute z-50 w-full mt-1 bg-popover text-popover-foreground border rounded-md shadow-md max-h-60 overflow-y-auto p-1 space-y-0.5">
 								{#each suggestions as category, index}
 									<li>
-										<button
-											type="button"
-											onclick={() => addTag(category.name)}
-											class="w-full text-left px-3 py-2 text-sm rounded-sm transition-colors cursor-pointer flex items-center justify-between
-                                                {index === activeSuggestionIndex
-												? 'bg-accent text-accent-foreground'
-												: 'hover:bg-muted'}"
-										>
-											<span>{category.name}</span>
-											<span class="text-xs text-muted-foreground">Sugerido</span>
+										<button type="button" onclick={() => addTag(category.name)} class="w-full text-left px-3 py-2 text-sm rounded-sm transition-colors cursor-pointer flex items-center justify-between {index === activeSuggestionIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}">
+											<span>{category.name}</span><span class="text-xs text-muted-foreground">Sugerido</span>
 										</button>
 									</li>
 								{/each}
@@ -856,17 +582,11 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-
 		<Separator class="my-6" />
-
 		<div class="flex justify-end space-x-4 pt-2">
-			<Button type="button" variant="outline" onclick={() => history.back()}>Cancelar</Button>
+			<a href="/dashboard/destinos" class={buttonVariants({ variant: 'outline' })}> Cancelar </a>
 			<Form.Button disabled={$delayed}>
-				{#if $delayed}
-					Salvando...
-				{:else}
-					{data.isEdit ? 'Salvar Alterações' : 'Publicar Destino'}
-				{/if}
+				{#if $delayed}Salvando...{:else}{data.isEdit ? 'Salvar Alterações' : 'Publicar Destino'}{/if}
 			</Form.Button>
 		</div>
 	</form>

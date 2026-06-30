@@ -3,6 +3,7 @@ import { DestinationCategory } from './DestinationCategory';
 import { DestinationImage } from './DestinationImage';
 import { Usuario } from './Usuario';
 import { Review } from './Review';
+import { AvailabilitySlot } from './AvailabilitySlot';
 
 @Entity('destinations')
 export class Destination {
@@ -95,4 +96,7 @@ export class Destination {
 
   @OneToMany(() => Review, (review) => review.destination)
   reviews!: Review[];
+
+  @OneToMany(() => AvailabilitySlot, (slot) => slot.destination)
+  availabilitySlots!: AvailabilitySlot[];
 }

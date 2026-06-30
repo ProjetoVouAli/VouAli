@@ -22,5 +22,7 @@ export const destinationSchema = z.object({
     isPublic: z.boolean().default(true),
     categories: z.array(z.string()).min(1, 'Adicione pelo menos uma categoria'),
     images: z.array(z.instanceof(File)).optional().default([]),
-    imagesToDelete: z.array(z.number()).optional().default([])
+    imagesToDelete: z.array(z.number()).optional().default([]),
+    scheduleEnabled: z.boolean().optional().default(false),
+    scheduleData: z.string().optional().default('[]')
 });

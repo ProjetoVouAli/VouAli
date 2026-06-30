@@ -42,26 +42,4 @@
 	});
 </script>
 
-<MapLibre
-	bounds={mapBounds}
-	style={mapStyle}
-	class="w-full h-full"
-	fitBoundsOptions={{maxZoom:11}}
-	maxPitch={85}
-	attributionControl={false}
->
-	{#each destinations as { name,slug, longitude, latitude, }}
-		<Marker lnglat={[Number(longitude), Number(latitude)]}>
-			{#snippet content()}
-				<div class="items-center *:last:hidden hover:*:last:block leading-none ">
-					<MapPin class="w-full" />
-					<p>{name}</p>
-				</div>
-			{/snippet}
-			<Popup class="text-center text-foreground w-36 h-36"   open={false} offset={offsets}>
-				<p>{name}</p>
-				<p>Clique para mais detalhes</p>
-			</Popup>
-		</Marker>
-	{/each}
-</MapLibre>
+<div bind:this={mapContainer} class="w-full h-full rounded-lg overflow-hidden"></div>
