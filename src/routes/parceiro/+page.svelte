@@ -7,7 +7,7 @@
     import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
     import TelephoneInput from '$lib/components/ui/telephone-input/telephone-input.svelte';
     import DocumentInput from '$lib/components/ui/document-input/document-input.svelte';
-    import { imask } from '@imask/svelte';
+    import { imask } from '$lib/actions/imask';
     import type { PageData } from './$types';
     import { untrack } from 'svelte';
 
