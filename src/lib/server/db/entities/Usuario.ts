@@ -20,6 +20,8 @@ export class Usuario {
 	@Column('varchar', { length: 40 })
 	nome!: string;
 
+	@Column('text', { nullable: true })
+	bio!: string | null;
 	@Column('varchar', { length: 30, unique: true })
 	email!: string;
 
@@ -40,6 +42,8 @@ export class Usuario {
 	})
 	papeis!: TipoUsuario[];
 
+	@Column('text', { nullable: true })
+	avatarUrl!: string | null;
 	@OneToMany(() => Destination, (destination) => destination.createdBy)
 	destinations!: Destination[];
 

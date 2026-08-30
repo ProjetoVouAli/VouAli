@@ -59,7 +59,7 @@
 					>
 						<div>
 							<label for="nome" class="block text-sm font-semibold mb-2">Nome</label>
-							<Input id="nome" name="nome" value={data.user?.nome || ''} required minlength="2" />
+							<Input id="nome" name="nome" value={data.user?.nome || ''} required minlength={2} />
 						</div>
 						<div>
 							<label for="bio" class="block text-sm font-semibold mb-2">Bio</label>
