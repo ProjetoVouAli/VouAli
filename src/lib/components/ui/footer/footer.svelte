@@ -44,7 +44,6 @@
                 <h3 class="font-semibold mb-4 text-foreground">Institucional</h3>
                 <ul class="space-y-3 text-sm text-muted-foreground">
                     <li><a href="/sobre" class="hover:text-foreground transition-colors">Sobre Nós</a></li>
-                    <li><a href="/como-funciona" class="hover:text-foreground transition-colors">Como Funciona</a></li>
                     <li><a href="/termos" class="hover:text-foreground transition-colors">Termos de Uso</a></li>
                     <li><a href="/privacidade" class="hover:text-foreground transition-colors">Privacidade</a></li>
                 </ul>
