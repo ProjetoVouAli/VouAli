@@ -1,48 +1,48 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
 import 'reflect-metadata';
-import { Destination } from "./Destination";
-import { Review } from "./Review";
+import { Destination } from './Destination';
+import { Review } from './Review';
 
 export enum TipoUsuario {
-    VIAJANTE = 'VIAJANTE',
-    ADMINISTRADOR = 'ADMINISTRADOR',
-    PARCEIRO = 'PARCEIRO'
+	VIAJANTE = 'VIAJANTE',
+	ADMINISTRADOR = 'ADMINISTRADOR',
+	PARCEIRO = 'PARCEIRO'
 }
 
 @Entity('usuario')
 export class Usuario {
-    @PrimaryGeneratedColumn('increment')
-    id!: number;
+	@PrimaryGeneratedColumn('increment')
+	id!: number;
 
-    @Column('varchar', { length: 36, unique: true })
-    uid!: string;
+	@Column('varchar', { length: 36, unique: true })
+	uid!: string;
 
-    @Column('varchar', { length: 40 })
-    nome!: string;
+	@Column('varchar', { length: 40 })
+	nome!: string;
 
-    @Column('varchar', { length: 30, unique: true })
-    email!: string;
+	@Column('varchar', { length: 30, unique: true })
+	email!: string;
 
-    @Column('enum', { enum: ['M', 'F', 'O'] })
-    sexo!: 'M' | 'F' | 'O';
+	@Column('enum', { enum: ['M', 'F', 'O'] })
+	sexo!: 'M' | 'F' | 'O';
 
-    @CreateDateColumn()
-    creationDate!: Date;
+	@CreateDateColumn()
+	creationDate!: Date;
 
-    @Column('boolean', { default: true })
-    estaAutenticado!: boolean;
+	@Column('boolean', { default: true })
+	estaAutenticado!: boolean;
 
-    @Column({
-        type: 'enum',
-        enum: TipoUsuario,
-        array: true,
-        default: [TipoUsuario.VIAJANTE]
-    })
-    papeis!: TipoUsuario[];
+	@Column({
+		type: 'enum',
+		enum: TipoUsuario,
+		array: true,
+		default: [TipoUsuario.VIAJANTE]
+	})
+	papeis!: TipoUsuario[];
 
-    @OneToMany(() => Destination, (destination) => destination.createdBy)
-    destinations!: Destination[];
+	@OneToMany(() => Destination, (destination) => destination.createdBy)
+	destinations!: Destination[];
 
-    @OneToMany(() => Review, (review) => review.usuario)
-    reviews!: Review[];
+	@OneToMany(() => Review, (review) => review.usuario)
+	reviews!: Review[];
 }

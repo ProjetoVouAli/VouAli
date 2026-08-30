@@ -3,16 +3,16 @@ import { Destination } from './Destination';
 
 @Entity('destinations_images')
 export class DestinationImage {
-  @PrimaryGeneratedColumn()
-  id!: number;
+	@PrimaryGeneratedColumn()
+	id!: number;
 
-  @Column({ type: 'varchar', length: 200 })
-  url!: string;
+	@Column({ type: 'varchar', length: 200 })
+	url!: string;
 
-  @Column({ type: 'integer', name: 'destination_id' })
-  destinationId!: number;
+	@Column({ type: 'integer', name: 'destination_id' })
+	destinationId!: number;
 
-  @ManyToOne(() => Destination, (destination) => destination.images)
-  @JoinColumn({ name: 'destination_id' })
-  destination!: Destination;
+	@ManyToOne(() => Destination, (destination) => destination.images)
+	@JoinColumn({ name: 'destination_id' })
+	destination!: Destination;
 }

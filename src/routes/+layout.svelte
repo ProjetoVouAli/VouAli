@@ -1,8 +1,7 @@
-
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import { ModeWatcher } from "mode-watcher";
+	import { ModeWatcher } from 'mode-watcher';
 
 	import Navbar from '$lib/components/ui/navbar/navbar.svelte';
 	import { flash } from '$lib/stores/flash';
@@ -25,7 +24,7 @@
 
 <ModeWatcher />
 
-<Navbar initialUser={data.user }/>
+<Navbar initialUser={data.user} />
 
 {#if $flash}
 	<div class="notificacao sucesso">

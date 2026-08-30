@@ -51,7 +51,7 @@
 	}}
 	bind:open
 >
-	<Popover.Trigger 
+	<Popover.Trigger
 		bind:ref={triggerRef}
 		class={cn(
 			'inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50',

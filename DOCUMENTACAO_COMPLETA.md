@@ -1,9 +1,10 @@
 -- Active: 1774973448207@@127.0.0.1@5432@local@public
+
 # VouAli - Documentação Completa do Projeto
 
 **Versão:** 0.0.1  
 **Última atualização:** 2026-05-04  
-**Status:** Em Desenvolvimento  
+**Status:** Em Desenvolvimento
 
 ---
 
@@ -51,36 +52,40 @@
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
-| Tecnologia | Versão | Propósito |
-|---|---|---|
-| **SvelteKit** | ^2.22.0 | Framework frontend com SSR |
-| **Svelte** | ^5.0.0 | Framework reativo (Runes) |
-| **TypeScript** | ^5.0.0 | Type-safety |
-| **TailwindCSS** | ^4.0.0 | Utility-first CSS framework |
-| **Bits UI** | ^2.11.4 | Componentes headless |
-| **MapLibre GL** | - | Visualização de mapas |
-| **Lucide Icons** | ^0.544.0 | Ícones vetoriais |
+
+| Tecnologia       | Versão   | Propósito                   |
+| ---------------- | -------- | --------------------------- |
+| **SvelteKit**    | ^2.22.0  | Framework frontend com SSR  |
+| **Svelte**       | ^5.0.0   | Framework reativo (Runes)   |
+| **TypeScript**   | ^5.0.0   | Type-safety                 |
+| **TailwindCSS**  | ^4.0.0   | Utility-first CSS framework |
+| **Bits UI**      | ^2.11.4  | Componentes headless        |
+| **MapLibre GL**  | -        | Visualização de mapas       |
+| **Lucide Icons** | ^0.544.0 | Ícones vetoriais            |
 
 ### Backend
-| Tecnologia | Versão | Propósito |
-|---|---|---|
-| **SvelteKit API Routes** | ^2.22.0 | Server-side actions |
-| **TypeORM** | ^0.3.28 | ORM para banco de dados |
-| **PostgreSQL** | ^16 (Docker) | Banco de dados relacional |
-| **Bcrypt** | ^6.0.0 | Hash de senhas |
+
+| Tecnologia               | Versão       | Propósito                 |
+| ------------------------ | ------------ | ------------------------- |
+| **SvelteKit API Routes** | ^2.22.0      | Server-side actions       |
+| **TypeORM**              | ^0.3.28      | ORM para banco de dados   |
+| **PostgreSQL**           | ^16 (Docker) | Banco de dados relacional |
+| **Bcrypt**               | ^6.0.0       | Hash de senhas            |
 
 ### Autenticação & Segurança
-| Tecnologia | Versão | Propósito |
-|---|---|---|
-| **Firebase Auth** | ^12.11.0 | Gerenciamento de autenticação |
-| **Firebase Admin** | ^13.7.0 | Gerenciamento server-side |
+
+| Tecnologia         | Versão   | Propósito                     |
+| ------------------ | -------- | ----------------------------- |
+| **Firebase Auth**  | ^12.11.0 | Gerenciamento de autenticação |
+| **Firebase Admin** | ^13.7.0  | Gerenciamento server-side     |
 
 ### Desenvolvimento
-| Tecnologia | Versão | Propósito |
-|---|---|---|
-| **Vite** | ^7.0.4 | Build tool moderno |
-| **Prettier** | ^3.4.2 | Formatação de código |
-| **Docker** | - | Containerização (PostgreSQL) |
+
+| Tecnologia   | Versão | Propósito                    |
+| ------------ | ------ | ---------------------------- |
+| **Vite**     | ^7.0.4 | Build tool moderno           |
+| **Prettier** | ^3.4.2 | Formatação de código         |
+| **Docker**   | -      | Containerização (PostgreSQL) |
 
 ---
 
@@ -223,6 +228,7 @@ npm run db:start
 ```
 
 Isso levantará um container PostgreSQL com:
+
 - **Usuário**: postgres
 - **Senha**: admin321
 - **Banco**: local
@@ -257,18 +263,21 @@ npm run preview
 ### 1. Autenticação de Usuários
 
 #### Cadastro
+
 - Formulário com validações (email, senha, confirmação)
 - Integração com Firebase Auth
 - Criação automática no banco PostgreSQL
 - Feedback visual (notificações flash)
 
 #### Login
+
 - Validação de credenciais via Firebase
 - Busca de usuário no banco local
 - Persistência via token JWT em cookies
 - Redirecionamento pós-login
 
 #### Logout
+
 - Limpeza de autenticação Firebase
 - Remoção do token dos cookies
 - Redirecionamento para home
@@ -460,7 +469,7 @@ export class Destination {
     active: boolean (default: true)     // Ativo/Inativo
     createdAt: Date                     // Data criação
     updatedAt: Date                     // Data atualização
-    
+
     // Relacionamentos
     images: DestinationImage[]          // OneToMany
     categories: DestinationCategory[]   // ManyToMany
@@ -472,11 +481,11 @@ export class Destination {
 ```typescript
 @Entity('destination_category')
 export class DestinationCategory {
-    id: number
-    name: string
-    
-    // Relacionamento
-    destinations: Destination[]         // ManyToMany
+	id: number;
+	name: string;
+
+	// Relacionamento
+	destinations: Destination[]; // ManyToMany
 }
 ```
 
@@ -485,9 +494,9 @@ export class DestinationCategory {
 ```typescript
 @Entity('destination_image')
 export class DestinationImage {
-    id: number
-    url: string
-    destination: Destination            // ManyToOne
+	id: number;
+	url: string;
+	destination: Destination; // ManyToOne
 }
 ```
 
@@ -513,93 +522,102 @@ npm run typeorm:run
 O projeto utiliza componentes reutilizáveis organizados em `src/lib/components/ui/`:
 
 #### Button
+
 ```svelte
-<Button variant="primary|secondary|ghost" size="sm|md|lg" href="/rota">
-  Texto do botão
-</Button>
+<Button variant="primary|secondary|ghost" size="sm|md|lg" href="/rota">Texto do botão</Button>
 ```
 
 #### Card (Composição)
+
 ```svelte
 <Card>
-  <CardHeader>
-    <CardTitle>Título</CardTitle>
-    <CardDescription>Descrição</CardDescription>
-  </CardHeader>
-  <CardContent>Conteúdo</CardContent>
-  <CardFooter>Rodapé</CardFooter>
+	<CardHeader>
+		<CardTitle>Título</CardTitle>
+		<CardDescription>Descrição</CardDescription>
+	</CardHeader>
+	<CardContent>Conteúdo</CardContent>
+	<CardFooter>Rodapé</CardFooter>
 </Card>
 ```
 
 #### Dialog (Modal)
+
 ```svelte
 <Dialog>
-  <DialogTrigger asChild>
-    <Button>Abrir Dialog</Button>
-  </DialogTrigger>
-  <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Título</DialogTitle>
-      <DialogDescription>Descrição</DialogDescription>
-    </DialogHeader>
-    <DialogFooter>
-      <DialogClose>Fechar</DialogClose>
-    </DialogFooter>
-  </DialogContent>
+	<DialogTrigger asChild>
+		<Button>Abrir Dialog</Button>
+	</DialogTrigger>
+	<DialogContent>
+		<DialogHeader>
+			<DialogTitle>Título</DialogTitle>
+			<DialogDescription>Descrição</DialogDescription>
+		</DialogHeader>
+		<DialogFooter>
+			<DialogClose>Fechar</DialogClose>
+		</DialogFooter>
+	</DialogContent>
 </Dialog>
 ```
 
 #### Input
+
 ```svelte
 <Input type="text|email|password" placeholder="..." />
 ```
 
 #### Carousel (Galeria)
+
 ```svelte
 <Carousel>
-  <CarouselContent>
-    <CarouselItem>Item 1</CarouselItem>
-    <CarouselItem>Item 2</CarouselItem>
-  </CarouselContent>
-  <CarouselPrevious />
-  <CarouselNext />
+	<CarouselContent>
+		<CarouselItem>Item 1</CarouselItem>
+		<CarouselItem>Item 2</CarouselItem>
+	</CarouselContent>
+	<CarouselPrevious />
+	<CarouselNext />
 </Carousel>
 ```
 
 #### Command (Busca/Seleção)
+
 ```svelte
 <Command>
-  <CommandInput placeholder="Pesquise..." />
-  <CommandList>
-    <CommandEmpty>Nenhum resultado</CommandEmpty>
-    <CommandGroup heading="Opções">
-      <CommandItem>Opção 1</CommandItem>
-    </CommandGroup>
-  </CommandList>
+	<CommandInput placeholder="Pesquise..." />
+	<CommandList>
+		<CommandEmpty>Nenhum resultado</CommandEmpty>
+		<CommandGroup heading="Opções">
+			<CommandItem>Opção 1</CommandItem>
+		</CommandGroup>
+	</CommandList>
 </Command>
 ```
 
 #### Popover
+
 ```svelte
 <Popover>
-  <PopoverTrigger>Abrir</PopoverTrigger>
-  <PopoverContent>Conteúdo do Popover</PopoverContent>
+	<PopoverTrigger>Abrir</PopoverTrigger>
+	<PopoverContent>Conteúdo do Popover</PopoverContent>
 </Popover>
 ```
 
 #### Navbar
+
 ```svelte
 <Navbar />
 ```
+
 - Automático: mostra nome de usuário se logado
 - Logout button para usuários autenticados
 - Login/Signup links para visitantes
 - Theme toggle
 
 #### ModeToggle
+
 ```svelte
 <ModeToggle />
 ```
+
 - Alternar entre dark/light mode
 
 ---
@@ -609,6 +627,7 @@ O projeto utiliza componentes reutilizáveis organizados em `src/lib/components/
 ### Padrões de Código
 
 #### TypeScript Strict Mode
+
 Sempre use tipos explícitos:
 
 ```typescript
@@ -617,72 +636,77 @@ const user = await getUser();
 
 // ✅ Bom
 interface User {
-    id: number;
-    nome: string;
-    email: string;
+	id: number;
+	nome: string;
+	email: string;
 }
 
 const user: User | null = await getUser();
 ```
 
 #### Componentes Svelte (Runes)
+
 Utilize Runes para reatividade:
 
 ```svelte
 <script lang="ts">
-    let count = $state(0);
-    let doubled = $derived(count * 2);
-    
-    function increment() {
-        count++;
-    }
+	let count = $state(0);
+	let doubled = $derived(count * 2);
+
+	function increment() {
+		count++;
+	}
 </script>
 
 <button on:click={increment}>
-    {count} (dobro: {doubled})
+	{count} (dobro: {doubled})
 </button>
 ```
 
 #### Stores
+
 Crie stores tipadas em `src/lib/stores/`:
 
 ```typescript
 import { writable } from 'svelte/store';
 
 export interface User {
-    id: number;
-    nome: string;
-    email: string;
+	id: number;
+	nome: string;
+	email: string;
 }
 
 export const user = writable<User | null>(null);
 ```
 
 #### Server Actions
+
 Use FormData para enviar dados:
 
 ```svelte
 <script lang="ts">
-    import { enhance } from '$app/forms';
-    
-    let formData = new FormData();
-    formData.append('email', 'user@example.com');
+	import { enhance } from '$app/forms';
+
+	let formData = new FormData();
+	formData.append('email', 'user@example.com');
 </script>
 
 <form method="POST" use:enhance>
-    <input name="email" type="email" required />
-    <button type="submit">Enviar</button>
+	<input name="email" type="email" required />
+	<button type="submit">Enviar</button>
 </form>
 ```
 
 ### Criando Novas Páginas
 
 1. **Criar pasta em `src/routes/`**
+
 ```bash
 mkdir src/routes/nova-pagina
 ```
 
 2. **Criar arquivos necessários**
+
 ```
 src/routes/nova-pagina/
 ├── +page.server.ts     (server-side logic)
@@ -690,56 +714,58 @@ src/routes/nova-pagina/
 ```
 
 3. **Exemplo +page.server.ts**
+
 ```typescript
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async () => {
-    // Carregar dados
-    return {
-        data: 'exemplo'
-    };
+	// Carregar dados
+	return {
+		data: 'exemplo'
+	};
 };
 
 export const actions: Actions = {
-    default: async ({ request }) => {
-        // Processar form submission
-        const data = await request.formData();
-        // ...
-        return { success: true };
-    }
+	default: async ({ request }) => {
+		// Processar form submission
+		const data = await request.formData();
+		// ...
+		return { success: true };
+	}
 };
 ```
 
 4. **Exemplo +page.svelte**
+
 ```svelte
 <script lang="ts">
-    import type { PageData } from './$types';
-    
-    export let data: PageData;
+	import type { PageData } from './$types';
+
+	export let data: PageData;
 </script>
 
-<h1>Nova Página</h1>
-<p>{data.data}</p>
+<h1>Nova Página</h1><p>{data.data}</p>
 ```
 
 ### Scripts NPM
 
-| Script | Descrição |
-|--------|-----------|
-| `npm run dev` | Servidor desenvolvimento (hot reload) |
-| `npm run build` | Build produção |
-| `npm run preview` | Preview do build |
-| `npm run check` | Verificar tipos TypeScript |
-| `npm run check:watch` | Verificar tipos em tempo real |
-| `npm run format` | Formatar código com Prettier |
-| `npm run lint` | Verificar estilo com Prettier |
-| `npm run db:start` | Iniciar PostgreSQL em Docker |
-| `npm run typeorm:generate` | Gerar migration |
-| `npm run typeorm:run` | Executar migration |
+| Script                     | Descrição                             |
+| -------------------------- | ------------------------------------- |
+| `npm run dev`              | Servidor desenvolvimento (hot reload) |
+| `npm run build`            | Build produção                        |
+| `npm run preview`          | Preview do build                      |
+| `npm run check`            | Verificar tipos TypeScript            |
+| `npm run check:watch`      | Verificar tipos em tempo real         |
+| `npm run format`           | Formatar código com Prettier          |
+| `npm run lint`             | Verificar estilo com Prettier         |
+| `npm run db:start`         | Iniciar PostgreSQL em Docker          |
+| `npm run typeorm:generate` | Gerar migration                       |
+| `npm run typeorm:run`      | Executar migration                    |
 
 ### Ferramentas Úteis
 
 #### Prettier (Formatação)
+
 ```bash
 # Formatar todos os arquivos
 npm run format
@@ -749,6 +775,7 @@ npm run lint
 ```
 
 #### TypeScript Check
+
 ```bash
 # Uma única verificação
 npm run check
@@ -758,6 +785,7 @@ npm run check:watch
 ```
 
 #### TypeORM Migrations
+
 ```bash
 # Gerar nova migration baseada em mudanças de entidades
 npm run typeorm:generate -- NomeDaMigration
@@ -773,9 +801,11 @@ npm run typeorm:run
 ### Server Actions (Formulários)
 
 #### POST `/cadastro`
+
 **Descrição**: Registrar novo usuário
 
 **Request Body** (FormData):
+
 ```
 email: string (required)
 password: string (required, min 6)
@@ -785,109 +815,119 @@ sexo: 'M' | 'F' | 'O' (optional, default: 'O')
 ```
 
 **Response (Success)**:
+
 ```json
 {
-    "success": true,
-    "user": {
-        "nome": "João Silva",
-        "email": "joao@example.com"
-    },
-    "message": "Cadastro realizado com sucesso!"
+	"success": true,
+	"user": {
+		"nome": "João Silva",
+		"email": "joao@example.com"
+	},
+	"message": "Cadastro realizado com sucesso!"
 }
 ```
 
 **Response (Error)**:
+
 ```json
 {
-    "success": false,
-    "email": "joao@example.com",
-    "message": "Email já cadastrado"
+	"success": false,
+	"email": "joao@example.com",
+	"message": "Email já cadastrado"
 }
 ```
 
 #### POST `/login`
+
 **Descrição**: Autenticar usuário
 
 **Request Body** (FormData):
+
 ```
 email: string (required)
 password: string (required)
 ```
 
 **Response (Success)**:
+
 ```json
 {
-    "success": true,
-    "user": {
-        "nome": "João Silva",
-        "email": "joao@example.com"
-    },
-    "message": "Login realizado com sucesso!"
+	"success": true,
+	"user": {
+		"nome": "João Silva",
+		"email": "joao@example.com"
+	},
+	"message": "Login realizado com sucesso!"
 }
 ```
 
 **Response (Error)**:
+
 ```json
 {
-    "success": false,
-    "email": "joao@example.com",
-    "message": "Senha incorreta"
+	"success": false,
+	"email": "joao@example.com",
+	"message": "Senha incorreta"
 }
 ```
 
 #### POST `/logout`
+
 **Descrição**: Desautenticar usuário
 
 **Response**:
+
 ```json
 {
-    "success": true,
-    "message": "Logout realizado"
+	"success": true,
+	"message": "Logout realizado"
 }
 ```
 
 ### Data Loading (+page.server.ts)
 
 #### GET `/` (Home)
+
 Carrega todos os destinos
 
 ```typescript
 export const load: PageServerLoad = async () => {
-    const results = await AppDataSource.getRepository(Destination).find({
-        relations: ['images', 'categories']
-    });
-    
-    return {
-        destinations: results
-    };
+	const results = await AppDataSource.getRepository(Destination).find({
+		relations: ['images', 'categories']
+	});
+
+	return {
+		destinations: results
+	};
 };
 ```
 
 #### GET `/search?q=termo&category=id`
+
 Busca e filtra destinos
 
 ```typescript
 export const load: PageServerLoad = async ({ url }) => {
-    const query = url.searchParams.get('q');
-    const category = url.searchParams.get('category');
-    
-    // Implementar query builder com filtros
-    return { results };
+	const query = url.searchParams.get('q');
+	const category = url.searchParams.get('category');
+
+	// Implementar query builder com filtros
+	return { results };
 };
 ```
 
 #### GET `/destination/[slug]`
+
 Carrega destino específico
 
 ```typescript
 export const load: PageServerLoad = async ({ params }) => {
-    const destination = await AppDataSource.getRepository(Destination)
-        .findOne({
-            where: { slug: params.slug },
-            relations: ['images', 'categories']
-        });
-    
-    return { destination };
+	const destination = await AppDataSource.getRepository(Destination).findOne({
+		where: { slug: params.slug },
+		relations: ['images', 'categories']
+	});
+
+	return { destination };
 };
 ```
 
@@ -901,27 +941,27 @@ A partir da versão 0.0.2, implementamos um sistema de **lazy loading** que não
 
 #### Arquivos Implementados
 
-| Arquivo | Descrição |
-|---------|-----------|
-| [src/hooks.server.ts](src/hooks.server.ts) | Handle com lazy loading de autenticação |
-| [src/lib/server/firebase-admin.ts](src/lib/server/firebase-admin.ts) | Inicialização e helpers do Firebase Admin SDK |
-| [src/app.d.ts](src/app.d.ts) | Tipagens para `event.locals.authUser()` e `event.locals.databaseUser()` |
+| Arquivo                                                              | Descrição                                                               |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [src/hooks.server.ts](src/hooks.server.ts)                           | Handle com lazy loading de autenticação                                 |
+| [src/lib/server/firebase-admin.ts](src/lib/server/firebase-admin.ts) | Inicialização e helpers do Firebase Admin SDK                           |
+| [src/app.d.ts](src/app.d.ts)                                         | Tipagens para `event.locals.authUser()` e `event.locals.databaseUser()` |
 
 #### Como Funciona?
 
 ```typescript
 // ❌ ANTES (valida em TODA requisição)
 export const handle = async ({ event, resolve }) => {
-    const user = await verifyToken(event.cookies);
-    event.locals.user = user;
+	const user = await verifyToken(event.cookies);
+	event.locals.user = user;
 };
 
 // ✅ AGORA (valida APENAS quando chamado)
 export const handle = async ({ event, resolve }) => {
-    event.locals.authUser = async () => {
-        if (validationAttempted) return cachedUser; // Cache!
-        // Validar apenas aqui...
-    };
+	event.locals.authUser = async () => {
+		if (validationAttempted) return cachedUser; // Cache!
+		// Validar apenas aqui...
+	};
 };
 ```
 
@@ -954,10 +994,11 @@ export const handle = async ({ event, resolve }) => {
 ### Usando em +page.server.ts
 
 #### Página Pública (Opcional Auth)
+
 ```typescript
 export const load: PageServerLoad = async ({ locals }) => {
     const user = await locals.authUser(); // ⚡ Lazy
-    
+
     return {
         destinations: [...],
         user: user || null, // Pode ser null
@@ -966,43 +1007,46 @@ export const load: PageServerLoad = async ({ locals }) => {
 ```
 
 #### Página Protegida
+
 ```typescript
 export const load: PageServerLoad = async ({ locals, redirect }) => {
-    const user = await locals.authUser();
-    
-    if (!user) {
-        throw redirect(303, '/login');
-    }
-    
-    return { user };
+	const user = await locals.authUser();
+
+	if (!user) {
+		throw redirect(303, '/login');
+	}
+
+	return { user };
 };
 ```
 
 #### Com Dados do Banco
+
 ```typescript
 export const load: PageServerLoad = async ({ locals, redirect }) => {
-    // Valida Firebase + Busca PostgreSQL
-    const user = await locals.databaseUser();
-    
-    if (!user) {
-        throw redirect(303, '/login');
-    }
-    
-    console.log(user.nome, user.papeis);
-    return { user };
+	// Valida Firebase + Busca PostgreSQL
+	const user = await locals.databaseUser();
+
+	if (!user) {
+		throw redirect(303, '/login');
+	}
+
+	console.log(user.nome, user.papeis);
+	return { user };
 };
 ```
 
 #### Apenas Admin
+
 ```typescript
 export const load: PageServerLoad = async ({ locals, redirect }) => {
-    const user = await locals.databaseUser();
-    
-    if (!user?.papeis?.includes('ADMINISTRADOR')) {
-        throw redirect(303, '/');
-    }
-    
-    return { user };
+	const user = await locals.databaseUser();
+
+	if (!user?.papeis?.includes('ADMINISTRADOR')) {
+		throw redirect(303, '/');
+	}
+
+	return { user };
 };
 ```
 
@@ -1017,11 +1061,11 @@ export const load: PageServerLoad = async ({ locals, redirect }) => {
 
 ```typescript
 cookies.set('authToken', token, {
-    path: '/',              // ✅ Disponível em toda a app
-    httpOnly: true,         // ✅ JS não pode acessar
-    secure: true,           // ✅ Apenas HTTPS
-    sameSite: 'strict',     // ✅ Proteção CSRF
-    maxAge: 60 * 60 * 24 * 7 // 7 dias
+	path: '/', // ✅ Disponível em toda a app
+	httpOnly: true, // ✅ JS não pode acessar
+	secure: true, // ✅ Apenas HTTPS
+	sameSite: 'strict', // ✅ Proteção CSRF
+	maxAge: 60 * 60 * 24 * 7 // 7 dias
 });
 ```
 
@@ -1034,16 +1078,17 @@ cookies.set('authToken', token, {
 
 ### Otimizações de Performance
 
-| Otimização | Ganho |
-|-----------|-------|
-| **Lazy Loading** | Não valida em cada requisição |
-| **Cache na Requisição** | Evita múltiplas validações |
-| **Session Cookies** | Usuário não precisa re-autenticar |
-| **Índices no Banco** | Busca rápida por UID/Email |
+| Otimização              | Ganho                             |
+| ----------------------- | --------------------------------- |
+| **Lazy Loading**        | Não valida em cada requisição     |
+| **Cache na Requisição** | Evita múltiplas validações        |
+| **Session Cookies**     | Usuário não precisa re-autenticar |
+| **Índices no Banco**    | Busca rápida por UID/Email        |
 
 ### Arquivo de Configuração
 
 Veja [AUTENTICACAO_GUIA.md](AUTENTICACAO_GUIA.md) para:
+
 - ✅ Setup completo com Firebase Admin
 - ✅ Configuração de variáveis de ambiente
 - ✅ Exemplos práticos de uso
@@ -1144,6 +1189,7 @@ Veja [AUTENTICACAO_GUIA.md](AUTENTICACAO_GUIA.md) para:
 ### Problema: Banco PostgreSQL não conecta
 
 **Solução:**
+
 ```bash
 # 1. Verificar se Docker está rodando
 docker ps
@@ -1165,6 +1211,7 @@ docker compose up
 ### Problema: Erros de tipo TypeScript
 
 **Solução:**
+
 ```bash
 # Executar verificação TypeScript
 npm run check
@@ -1183,21 +1230,23 @@ npm run check:watch
 **Causa:** Não há SSR loading de usuário
 
 **Solução:** Implementar em `hooks.server.ts`:
+
 ```typescript
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-    // Verificar authToken do cookie
-    // Carregar usuário do banco
-    // Adicionar a event.locals.user
-    
-    return await resolve(event);
+	// Verificar authToken do cookie
+	// Carregar usuário do banco
+	// Adicionar a event.locals.user
+
+	return await resolve(event);
 };
 ```
 
 ### Problema: CORS ou requisições bloqueadas
 
 **Verificar:**
+
 - Origem das requisições
 - Headers Content-Type
 - Cookies não sendo enviados
@@ -1205,6 +1254,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 ### Problema: Migrations não executam
 
 **Solução:**
+
 ```bash
 # 1. Verificar se banco está rodando
 npm run db:start
@@ -1225,6 +1275,7 @@ npm run typeorm:run
 ### Workflow de Contribuição
 
 1. **Criar Branch**
+
 ```bash
 git checkout -b feat/nome-da-feature
 # ou
@@ -1237,16 +1288,19 @@ git checkout -b fix/nome-do-bug
    - Adicionar tipos TypeScript
 
 3. **Formatar Código**
+
 ```bash
 npm run format
 ```
 
 4. **Verificar Tipos**
+
 ```bash
 npm run check
 ```
 
 5. **Commit e Push**
+
 ```bash
 git add .
 git commit -m "feat: descrição clara da mudança"
@@ -1291,6 +1345,7 @@ chore: tarefas de build, deps, etc
 ## 📄 Changelog
 
 ### v0.0.1 (2026-05-04)
+
 - ✅ Inicial setup do projeto
 - ✅ Autenticação Firebase
 - ✅ Componentes UI base
@@ -1311,6 +1366,6 @@ chore: tarefas de build, deps, etc
 
 **Última atualização**: 2026-05-04  
 **Versão**: 0.0.1  
-**Status do Projeto**: Em Desenvolvimento  
+**Status do Projeto**: Em Desenvolvimento
 
-*Para mais informações ou dúvidas, entre em contato com a equipe de desenvolvimento.*
+_Para mais informações ou dúvidas, entre em contato com a equipe de desenvolvimento._

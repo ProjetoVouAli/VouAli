@@ -15,13 +15,14 @@
 	<HeroBanner destinations={data.destinations} />
 
 	<!-- Featured Destinations Section -->
-	<section id="destinations" class="py-20 px-8 bg-gradient-to-b from-background to-gray-50 dark:from-background dark:to-gray-950">
+	<section
+		id="destinations"
+		class="py-20 px-8 bg-gradient-to-b from-background to-gray-50 dark:from-background dark:to-gray-950"
+	>
 		<div class="max-w-7xl mx-auto">
 			<!-- Section Header -->
 			<div class="mb-16">
-				<h2 class="text-5xl font-bold mb-4">
-					Destinos em Destaque
-				</h2>
+				<h2 class="text-5xl font-bold mb-4">Destinos em Destaque</h2>
 				<p class="text-lg text-muted-foreground max-w-2xl">
 					Confira alguns dos destinos mais populares e visitados.
 				</p>
@@ -32,7 +33,9 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					{#each data.destinations.slice(0, 6) as destination (destination.id)}
 						<a href={`/destination/${destination.slug}`} class="group hover:no-underline">
-							<Card class="overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+							<Card
+								class="overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col"
+							>
 								<!-- Image -->
 								<div class="h-64 bg-gray-200 dark:bg-gray-800 overflow-hidden">
 									{#if destination.images && destination.images.length > 0}
@@ -42,7 +45,9 @@
 											class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
 										/>
 									{:else}
-										<div class="w-full h-full flex items-center justify-center text-muted-foreground">
+										<div
+											class="w-full h-full flex items-center justify-center text-muted-foreground"
+										>
 											Sem imagem
 										</div>
 									{/if}
@@ -51,22 +56,34 @@
 								<!-- Content -->
 								<CardContent class="flex-1 flex flex-col">
 									<div class="flex gap-2 flex-wrap mb-3">
-										<span class="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-1 {destination.isPublic ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+										<span
+											class="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-1 {destination.isPublic
+												? 'bg-green-100 text-green-800'
+												: 'bg-orange-100 text-orange-800'}"
+										>
 											{destination.isPublic ? 'Público' : 'Privado'}
 										</span>
 										{#if destination.categories && destination.categories.length > 0}
-											<span class="inline-block text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border px-2 py-1">
+											<span
+												class="inline-block text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border px-2 py-1"
+											>
 												{destination.categories[0]}
 											</span>
 										{/if}
 									</div>
 
-									<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 mb-2 cursor-help" title={destination.name}>
+									<h3
+										class="text-xl font-bold group-hover:underline transition-all line-clamp-1 mb-2 cursor-help"
+										title={destination.name}
+									>
 										{destination.name}
 									</h3>
 
 									{#if destination.description}
-										<p class="text-sm text-muted-foreground line-clamp-2 mb-4 cursor-help flex-1" title={destination.description}>
+										<p
+											class="text-sm text-muted-foreground line-clamp-2 mb-4 cursor-help flex-1"
+											title={destination.description}
+										>
 											{destination.description}
 										</p>
 									{/if}
@@ -87,7 +104,9 @@
 									</div>
 
 									<div class="pt-4 border-t border-border">
-										<span class="text-xs font-bold uppercase tracking-wide text-foreground group-hover:gap-2 flex items-center transition-all">
+										<span
+											class="text-xs font-bold uppercase tracking-wide text-foreground group-hover:gap-2 flex items-center transition-all"
+										>
 											Saiba Mais
 											<span class="ml-2">→</span>
 										</span>
@@ -100,9 +119,7 @@
 
 				<!-- View All Button -->
 				<div class="mt-16 text-center">
-					<Button href="/search" variant="outline">
-						Ver Todos os Destinos
-					</Button>
+					<Button href="/search" variant="outline">Ver Todos os Destinos</Button>
 				</div>
 			{:else}
 				<div class="text-center py-16">

@@ -4,8 +4,8 @@
  */
 
 export interface ValidationResult {
-    valid: boolean;
-    message?: string;
+	valid: boolean;
+	message?: string;
 }
 
 /**
@@ -14,13 +14,13 @@ export interface ValidationResult {
  * @returns Objeto com status de validação e mensagem de erro (se houver)
  */
 export function validateEmail(email: string): ValidationResult {
-    if (!email.includes('@')) {
-        return {
-            valid: false,
-            message: 'Email inválido'
-        };
-    }
-    return { valid: true };
+	if (!email.includes('@')) {
+		return {
+			valid: false,
+			message: 'Email inválido'
+		};
+	}
+	return { valid: true };
 }
 
 /**
@@ -29,11 +29,11 @@ export function validateEmail(email: string): ValidationResult {
  * @returns Objeto com status de validação e mensagem de erro (se houver)
  */
 export function validatePassword(password: string): ValidationResult {
-    if (password.length < 6) {
-        return {
-            valid: false,
-            message: 'Senha deve ter pelo menos 6 caracteres'
-        };
-    }
-    return { valid: true };
+	if (password.length < 6) {
+		return {
+			valid: false,
+			message: 'Senha deve ter pelo menos 6 caracteres'
+		};
+	}
+	return { valid: true };
 }

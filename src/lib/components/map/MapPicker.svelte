@@ -1,198 +1,222 @@
 <script lang="ts">
-    import { browser } from '$app/environment';
+	import { browser } from '$app/environment';
 
-    interface Props {
-        latitude?: number;
-        longitude?: number;
-        searchQuery?: string;
-        onPinMoved?: (lat: number, lng: number) => void;
-    }
+	interface Props {
+		latitude?: number;
+		longitude?: number;
+		searchQuery?: string;
+		onPinMoved?: (lat: number, lng: number) => void;
+	}
 
-    let { latitude = $bindable(-22.9068), longitude = $bindable(-43.1729), searchQuery = '', onPinMoved }: Props = $props();
+	let {
+		latitude = $bindable(-22.9068),
+		longitude = $bindable(-43.1729),
+		searchQuery = '',
+		onPinMoved
+	}: Props = $props();
 
-    let mapContainer: HTMLDivElement | undefined = $state();
-    let mapReady = $state(false);
-    let geocoding = $state(false);
-    let geocodeError = $state('');
-    let pulseStyle = $state('');
+	let mapContainer: HTMLDivElement | undefined = $state();
+	let mapReady = $state(false);
+	let geocoding = $state(false);
+	let geocodeError = $state('');
+	let pulseStyle = $state('');
 
-    let map: any;
-    let marker = $state<any>();
+	let map: any;
+	let marker = $state<any>();
 
-    async function initMap() {
-        if (!browser) return;
+	async function initMap() {
+		if (!browser) return;
 
-        const maplibregl = await import('maplibre-gl');
-        if (!document.getElementById('ml-css')) {
-            const link = document.createElement('link');
-            link.id = 'ml-css';
-            link.rel = 'stylesheet';
-            link.href = 'https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.3/dist/maplibre-gl.css';
-            document.head.appendChild(link);
-        }
+		const maplibregl = await import('maplibre-gl');
+		if (!document.getElementById('ml-css')) {
+			const link = document.createElement('link');
+			link.id = 'ml-css';
+			link.rel = 'stylesheet';
+			link.href = 'https://cdn.jsdelivr.net/npm/maplibre-gl@5.7.3/dist/maplibre-gl.css';
+			document.head.appendChild(link);
+		}
 
-        const startLng = Number(longitude) || -43.1729;
-        const startLat = Number(latitude) || -22.9068;
+		const startLng = Number(longitude) || -43.1729;
+		const startLat = Number(latitude) || -22.9068;
 
-        map = new maplibregl.Map({
-            container: mapContainer!,
-            style: 'https://tiles.openfreemap.org/styles/liberty',
-            center: [startLng, startLat],
-            zoom: 12,
-        });
+		map = new maplibregl.Map({
+			container: mapContainer!,
+			style: 'https://tiles.openfreemap.org/styles/liberty',
+			center: [startLng, startLat],
+			zoom: 12
+		});
 
-        map.addControl(new maplibregl.NavigationControl(), 'top-right');
+		map.addControl(new maplibregl.NavigationControl(), 'top-right');
 
-        // Pulse circle behind the pin
-        const pulse = document.createElement('div');
-        pulse.style.cssText = 'position:absolute;width:60px;height:60px;top:-16px;left:-16px;border-radius:50%;background:rgba(220,38,38,0.2);border:2px solid rgba(220,38,38,0.4);animation:pulse 2s ease-in-out infinite;pointer-events:none;';
+		// Pulse circle behind the pin
+		const pulse = document.createElement('div');
+		pulse.style.cssText =
+			'position:absolute;width:60px;height:60px;top:-16px;left:-16px;border-radius:50%;background:rgba(220,38,38,0.2);border:2px solid rgba(220,38,38,0.4);animation:pulse 2s ease-in-out infinite;pointer-events:none;';
 
-        const el = document.createElement('div');
-        el.style.cssText = 'position:relative;width:28px;height:40px;';
-        el.appendChild(pulse);
+		const el = document.createElement('div');
+		el.style.cssText = 'position:relative;width:28px;height:40px;';
+		el.appendChild(pulse);
 
-        const pin = document.createElement('div');
-        pin.style.cssText = 'position:absolute;top:0;left:0;width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:1;pointer-events:none;';
-        el.appendChild(pin);
+		const pin = document.createElement('div');
+		pin.style.cssText =
+			'position:absolute;top:0;left:0;width:28px;height:28px;background:#dc2626;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3);z-index:1;pointer-events:none;';
+		el.appendChild(pin);
 
-        // Inject pulse keyframes once
-        if (!document.getElementById('map-pulse-style')) {
-            const style = document.createElement('style');
-            style.id = 'map-pulse-style';
-            style.textContent = '@keyframes pulse{0%{transform:scale(0.8);opacity:0.6}50%{transform:scale(1.3);opacity:0.2}100%{transform:scale(0.8);opacity:0.6}}';
-            document.head.appendChild(style);
-        }
+		// Inject pulse keyframes once
+		if (!document.getElementById('map-pulse-style')) {
+			const style = document.createElement('style');
+			style.id = 'map-pulse-style';
+			style.textContent =
+				'@keyframes pulse{0%{transform:scale(0.8);opacity:0.6}50%{transform:scale(1.3);opacity:0.2}100%{transform:scale(0.8);opacity:0.6}}';
+			document.head.appendChild(style);
+		}
 
-        marker = new maplibregl.Marker({ element: el })
-            .setLngLat([startLng, startLat])
-            .addTo(map);
+		marker = new maplibregl.Marker({ element: el }).setLngLat([startLng, startLat]).addTo(map);
 
-        map.on('click', (e: any) => {
-            ignoreSearchUntil = Date.now() + 4000;
-            geocodeError = ''; // Limpa o erro se o usuário corrigiu na mão
-            const lng = e.lngLat.lng;
-            const lat = e.lngLat.lat;
-            marker.setLngLat(e.lngLat);
-            latitude = lat;
-            longitude = lng;
-            onPinMoved?.(lat, lng);
-        });
+		map.on('click', (e: any) => {
+			ignoreSearchUntil = Date.now() + 4000;
+			geocodeError = ''; // Limpa o erro se o usuário corrigiu na mão
+			const lng = e.lngLat.lng;
+			const lat = e.lngLat.lat;
+			marker.setLngLat(e.lngLat);
+			latitude = lat;
+			longitude = lng;
+			onPinMoved?.(lat, lng);
+		});
 
-        map.on('load', () => {
-            mapReady = true;
-        });
-    }
+		map.on('load', () => {
+			mapReady = true;
+		});
+	}
 
-    $effect(() => {
-        if (!marker || latitude == null || longitude == null) return;
-        marker.setLngLat([longitude, latitude]);
-    });
+	$effect(() => {
+		if (!marker || latitude == null || longitude == null) return;
+		marker.setLngLat([longitude, latitude]);
+	});
 
-    $effect(() => {
-        if (!browser || !mapContainer) return;
+	$effect(() => {
+		if (!browser || !mapContainer) return;
 
-        initMap();
+		initMap();
 
-        return () => {
-            map?.remove();
-        };
-    });
+		return () => {
+			map?.remove();
+		};
+	});
 
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-    let ignoreSearchUntil = 0;
+	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+	let ignoreSearchUntil = 0;
 
-    // Função auxiliar para buscar no Nominatim
-    async function fetchGeocode(query: string) {
-        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&accept-language=pt`;
-        const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
-        return await res.json();
-    }
+	// Função auxiliar para buscar no Nominatim
+	async function fetchGeocode(query: string) {
+		const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&accept-language=pt`;
+		const res = await fetch(url, { headers: { 'User-Agent': 'VouAli/1.0' } });
+		return await res.json();
+	}
 
-    $effect(() => {
-        const q = searchQuery?.trim();
-        if (!q || q.length < 5 || !mapReady) return;
+	$effect(() => {
+		const q = searchQuery?.trim();
+		if (!q || q.length < 5 || !mapReady) return;
 
-        // Se o usuário acabou de clicar no mapa, ignoramos buscas automáticas
-        if (Date.now() < ignoreSearchUntil) {
-            geocodeError = ''; // Garante que a mensagem suma
-            return;
-        }
+		// Se o usuário acabou de clicar no mapa, ignoramos buscas automáticas
+		if (Date.now() < ignoreSearchUntil) {
+			geocodeError = ''; // Garante que a mensagem suma
+			return;
+		}
 
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(async () => {
-            geocoding = true;
-            geocodeError = '';
-            try {
-                let data = await fetchGeocode(q);
+		clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(async () => {
+			geocoding = true;
+			geocodeError = '';
+			try {
+				let data = await fetchGeocode(q);
 
-                // Fallback: se não achar com o número, tenta sem o número (caso tenha)
-                // Assumindo que a query é "Rua, Numero, Bairro..."
-                if ((!data || data.length === 0) && q.includes(',')) {
-                    const parts = q.split(',').map(p => p.trim());
-                    // Remove o segundo elemento (geralmente o número) se for curto
-                    if (parts.length >= 3 && parts[1].length <= 5 && !isNaN(Number(parts[1]))) {
-                        parts.splice(1, 1);
-                        const fallbackQ = parts.join(', ');
-                        data = await fetchGeocode(fallbackQ);
-                        if (data && data.length > 0) {
-                            geocodeError = 'Número não encontrado exatamente. O pino foi movido para a rua. Ajuste manualmente.';
-                        }
-                    }
-                }
+				// Fallback: se não achar com o número, tenta sem o número (caso tenha)
+				// Assumindo que a query é "Rua, Numero, Bairro..."
+				if ((!data || data.length === 0) && q.includes(',')) {
+					const parts = q.split(',').map((p) => p.trim());
+					// Remove o segundo elemento (geralmente o número) se for curto
+					if (parts.length >= 3 && parts[1].length <= 5 && !isNaN(Number(parts[1]))) {
+						parts.splice(1, 1);
+						const fallbackQ = parts.join(', ');
+						data = await fetchGeocode(fallbackQ);
+						if (data && data.length > 0) {
+							geocodeError =
+								'Número não encontrado exatamente. O pino foi movido para a rua. Ajuste manualmente.';
+						}
+					}
+				}
 
-                if (data && data.length > 0) {
-                    const lon = parseFloat(data[0].lon);
-                    const lat = parseFloat(data[0].lat);
-                    marker?.setLngLat([lon, lat]);
-                    latitude = lat;
-                    longitude = lon;
+				if (data && data.length > 0) {
+					const lon = parseFloat(data[0].lon);
+					const lat = parseFloat(data[0].lat);
+					marker?.setLngLat([lon, lat]);
+					latitude = lat;
+					longitude = lon;
 
-                    if (data[0].boundingbox) {
-                        const [south, north, west, east] = data[0].boundingbox.map(parseFloat);
-                        map?.fitBounds([[west, south], [east, north]], { padding: 60, maxZoom: 17 });
-                    } else {
-                        map?.setCenter([lon, lat]);
-                        map?.setZoom(15);
-                    }
-                } else {
-                    geocodeError = 'Local não encontrado automaticamente. Clique no mapa para posicionar o pin.';
-                }
-            } catch {
-                geocodeError = 'Erro ao buscar local.';
-            } finally {
-                geocoding = false;
-            }
-        }, 800);
-    });
+					if (data[0].boundingbox) {
+						const [south, north, west, east] = data[0].boundingbox.map(parseFloat);
+						map?.fitBounds(
+							[
+								[west, south],
+								[east, north]
+							],
+							{ padding: 60, maxZoom: 17 }
+						);
+					} else {
+						map?.setCenter([lon, lat]);
+						map?.setZoom(15);
+					}
+				} else {
+					geocodeError =
+						'Local não encontrado automaticamente. Clique no mapa para posicionar o pin.';
+				}
+			} catch {
+				geocodeError = 'Erro ao buscar local.';
+			} finally {
+				geocoding = false;
+			}
+		}, 800);
+	});
 </script>
 
 <div class="space-y-2">
-    {#if geocodeError}
-        <p class="text-xs text-destructive">{geocodeError}</p>
-    {/if}
+	{#if geocodeError}
+		<p class="text-xs text-destructive">{geocodeError}</p>
+	{/if}
 
-    <div class="relative w-full h-72 md:h-80 rounded-lg overflow-hidden border border-border">
-        {#if browser}
-            <div bind:this={mapContainer} class="w-full h-full"></div>
-            {#if geocoding}
-                <div class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm text-xs font-medium px-3 py-1.5 rounded-full shadow-sm z-10">
-                    Buscando local...
-                </div>
-            {/if}
-        {:else}
-            <div class="w-full h-full flex items-center justify-center bg-muted text-sm text-muted-foreground">
-                Carregando mapa...
-            </div>
-        {/if}
-    </div>
+	<div class="relative w-full h-72 md:h-80 rounded-lg overflow-hidden border border-border">
+		{#if browser}
+			<div bind:this={mapContainer} class="w-full h-full"></div>
+			{#if geocoding}
+				<div
+					class="absolute top-3 left-3 bg-background/80 backdrop-blur-sm text-xs font-medium px-3 py-1.5 rounded-full shadow-sm z-10"
+				>
+					Buscando local...
+				</div>
+			{/if}
+		{:else}
+			<div
+				class="w-full h-full flex items-center justify-center bg-muted text-sm text-muted-foreground"
+			>
+				Carregando mapa...
+			</div>
+		{/if}
+	</div>
 
-    <div class="flex items-center justify-between text-xs text-muted-foreground">
-        <span>
-            {latitude?.toFixed(6) ?? '--'}, {longitude?.toFixed(6) ?? '--'}
-        </span>
-        <span class="flex items-center gap-1">
-            <svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            Clique no mapa para posicionar o pin
-        </span>
-    </div>
+	<div class="flex items-center justify-between text-xs text-muted-foreground">
+		<span>
+			{latitude?.toFixed(6) ?? '--'}, {longitude?.toFixed(6) ?? '--'}
+		</span>
+		<span class="flex items-center gap-1">
+			<svg class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+				><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle
+					cx="12"
+					cy="10"
+					r="3"
+				/></svg
+			>
+			Clique no mapa para posicionar o pin
+		</span>
+	</div>
 </div>

@@ -1,176 +1,176 @@
-import type { PageServerLoad } from "../$types";
+import type { PageServerLoad } from '../$types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
-import { registerWithEmail } from "$lib/auth";
+import { registerWithEmail } from '$lib/auth';
 import { setAuthCookie } from '$lib/server/utils/auth';
 import { buildAuthSuccessResponse } from '$lib/server/utils/responses';
-import { saveUserToDatabase } from "$lib/server/auth/cadastro";
+import { saveUserToDatabase } from '$lib/server/auth/cadastro';
 
 /**
  * Página de Cadastro - Protegida com redirecionamento
- * 
+ *
  * Padrão de mercado:
  * - Se já está logado, redireciona para home
  * - Se não está logado, mostra formulário de cadastro
  */
 export const load: PageServerLoad = async ({ locals }) => {
-    // ✅ Lazy Loading: Verifica apenas se está logado
-    const user = await locals.authUser();
+	// ✅ Lazy Loading: Verifica apenas se está logado
+	const user = await locals.authUser();
 
-    // Se já está logado, redireciona para home
-    if (user) {
-        throw redirect(303, '/');
-    }
+	// Se já está logado, redireciona para home
+	if (user) {
+		throw redirect(303, '/');
+	}
 
-    return {
-        registerWithEmail: true,
-        registerWithGoogle: true
-    };
+	return {
+		registerWithEmail: true,
+		registerWithGoogle: true
+	};
 };
 
 export const actions: Actions = {
-    register: async ({ request, cookies }) => {
-        const data = await request.formData();
-        const email =  data.get('email')?.toString().trim()  ??  '';
-        const password = data.get('password')?.toString().trim() ?? '';
-        const confirmPassword = data.get('confirmPassword')?.toString().trim() ?? '';
-        const nome = data.get('nome')?.toString().trim() ?? '';
-        const sexo = (data.get('sexo')?.toString() ?? 'O') as 'M' | 'F' | 'O';
+	register: async ({ request, cookies }) => {
+		const data = await request.formData();
+		const email = data.get('email')?.toString().trim() ?? '';
+		const password = data.get('password')?.toString().trim() ?? '';
+		const confirmPassword = data.get('confirmPassword')?.toString().trim() ?? '';
+		const nome = data.get('nome')?.toString().trim() ?? '';
+		const sexo = (data.get('sexo')?.toString() ?? 'O') as 'M' | 'F' | 'O';
 
-        //  VALIDAÇÃO
-        if (!email || !password || !confirmPassword) {
-            return  fail(400, {
-                email,
-                message: 'Todos os campos são obrigatórios'
-            });
-        }
+		//  VALIDAÇÃO
+		if (!email || !password || !confirmPassword) {
+			return fail(400, {
+				email,
+				message: 'Todos os campos são obrigatórios'
+			});
+		}
 
-        if (!email.includes('@')) {
-            return fail(400, {
-                email,
-                message: 'Email inválido'
-            });
-        }
+		if (!email.includes('@')) {
+			return fail(400, {
+				email,
+				message: 'Email inválido'
+			});
+		}
 
-        if (password.length <6) {
-            return fail(400, {
-                email,
-                message: 'Senha deve ter pelo menos6 caracteres'
-            });
-        }
+		if (password.length < 6) {
+			return fail(400, {
+				email,
+				message: 'Senha deve ter pelo menos6 caracteres'
+			});
+		}
 
-        if (password !== confirmPassword) {
-            return fail(400, {
-                email,
-                message: 'Senhas não  coincidem'
-            });
-        }
+		if (password !== confirmPassword) {
+			return fail(400, {
+				email,
+				message: 'Senhas não  coincidem'
+			});
+		}
 
-        try {
-            // 1. CADASTRO COM FIREBASE
-            const result =  await registerWithEmail(email, password);
-            
-            if (!result.success) {
-                return fail(401, {
-                    email,
-                    message: result.message
-                });
-            }
+		try {
+			// 1. CADASTRO COM FIREBASE
+			const result = await registerWithEmail(email, password);
 
-            if (!result.token) {
-                return fail(500, {
-                    email,
-                    message: 'Token de autenticação inválido'
-                });
-            }
+			if (!result.success) {
+				return fail(401, {
+					email,
+					message: result.message
+				});
+			}
 
-            // 2. SALVAR NO  BANCO DE  DADOS COM UID DO FIREBASE
-            const firebaseUid = result.user?.uid;
+			if (!result.token) {
+				return fail(500, {
+					email,
+					message: 'Token de autenticação inválido'
+				});
+			}
 
-            if (!firebaseUid) {
-                return fail(500, {
-                    email,
-                    message: 'Erro ao obter UID do Firebase'
-                });
-            }
-            
+			// 2. SALVAR NO  BANCO DE  DADOS COM UID DO FIREBASE
+			const firebaseUid = result.user?.uid;
 
-            const usuario = await saveUserToDatabase(firebaseUid, email, nome, sexo);
+			if (!firebaseUid) {
+				return fail(500, {
+					email,
+					message: 'Erro ao obter UID do Firebase'
+				});
+			}
 
-            // 3. GUARDAR TOKEN NOS COOKIES
-            // ✅ Usar função centralizada para definir cookie
-            setAuthCookie(cookies, result.token);
+			const usuario = await saveUserToDatabase(firebaseUid, email, nome, sexo);
 
-            // ✅ Usar função centralizada para construir response
-            // O frontend vai fazer o redirect após atualizar o store
-            return buildAuthSuccessResponse(usuario, '✅ Cadastro realizado com sucesso!');
+			// 3. GUARDAR TOKEN NOS COOKIES
+			// ✅ Usar função centralizada para definir cookie
+			setAuthCookie(cookies, result.token);
 
-        } catch (error: any) {
-            if (error.location) throw error;
+			// ✅ Usar função centralizada para construir response
+			// O frontend vai fazer o redirect após atualizar o store
+			return buildAuthSuccessResponse(usuario, '✅ Cadastro realizado com sucesso!');
+		} catch (error: any) {
+			if (error.location) throw error;
 
-            console.error('Erro ao cadastrar:', error);
-            return fail(500, {
-                email,
-                message: 'Erro ao processar cadastro'
-            })
-        }
-    },
-    
-    google: async ({ request, cookies }) => {
-        const data = await request.formData();
-        const idToken = data.get('idToken')?.toString().trim();
+			console.error('Erro ao cadastrar:', error);
+			return fail(500, {
+				email,
+				message: 'Erro ao processar cadastro'
+			});
+		}
+	},
 
-        if (!idToken) {
-            return fail(400, { message: 'Token do Google ausente' });
-        }
+	google: async ({ request, cookies }) => {
+		const data = await request.formData();
+		const idToken = data.get('idToken')?.toString().trim();
 
-        try {
-            const { verifyIdToken } = await import('$lib/server/firebase-admin');
-            const decodedToken = await verifyIdToken(idToken);
-            
-            if (!decodedToken) {
-                return fail(401, { message: 'Token do Google inválido ou expirado' });
-            }
+		if (!idToken) {
+			return fail(400, { message: 'Token do Google ausente' });
+		}
 
-            const email = decodedToken.email;
-            if (!email) {
-                return fail(400, { message: 'Conta do Google sem email associado' });
-            }
+		try {
+			const { verifyIdToken } = await import('$lib/server/firebase-admin');
+			const decodedToken = await verifyIdToken(idToken);
 
-            setAuthCookie(cookies, idToken);
+			if (!decodedToken) {
+				return fail(401, { message: 'Token do Google inválido ou expirado' });
+			}
 
-            const { AppDataSource } = await import('$lib/server/db/data-source');
-            const { Usuario, TipoUsuario } = await import('$lib/server/db/entities/Usuario');
-            const userRepository = AppDataSource.getRepository(Usuario);
-            let usuario = await userRepository.findOne({ where: { email } });
+			const email = decodedToken.email;
+			if (!email) {
+				return fail(400, { message: 'Conta do Google sem email associado' });
+			}
 
-            if (!usuario) {
-                const { SolicitacaoParceiro, StatusSolicitacao } = await import('$lib/server/db/entities/SolicitacaoParceiro');
-                const solicitacaoRepository = AppDataSource.getRepository(SolicitacaoParceiro);
-                const solicitacao = await solicitacaoRepository.findOne({
-                    where: { emailResponsavel: email, status: StatusSolicitacao.APROVADA }
-                });
+			setAuthCookie(cookies, idToken);
 
-                const papeis = [TipoUsuario.VIAJANTE];
-                if (solicitacao) {
-                    papeis.push(TipoUsuario.PARCEIRO);
-                }
+			const { AppDataSource } = await import('$lib/server/db/data-source');
+			const { Usuario, TipoUsuario } = await import('$lib/server/db/entities/Usuario');
+			const userRepository = AppDataSource.getRepository(Usuario);
+			let usuario = await userRepository.findOne({ where: { email } });
 
-                usuario = userRepository.create({
-                    uid: decodedToken.uid,
-                    email: email,
-                    nome: decodedToken.name || email.split('@')[0],
-                    sexo: 'O',
-                    estaAutenticado: true,
-                    papeis: papeis
-                });
+			if (!usuario) {
+				const { SolicitacaoParceiro, StatusSolicitacao } = await import(
+					'$lib/server/db/entities/SolicitacaoParceiro'
+				);
+				const solicitacaoRepository = AppDataSource.getRepository(SolicitacaoParceiro);
+				const solicitacao = await solicitacaoRepository.findOne({
+					where: { emailResponsavel: email, status: StatusSolicitacao.APROVADA }
+				});
 
-                await userRepository.save(usuario);
-            }
+				const papeis = [TipoUsuario.VIAJANTE];
+				if (solicitacao) {
+					papeis.push(TipoUsuario.PARCEIRO);
+				}
 
-            return buildAuthSuccessResponse(usuario, '✅ Cadastro com Google realizado com sucesso!');
-        } catch (error: any) {
-            console.error('Erro no Cadastro com Google:', error);
-            return fail(500, { message: 'Erro ao validar token do Google.' });
-        }
-    }
+				usuario = userRepository.create({
+					uid: decodedToken.uid,
+					email: email,
+					nome: decodedToken.name || email.split('@')[0],
+					sexo: 'O',
+					estaAutenticado: true,
+					papeis: papeis
+				});
+
+				await userRepository.save(usuario);
+			}
+
+			return buildAuthSuccessResponse(usuario, '✅ Cadastro com Google realizado com sucesso!');
+		} catch (error: any) {
+			console.error('Erro no Cadastro com Google:', error);
+			return fail(500, { message: 'Erro ao validar token do Google.' });
+		}
+	}
 };

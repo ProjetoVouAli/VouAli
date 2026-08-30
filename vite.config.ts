@@ -6,7 +6,7 @@ export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
 	// For Presentations:
 	server: {
-		allowedHosts:["bruno-aspire.tail84cca9.ts.net"],
+		allowedHosts: ['bruno-aspire.tail84cca9.ts.net'],
 		host: '0.0.0.0',
 		port: 8443
 	}

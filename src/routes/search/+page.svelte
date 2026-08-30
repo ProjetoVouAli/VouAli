@@ -36,7 +36,7 @@
 	function toggleCategory(categoryName: string) {
 		const categoryNameStr = String(categoryName);
 		if (selectedCategories.includes(categoryNameStr)) {
-			selectedCategories = selectedCategories.filter(c => c !== categoryNameStr);
+			selectedCategories = selectedCategories.filter((c) => c !== categoryNameStr);
 		} else {
 			selectedCategories = [...selectedCategories, categoryNameStr];
 		}
@@ -49,12 +49,8 @@
 	<div class="max-w-7xl mx-auto px-8">
 		<!-- Page Header -->
 		<div class="mb-16">
-			<h1 class="text-5xl font-bold mb-4">
-				Explore Destinos
-			</h1>
-			<p class="text-lg text-muted-foreground">
-				Encontre o destino perfeito para suas aventuras
-			</p>
+			<h1 class="text-5xl font-bold mb-4">Explore Destinos</h1>
+			<p class="text-lg text-muted-foreground">Encontre o destino perfeito para suas aventuras</p>
 		</div>
 
 		<div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-16">
@@ -77,12 +73,12 @@
 
 					{#if data.categories && data.categories.length > 0}
 						<div>
-							<div class="text-sm font-bold mb-4 uppercase tracking-wide">
-								Categorias
-							</div>
+							<div class="text-sm font-bold mb-4 uppercase tracking-wide">Categorias</div>
 							<div class="space-y-3">
 								{#each data.categories as category (category.name)}
-									<label class="flex items-center gap-3 cursor-pointer hover:text-foreground transition-colors group">
+									<label
+										class="flex items-center gap-3 cursor-pointer hover:text-foreground transition-colors group"
+									>
 										<input
 											type="checkbox"
 											id="category-{category.name}"
@@ -121,14 +117,19 @@
 				{#if data.destinations && data.destinations.length > 0}
 					<div class="mb-8">
 						<p class="text-sm text-muted-foreground font-medium">
-							{data.destinations.length} resultado{data.destinations.length !== 1 ? 's' : ''} encontrado{data.destinations.length !== 1 ? 's' : ''}
+							{data.destinations.length} resultado{data.destinations.length !== 1 ? 's' : ''} encontrado{data
+								.destinations.length !== 1
+								? 's'
+								: ''}
 						</p>
 					</div>
 
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 						{#each data.destinations as destination (destination.id)}
 							<a href={`/destination/${destination.slug}`} class="group">
-								<Card class="rounded-none overflow-hidden hover:shadow-2xl transition-all duration-300 border-border flex flex-col h-full">
+								<Card
+									class="rounded-none overflow-hidden hover:shadow-2xl transition-all duration-300 border-border flex flex-col h-full"
+								>
 									<div class="h-56 bg-muted overflow-hidden shrink-0">
 										{#if destination.images && destination.images.length > 0}
 											<img
@@ -137,7 +138,9 @@
 												class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
 											/>
 										{:else}
-											<div class="w-full h-full flex items-center justify-center text-muted-foreground">
+											<div
+												class="w-full h-full flex items-center justify-center text-muted-foreground"
+											>
 												Sem imagem
 											</div>
 										{/if}
@@ -145,22 +148,34 @@
 
 									<CardContent class="p-6 flex-1 flex flex-col">
 										<div class="flex gap-2 flex-wrap mb-3">
-											<span class="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-1 {destination.isPublic ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}">
+											<span
+												class="inline-block text-[10px] font-black uppercase tracking-widest px-2 py-1 {destination.isPublic
+													? 'bg-green-100 text-green-800'
+													: 'bg-orange-100 text-orange-800'}"
+											>
 												{destination.isPublic ? 'Público' : 'Privado'}
 											</span>
 											{#if destination.categories && destination.categories.length > 0}
-												<span class="inline-block text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border px-2 py-1">
+												<span
+													class="inline-block text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border px-2 py-1"
+												>
 													{destination.categories[0]}
 												</span>
 											{/if}
 										</div>
 
-										<h3 class="text-xl font-bold group-hover:underline transition-all line-clamp-1 mb-2 cursor-help" title={destination.name}>
+										<h3
+											class="text-xl font-bold group-hover:underline transition-all line-clamp-1 mb-2 cursor-help"
+											title={destination.name}
+										>
 											{destination.name}
 										</h3>
 
 										{#if destination.description}
-											<p class="text-sm text-muted-foreground line-clamp-2 mb-4 cursor-help flex-1" title={destination.description}>
+											<p
+												class="text-sm text-muted-foreground line-clamp-2 mb-4 cursor-help flex-1"
+												title={destination.description}
+											>
 												{destination.description}
 											</p>
 										{/if}
@@ -181,7 +196,9 @@
 										</div>
 
 										<div class="pt-4 border-t border-border">
-											<span class="text-xs font-bold uppercase tracking-wide text-foreground group-hover:gap-2 flex items-center transition-all">
+											<span
+												class="text-xs font-bold uppercase tracking-wide text-foreground group-hover:gap-2 flex items-center transition-all"
+											>
 												Saiba Mais
 												<span class="ml-2">→</span>
 											</span>
@@ -191,13 +208,10 @@
 							</a>
 						{/each}
 					</div>
-
 				{:else}
 					<div class="py-20 text-center space-y-6">
 						<div class="text-6xl mb-4">🔍</div>
-						<h3 class="text-2xl font-bold">
-							Nenhum destino encontrado
-						</h3>
+						<h3 class="text-2xl font-bold">Nenhum destino encontrado</h3>
 						<p class="text-muted-foreground text-lg">
 							{#if searchParam || selectedCategories.length > 0}
 								Tente ajustar seus filtros de busca

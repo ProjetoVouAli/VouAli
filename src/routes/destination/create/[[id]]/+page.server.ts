@@ -15,222 +15,232 @@ import fs from 'fs';
 import path from 'path';
 
 export const load: PageServerLoad = async ({ locals, parent, params }) => {
-    const { user } = await parent();
+	const { user } = await parent();
 
-    if (
-        !user ||
-        (!user.papeis.includes(TipoUsuario.PARCEIRO) &&
-            !user.papeis.includes(TipoUsuario.ADMINISTRADOR))
-    ) {
-        throw error(403, {
-            message: 'Acesso negado. Apenas Parceiros ou Administradores podem gerenciar destinos.'
-        });
-    }
+	if (
+		!user ||
+		(!user.papeis.includes(TipoUsuario.PARCEIRO) &&
+			!user.papeis.includes(TipoUsuario.ADMINISTRADOR))
+	) {
+		throw error(403, {
+			message: 'Acesso negado. Apenas Parceiros ou Administradores podem gerenciar destinos.'
+		});
+	}
 
-    let initialData: Record<string, unknown> = {
-        state: 'RJ',
-        active: true,
-        latitude: -22.9068,
-        longitude: -43.1729,
-        categories: [],
-        images: [],
-        imagesToDelete: [], // Adicionado fallback para deleção
-        price: '',
-        openingHours: '',
-        isPublic: true,
-        street: 'Atualizar rua',
-        number: 'S/N',
-        complement: ''
-    };
+	let initialData: Record<string, unknown> = {
+		state: 'RJ',
+		active: true,
+		latitude: -22.9068,
+		longitude: -43.1729,
+		categories: [],
+		images: [],
+		imagesToDelete: [], // Adicionado fallback para deleção
+		price: '',
+		openingHours: '',
+		isPublic: true,
+		street: 'Atualizar rua',
+		number: 'S/N',
+		complement: ''
+	};
 
-    let destinationStatus: string | null = null;
-    let existingImages: DestinationImage[] = [];
+	let destinationStatus: string | null = null;
+	let existingImages: DestinationImage[] = [];
 
-    if (params.id) {
-        const destId = parseInt(params.id);
-        const whereCondition = isNaN(destId) ? { slug: params.id } : { id: destId };
-        
-        const destinationRepo = AppDataSource.getRepository(Destination);
-        const destination = await destinationRepo.findOne({
-            where: whereCondition,
-            relations: ['categories', 'images'] // Traz as imagens vinculadas do banco
-        });
+	if (params.id) {
+		const destId = parseInt(params.id);
+		const whereCondition = isNaN(destId) ? { slug: params.id } : { id: destId };
 
-        if (!destination) {
-            throw error(404, 'Destino não encontrado');
-        }
+		const destinationRepo = AppDataSource.getRepository(Destination);
+		const destination = await destinationRepo.findOne({
+			where: whereCondition,
+			relations: ['categories', 'images'] // Traz as imagens vinculadas do banco
+		});
 
-        existingImages = destination.images || [];
+		if (!destination) {
+			throw error(404, 'Destino não encontrado');
+		}
 
-        initialData = {
-            ...destination,
-            street: destination.street ?? '',
-            number: destination.number ?? '',
-            complement: destination.complement ?? '',
-            categories: destination.categories?.map(category => category.name) ?? [],
-            images: [],
-            imagesToDelete: []
-        };
+		existingImages = destination.images || [];
 
-        destinationStatus = destination.status;
-    }
+		initialData = {
+			...destination,
+			street: destination.street ?? '',
+			number: destination.number ?? '',
+			complement: destination.complement ?? '',
+			categories: destination.categories?.map((category) => category.name) ?? [],
+			images: [],
+			imagesToDelete: []
+		};
 
-    const form = await superValidate(initialData, zod(destinationSchema));
+		destinationStatus = destination.status;
+	}
 
-    const categories = (await AppDataSource.getRepository(DestinationCategory).find({ order: { name: 'ASC' } })).map(
-        (category) => ({
-            id: category.id,
-            name: category.name
-        })
-    );
-    
-    // CORREÇÃO: Agora enviamos o ID da imagem junto com a URL para o frontend poder referenciá-la na hora de apagar
-    const imagesData = existingImages.map((image) => ({
-        id: image.id, 
-        url: image.url
-    }));
+	const form = await superValidate(initialData, zod(destinationSchema));
 
-    return {
-        form,
-        isEdit: !!params.id,
-        categories,
-        existingImages: imagesData,
-        destinationStatus
-    };
+	const categories = (
+		await AppDataSource.getRepository(DestinationCategory).find({ order: { name: 'ASC' } })
+	).map((category) => ({
+		id: category.id,
+		name: category.name
+	}));
+
+	// CORREÇÃO: Agora enviamos o ID da imagem junto com a URL para o frontend poder referenciá-la na hora de apagar
+	const imagesData = existingImages.map((image) => ({
+		id: image.id,
+		url: image.url
+	}));
+
+	return {
+		form,
+		isEdit: !!params.id,
+		categories,
+		existingImages: imagesData,
+		destinationStatus
+	};
 };
 
 export const actions: Actions = {
-    default: async ({ request, params, locals }) => {
-        const user = await locals.databaseUser();
-        if (!user || (!user.papeis.includes(TipoUsuario.PARCEIRO) && !user.papeis.includes(TipoUsuario.ADMINISTRADOR))) {
-            throw error(403, { message: 'Acesso negado.' });
-        }
+	default: async ({ request, params, locals }) => {
+		const user = await locals.databaseUser();
+		if (
+			!user ||
+			(!user.papeis.includes(TipoUsuario.PARCEIRO) &&
+				!user.papeis.includes(TipoUsuario.ADMINISTRADOR))
+		) {
+			throw error(403, { message: 'Acesso negado.' });
+		}
 
-        const form = await superValidate(request, zod(destinationSchema));
+		const form = await superValidate(request, zod(destinationSchema));
 
-        if (!form.valid) {
-            console.error('Validation failed!', JSON.stringify(form.errors, null, 2));
-            return fail(400, { form });
-        }
+		if (!form.valid) {
+			console.error('Validation failed!', JSON.stringify(form.errors, null, 2));
+			return fail(400, { form });
+		}
 
-        const destinationRepo = AppDataSource.getRepository(Destination);
-        const categoryRepo = AppDataSource.getRepository(DestinationCategory);
-        const imageRepo = AppDataSource.getRepository(DestinationImage);
+		const destinationRepo = AppDataSource.getRepository(Destination);
+		const categoryRepo = AppDataSource.getRepository(DestinationCategory);
+		const imageRepo = AppDataSource.getRepository(DestinationImage);
 
-        // Separação de arquivos para upload, ids para deleção, id do form, e dados comuns
-        const { categories: inputCategoryNames, images: uploadedFiles, imagesToDelete, id: formId, ...destinationData } = form.data;
+		// Separação de arquivos para upload, ids para deleção, id do form, e dados comuns
+		const {
+			categories: inputCategoryNames,
+			images: uploadedFiles,
+			imagesToDelete,
+			id: formId,
+			...destinationData
+		} = form.data;
 
-        // 1. Processamento das Tags/Categorias
-        let finalCategories: DestinationCategory[] = [];
+		// 1. Processamento das Tags/Categorias
+		let finalCategories: DestinationCategory[] = [];
 
-        if (inputCategoryNames && inputCategoryNames.length > 0) {
-            const existingCategories = await categoryRepo.findBy({
-                name: In(inputCategoryNames)
-            });
+		if (inputCategoryNames && inputCategoryNames.length > 0) {
+			const existingCategories = await categoryRepo.findBy({
+				name: In(inputCategoryNames)
+			});
 
-            const existingNames = existingCategories.map(c => c.name.toLowerCase());
-            
-            const newNamesToCreate = inputCategoryNames.filter(
-                name => !existingNames.includes(name.toLowerCase())
-            );
+			const existingNames = existingCategories.map((c) => c.name.toLowerCase());
 
-            let savedNewCategories: DestinationCategory[] = [];
-            if (newNamesToCreate.length > 0) {
-                const newCategoryEntities = newNamesToCreate.map(name => 
-                    categoryRepo.create({ name: name.trim() })
-                );
-                savedNewCategories = await categoryRepo.save(newCategoryEntities);
-            }
+			const newNamesToCreate = inputCategoryNames.filter(
+				(name) => !existingNames.includes(name.toLowerCase())
+			);
 
-            finalCategories = [...existingCategories, ...savedNewCategories];
-        }
+			let savedNewCategories: DestinationCategory[] = [];
+			if (newNamesToCreate.length > 0) {
+				const newCategoryEntities = newNamesToCreate.map((name) =>
+					categoryRepo.create({ name: name.trim() })
+				);
+				savedNewCategories = await categoryRepo.save(newCategoryEntities);
+			}
 
-        let destinationId: number;
+			finalCategories = [...existingCategories, ...savedNewCategories];
+		}
 
-        // 2. Persistência da Entidade Principal (Destination)
-        if (params.id) {
-            const destId = parseInt(params.id);
-            const whereCondition = isNaN(destId) ? { slug: params.id } : { id: destId };
+		let destinationId: number;
 
-            const existingDestination = await destinationRepo.findOne({
-                where: whereCondition,
-                relations: ['categories']
-            });
+		// 2. Persistência da Entidade Principal (Destination)
+		if (params.id) {
+			const destId = parseInt(params.id);
+			const whereCondition = isNaN(destId) ? { slug: params.id } : { id: destId };
 
-            if (!existingDestination) {
-                throw error(404, 'Destino não encontrado para atualização.');
-            }
+			const existingDestination = await destinationRepo.findOne({
+				where: whereCondition,
+				relations: ['categories']
+			});
 
-            destinationRepo.merge(existingDestination, destinationData);
-            existingDestination.categories = finalCategories;
+			if (!existingDestination) {
+				throw error(404, 'Destino não encontrado para atualização.');
+			}
 
-            if (existingDestination.status === 'rejected') {
-                existingDestination.status = 'pending';
-                existingDestination.rejectionReason = null;
-            }
+			destinationRepo.merge(existingDestination, destinationData);
+			existingDestination.categories = finalCategories;
 
-            await destinationRepo.save(existingDestination);
-            destinationId = existingDestination.id;
-        } else {
-            const isAdmin = user.papeis.includes(TipoUsuario.ADMINISTRADOR);
+			if (existingDestination.status === 'rejected') {
+				existingDestination.status = 'pending';
+				existingDestination.rejectionReason = null;
+			}
 
-            const newDestination = destinationRepo.create({
-                ...destinationData,
-                categories: finalCategories,
-                createdBy: user,
-                status: isAdmin ? 'approved' : 'pending',
-            });
+			await destinationRepo.save(existingDestination);
+			destinationId = existingDestination.id;
+		} else {
+			const isAdmin = user.papeis.includes(TipoUsuario.ADMINISTRADOR);
 
-            const createdDestination = await destinationRepo.save(newDestination);
-            destinationId = createdDestination.id;
-        }
+			const newDestination = destinationRepo.create({
+				...destinationData,
+				categories: finalCategories,
+				createdBy: user,
+				status: isAdmin ? 'approved' : 'pending'
+			});
 
-        // 3. Exclusão de Imagens Antigas (Arquivos Locais + Banco de Dados)
-        if (imagesToDelete && imagesToDelete.length > 0) {
-            const imagesToRemove = await imageRepo.findBy({
-                id: In(imagesToDelete),
-                destinationId: destinationId // Garante que a imagem pertence a este destino
-            });
+			const createdDestination = await destinationRepo.save(newDestination);
+			destinationId = createdDestination.id;
+		}
 
-            for (const img of imagesToRemove) {
-                try {
-                    // O path.join com process.cwd() vai apontar certinho para a pasta do projeto
-                    // Exemplo: process.cwd() + 'static' + '/upload/arquivo.png'
-                    const filePath = path.join(process.cwd(), 'static', img.url);
-                    
-                    if (fs.existsSync(filePath)) {
-                        fs.unlinkSync(filePath); // Apaga o arquivo físico do HD
-                    }
-                } catch (err) {
-                    console.error(`Erro ao apagar arquivo de imagem (${img.url}):`, err);
-                }
-            }
+		// 3. Exclusão de Imagens Antigas (Arquivos Locais + Banco de Dados)
+		if (imagesToDelete && imagesToDelete.length > 0) {
+			const imagesToRemove = await imageRepo.findBy({
+				id: In(imagesToDelete),
+				destinationId: destinationId // Garante que a imagem pertence a este destino
+			});
 
-            if (imagesToRemove.length > 0) {
-                await imageRepo.remove(imagesToRemove); // Remove os registros da tabela relacional
-            }
-        }
+			for (const img of imagesToRemove) {
+				try {
+					// O path.join com process.cwd() vai apontar certinho para a pasta do projeto
+					// Exemplo: process.cwd() + 'static' + '/upload/arquivo.png'
+					const filePath = path.join(process.cwd(), 'static', img.url);
 
-        // 4. Upload de Novas Imagens para Cloudinary
-        if (uploadedFiles && uploadedFiles.length > 0) {
-            for (const file of uploadedFiles) {
-                if (file instanceof File && file.size > 0 && file.name !== 'undefined') {
-                    try {
-                        const result = await uploadImage(file, 'vouali/destinations');
-                        const destinationImage = imageRepo.create({
-                            url: result.url,
-                            destinationId: destinationId
-                        });
-                        await imageRepo.save(destinationImage);
-                        console.log('[CLOUDINARY] Upload OK:', result.url);
-                    } catch (e: any) {
-                        console.error('[CLOUDINARY] Upload failed:', e.message);
-                    }
-                }
-            }
-        }
+					if (fs.existsSync(filePath)) {
+						fs.unlinkSync(filePath); // Apaga o arquivo físico do HD
+					}
+				} catch (err) {
+					console.error(`Erro ao apagar arquivo de imagem (${img.url}):`, err);
+				}
+			}
 
-        const isAdminAction = user.papeis.includes(TipoUsuario.ADMINISTRADOR);
-        throw redirect(303, `/inventory?success=destino_salvo&admin=${isAdminAction}`);
-    }
+			if (imagesToRemove.length > 0) {
+				await imageRepo.remove(imagesToRemove); // Remove os registros da tabela relacional
+			}
+		}
+
+		// 4. Upload de Novas Imagens para Cloudinary
+		if (uploadedFiles && uploadedFiles.length > 0) {
+			for (const file of uploadedFiles) {
+				if (file instanceof File && file.size > 0 && file.name !== 'undefined') {
+					try {
+						const result = await uploadImage(file, 'vouali/destinations');
+						const destinationImage = imageRepo.create({
+							url: result.url,
+							destinationId: destinationId
+						});
+						await imageRepo.save(destinationImage);
+						console.log('[CLOUDINARY] Upload OK:', result.url);
+					} catch (e: any) {
+						console.error('[CLOUDINARY] Upload failed:', e.message);
+					}
+				}
+			}
+		}
+
+		const isAdminAction = user.papeis.includes(TipoUsuario.ADMINISTRADOR);
+		throw redirect(303, `/inventory?success=destino_salvo&admin=${isAdminAction}`);
+	}
 };

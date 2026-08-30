@@ -11,7 +11,7 @@ export function getCurrentSeason(): Season {
 	// Jun-Ago = Inverno (Winter)
 	// Set-Nov = Primavera (Spring)
 	const month = new Date().getMonth(); // 0-11
-	
+
 	if (month === 11 || month <= 1) {
 		return 'summer';
 	} else if (month >= 2 && month <= 4) {
@@ -41,11 +41,11 @@ export function getThemeForSeason(season: Season): string {
 export function getSeasonalTheme(region: string | null, season: Season): string {
 	// Combine region and season to resolve conflict
 	// e.g., coastal + summer -> beach_summer
-	
+
 	if (region === 'coastal' && season === 'summer') {
 		return 'beach_summer';
 	}
-	
+
 	if (region === 'mountain' && season === 'winter') {
 		return 'mountain_winter';
 	}

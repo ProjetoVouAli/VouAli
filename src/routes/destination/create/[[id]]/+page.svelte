@@ -87,7 +87,7 @@
 		if (customDays.length > 0) parts.push(customDays.join(', '));
 		if (customTimeStart && customTimeEnd) parts.push(`(${customTimeStart} às ${customTimeEnd})`);
 		else if (customTimeStart) parts.push(`(A partir das ${customTimeStart})`);
-		
+
 		customHours = parts.join(' ');
 	}
 
@@ -149,7 +149,7 @@
 			const data = await res.json();
 			if (data?.address) {
 				const addr = data.address;
-				
+
 				if (addr.road) $formData.street = addr.road;
 				if (addr.house_number) $formData.number = addr.house_number;
 				if (addr.postcode) {
@@ -161,11 +161,11 @@
 
 				if (addr.suburb) $formData.neighborhood = addr.suburb;
 				else if (addr.neighbourhood) $formData.neighborhood = addr.neighbourhood;
-				
+
 				if (addr.city) $formData.city = addr.city;
 				else if (addr.town) $formData.city = addr.town;
 				else if (addr.village) $formData.city = addr.village;
-				
+
 				if (addr.state) {
 					const ufMatch = addr.state.match(/\(([A-Z]{2})\)/);
 					if (ufMatch) {
@@ -512,14 +512,18 @@
 							{#each daysOfWeek as day}
 								<button
 									type="button"
-									class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors border {customDays.includes(day) ? 'bg-primary text-primary-foreground border-primary shadow-sm' : 'bg-background hover:bg-muted border-border'}"
+									class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors border {customDays.includes(
+										day
+									)
+										? 'bg-primary text-primary-foreground border-primary shadow-sm'
+										: 'bg-background hover:bg-muted border-border'}"
 									onclick={() => toggleDay(day)}
 								>
 									{day}
 								</button>
 							{/each}
 						</div>
-						
+
 						<div class="flex gap-4">
 							<div class="space-y-2 flex-1">
 								<Label class="text-xs">Abertura</Label>
@@ -533,10 +537,7 @@
 
 						<div class="space-y-2">
 							<Label class="text-xs text-muted-foreground">Ou digite o horário livremente</Label>
-							<Input
-								bind:value={customHours}
-								placeholder="Ex: Seg a Sex, das 09h às 17h"
-							/>
+							<Input bind:value={customHours} placeholder="Ex: Seg a Sex, das 09h às 17h" />
 						</div>
 					</div>
 				{/if}
